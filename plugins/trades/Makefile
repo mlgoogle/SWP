@@ -35,7 +35,7 @@ CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-PLUGIN = $(SO_DIR)/transactions/transactions.so
+PLUGIN = $(SO_DIR)/trades/trades.so
                 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(LIB_DIR)/BasicCore \
@@ -87,14 +87,14 @@ clean :
 # function.
 
 
-transactions_init.o : ./transactions_init.cc ./transactions_init.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./transactions_init.cc $(INCLUDE_PATHS)
+trades_init.o : ./trades_init.cc ./trades_init.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./trades_init.cc $(INCLUDE_PATHS)
 
-transactions_logic.o : ./transactions_logic.cc ./transactions_logic.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./transactions_logic.cc $(INCLUDE_PATHS)
+trades_logic.o : ./trades_logic.cc ./trades_logic.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./trades_logic.cc $(INCLUDE_PATHS)
 
 
-$(PLUGIN) : transactions_init.o  transactions_logic.o \
+$(PLUGIN) : trades_init.o  trades_logic.o \
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
 	$^ -o $@
