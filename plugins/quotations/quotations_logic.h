@@ -6,8 +6,8 @@
 
 #include "basic/basictypes.h"
 #include "core/common.h"
-//#include "net/comm_head.h"
-//#include "net/packet_processing.h"
+#include "net/comm_head.h"
+#include "net/packet_processing.h"
 
 namespace quatations_logic {
 
@@ -15,7 +15,8 @@ class Quotationslogic {
 public:
   Quotationslogic();
   virtual ~Quotationslogic();
-
+private:
+  bool OnQutations(struct server* srv, int socket, struct PacketHead *packet);
 private:
   static Quotationslogic *instance_;
 
