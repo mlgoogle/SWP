@@ -31,18 +31,16 @@ int32 RegisterAccountRecv::Deserialize() {
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
-      LOG_IF(ERROR, !r) << "RegisterAccountRecv::timestamp_ parse error";
-      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
+      r = dic->GetBigInteger(L"vCode", &verify_code_);
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::verify_code_ parse error";
-      r = dic->GetBigInteger(L"user_type_", &user_type_);
-      LOG_IF(ERROR, !r) << "RegisterAccountRecv::user_type_ parse error";
+      r = dic->GetBigInteger(L"timestamp", &timestamp_);
+      LOG_IF(ERROR, !r) << "RegisterAccountRecv::timestamp_ parse error";
+      r = dic->GetString(L"token", &token_);
+      LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
       r = dic->GetString(L"phone", &phone_num_);
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::phone parse error";
       r = dic->GetString(L"pwd", &passwd_);
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::pwd parse error";
-      r = dic->GetString(L"token_", &token_);
-      LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
     } else {
       LOG(ERROR)<< "RegisterAccountRecv Deserialize error";
       err = JSON_FORMAT_ERR;

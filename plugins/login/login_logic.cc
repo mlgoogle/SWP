@@ -25,9 +25,12 @@
 #include "login/login_opcode.h"
 //#include "pub/share/data_share_mgr.h"
 #include "login/login_proto.h"
+#include "public/basic/md5sum.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/login/login_config.xml"
 
+#define SHELL_SMS "./verify_code_sms.sh"
+#define SMS_KEY "yd1742653sd"
 namespace login {
 Loginlogic* Loginlogic::instance_ = NULL;
 
@@ -161,7 +164,7 @@ int32 Loginlogic::RegisterAccount(const int32 socket, PacketHead* packet) {
     err = rev.Deserialize();
     if (err < 0)
       break;
-    /*if (time(NULL) - rev.timestamp() > 15 * 60) {
+    if (time(NULL) - rev.timestamp() > 15 * 60) {
       err = VERIFY_CODE_OVERDUE;
       break;
     }
@@ -171,7 +174,7 @@ int32 Loginlogic::RegisterAccount(const int32 socket, PacketHead* packet) {
     if (md5.GetHash() != rev.token()) {
       err = VERIFY_CODE_ERR;
       break;
-	  }*/
+	}
     DicValue dic;
     //err = login_mysql_->RegisterInsertAndSelect(rev.phone_num(), rev.passwd(), &dic);
     //if (err < 0)
@@ -291,8 +294,19 @@ int32 Loginlogic::RegisterAccountReply(const int32 socket, PacketHead* packet) {
   do {
     RegisterAccountRecv rev(*packet);
     err = rev.Deserialize();
-      if (err < 0)
-        break;
+    if (err < 0)
+      break;
+    /*if (time(NULL) - rev.timestamp() > 15 * 60) {
+      err = VERIFY_CODE_OVERDUE;
+      break;
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << rev.timestamp() << rev.verify_code() << rev.phone_num();
+	base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != rev.token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+	  }*/
   	if (rev.phone_num() != "") {
       DicValue dic;
       err = login_mysql_->RegisterInsertAndSelect(rev.phone_num(), rev.passwd(), &dic);

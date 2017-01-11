@@ -13,19 +13,19 @@ class RegisterAccountRecv : public PacketHead {
   RegisterAccountRecv(PacketHead packet);
   int32 Deserialize();
   
-  inline int64 timestamp() { return timestamp_; }
   inline int64 verify_code() { return verify_code_; }
+  inline int64 timestamp() { return timestamp_; }
+  inline std::string token() { return token_; }
   inline std::string phone_num() { return phone_num_; }
   inline std::string passwd() { return passwd_; }
-  inline std::string token() { return token_; }
   inline int64 user_type() { return user_type_; }
  private:
-  int64 timestamp_;
   int64 verify_code_;
+  int64 timestamp_;
+  std::string token_;
   int64 user_type_;
   std::string phone_num_;
   std::string passwd_;
-  std::string token_;
 };
 
 //recv
