@@ -11,6 +11,12 @@
 #include "basic/basictypes.h"
 #include "logic/base_values.h"
 
+enum {
+  STOCK_TYPE = 1,
+  GOODS_TYPE = 2,
+  FUTURES_TYPE = 3
+};
+
 namespace swp_logic {
 
 class Quotations {
@@ -26,6 +32,8 @@ class Quotations {
       data_->Release();
     }
   }
+
+  static bool cmp(const Quotations& t_info, const Quotations& r_info);
 
   void set_platform_name(const std::string& platform) {
     data_->platform_name_ = platform;
@@ -71,7 +79,7 @@ class Quotations {
     data_->type_ = type;
   }
 
-  void set_current_unix_time(const double current_unix_time) {
+  void set_current_unix_time(const int64 current_unix_time) {
     data_->current_unix_time_ = current_unix_time;
   }
 
@@ -123,6 +131,7 @@ class Quotations {
   }
 
   std::string ValueSerialize();
+  void ValueDeserialize(std::string& str);
 
  private:
   class Data {

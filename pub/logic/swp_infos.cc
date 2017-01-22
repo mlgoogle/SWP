@@ -31,6 +31,32 @@ Quotations& Quotations::operator =(const Quotations& quotations) {
   return (*this);
 }
 
+bool Quotations::cmp(const Quotations& t_info, const Quotations& r_info) {
+  return t_info.current_unix_time() > r_info.current_unix_time();
+}
+
+void Quotations::ValueDeserialize(std::string& str) {
+  int32 error_code;
+  std::string error_str;
+  base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON);
+  if (engine == NULL) {
+    LOG_ERROR("engine create null");
+  }
+  base_logic::DictionaryValue* dict =  (base_logic::DictionaryValue*)engine->Deserialize(&str,&error_code,&error_str);
+  dict->GetReal(L"current_price", &data_->current_price_);
+  dict->GetReal(L"high_price", &data_->high_price_);
+  dict->GetReal(L"low_price", &data_->low_price_);
+  dict->GetReal(L"opening_today_price", &data_->opening_today_price_);
+  dict->GetReal(L"closed_yesterday_price", &data_->closed_yesterday_price_);
+  dict->GetReal(L"change", &data_->change_);
+  dict->GetReal(L"pchg", &data_->pchg_);
+  dict->GetBigInteger(L"current_unix_time", &data_->current_unix_time_);
+  dict->GetString(L"platform_name",&data_->platform_name_);
+  dict->GetString(L"symbol", &data_->symbol_);
+  dict->GetString(L"exchange_name", &data_->exchange_name_);
+}
+
 std::string Quotations::ValueSerialize() {
   std::string json_content;
   base_logic::DictionaryValue dict;
