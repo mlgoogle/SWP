@@ -4,6 +4,7 @@
 #ifndef SWP_QUOTATIONS_QUOTATIONS_LOGIC_
 #define SWP_QUOTATIONS_QUOTATIONS_LOGIC_
 
+#include "quotations/quotations_redis.h"
 #include "basic/basictypes.h"
 #include "core/common.h"
 #include "net/comm_head.h"
@@ -42,9 +43,18 @@ public:
   bool OnIniTimer(struct server *srv);
 
   bool OnTimeout(struct server *srv, char *id, int opcode, int time);
+private:
+  bool OnRealTime(struct server* srv, int socket, struct PacketHead *packet);
+
+  bool OnTimeLine(struct server* srv, int socket, struct PacketHead *packet);
+
+  void Test();
 
 private:
   bool Init();
+
+private:
+  quotations_logic::QuotationsRedis* quotations_redis_;
 };
 } // namespace quatations_logic
 
