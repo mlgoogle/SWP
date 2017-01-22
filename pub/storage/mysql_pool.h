@@ -1,13 +1,14 @@
-//  Copyright (c) 2015-2015 The george Authors. All rights reserved.
-//  Created on: 2016年5月18日 Author: kerry
+//  Copyright (c) 2016-2017 The SWP Authors. All rights reserved.
+//  Created on: 2016年12月30日 Author: kerry
+
+#ifndef DATA_MYSQL_POOL_H__
+#define DATA_MYSQL_POOL_H__
 
 #include "storage/storage.h"
-
-#include <list>
-
-#include "public/basic/basictypes.h"
-#include "base/thread/base_thread_handler.h"
-#include "base/thread/base_thread_lock.h"
+#include "basic/basictypes.h"
+#include "thread/base_thread_handler.h"
+#include "thread/base_thread_lock.h"
+#include "logic/logic_comm.h"
 
 namespace base_logic {
 
@@ -16,7 +17,7 @@ class MYSQL_Pool {
 	MYSQL_Pool();
 	virtual ~MYSQL_Pool(){};
  public:
-	void Init(std::list<base::ConnAddr>& addrlist, const int32 db_conn_num = 10);
+	void Init(std::list<base::ConnAddr>& addrlist, const int32 db_conn_num = 1);
 	void Dest();
  public:
 	base_storage::DBStorageEngine* DBConnectionPop(void);
@@ -28,3 +29,5 @@ class MYSQL_Pool {
 };
 
 }
+
+#endif

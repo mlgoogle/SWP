@@ -1,15 +1,15 @@
-//  Copyright (c) 2015-2015 The george Authors. All rights reserved.
-//  Created on: 2016年5月18日 Author: kerry
+//  Copyright (c) 2016-2017 The SWP Authors. All rights reserved.
+//  Created on: 2016年12月30日 Author: kerry
 
-#ifndef GEORGE_STORAGE_ENGINE_H_
-#define GEORGE_STORAGE_ENGINE_H_
+
+#ifndef SWP_STORAGE_STORAGE_ENGINE_H_
+#define SWP_STORAGE_STORAGE_ENGINE_H_
 
 #include <list>
-
-#include "base/logic/base_values.h"
-#include "public/basic/basictypes.h"
-#include "public/config/config.h"
-#include "public/storage/storage.h"
+#include "basic/basictypes.h"
+#include "logic/base_values.h"
+#include "config/config.h"
+#include "storage/storage.h"
 
 
 enum STORAGETYPE{
@@ -25,7 +25,9 @@ enum MEMCACHE_TYPE{
 
 enum REDIS_TYPE{
     HASH_VALUE = 0,
-    READIS_KEY_VALUE = 1,
+    LIST_VALUE = 1,
+    READIS_KEY_VALUE = 1
+
 };
 
 
@@ -33,21 +35,23 @@ namespace base_logic {
 
 class DataEngine {
  public:
-  static DataEngine* Create(int32 type);
-  void Init(config::FileConfig* config);
-  void Dest();
-  virtual ~DataEngine() {}
+    static DataEngine* Create(int32 type);
+    void Init(config::FileConfig* config);
+    void Dest();
+    virtual ~DataEngine() {}
  public:
-  virtual void Release() = 0;
-  virtual void InitParam(std::list<base::ConnAddr>& addrlist) = 0;
+    virtual void Release() = 0;
+    virtual void InitParam(std::list<base::ConnAddr>& addrlist) = 0;
  public:
-  virtual bool ReadData(const std::string& sql, base_logic::Value* value,
-  void (*storage_get)(void*, base_logic::Value*)) = 0;
+    virtual bool ReadData(const int32 type, base_logic::Value* value,
+    void (*storage_get)(void*, base_logic::Value*)) = 0;
 
-  virtual bool WriteData(const std::string& sql) = 0;
-  virtual bool WriteDatas(std::list<std::string>& sqls) = 0;
+    virtual bool WriteData(const int32 type, base_logic::Value* value) = 0;
+
+ private:
+    config::FileConfig* config_;
 };
-
 }  // namespace base_logic
+
 
 #endif /* PLUGINS_CRAWLERSVC_STORAGE_STORAGE_BASE_ENGINE_H_ */

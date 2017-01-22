@@ -5,11 +5,12 @@
 #define QUOTATIONS_SCHDULER_ENGINE_H__
 
 #include "logic/swp_infos.h"
+#include "quotations/quotations_redis.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
 
 typedef std::list<swp_logic::Quotations> QUOTATIONS_LIST;
-typedef std::map<std::string, QUOTATIONS_LIST> QUOTATIONS_MAP; /*现货ID，行情*/
+typedef std::map<std::string, QUOTATIONS_LIST> QUOTATIONS_MAP; /*现货ID，行情*/ /*平台名称:交易所:现货ID 如:JH:TJPME:AG*/
 typedef std::map<int64,QUOTATIONS_MAP> QUOTATIONS_ALL_MAP; /*股票,现货,期货 QUOTATIONS_MAP*/
 
 namespace quotations_logic {
@@ -28,11 +29,29 @@ class QuotationsManager {
 
   void LoginQuotationsCenter(const int socket);
 
+  void SendRealTime(const int socket, base_logic::ListValue* value);
+
+  void SendTimeLine(const int socket, const std::string& exchange_name,
+                    const std::string& platform_name,
+                    const std::string& good_type);
+
   void TimeEvent(int opcode, int time);
+
+  void InitRedis(quotations_logic::QuotationsRedis* quotations_redis);
+
+  void InitGoodsData();
+ private:
+  void SetQuotationsUnit(swp_logic::Quotations& quotation);
+
+  void GetGoodsRealTime(const std::string& good_type, swp_logic::Quotations* quotations);
+
+  void GetGoodsTimeLine(const std::string& good_type, std::list<swp_logic::Quotations>& list);
+
  private:
   void  Init();
  private:
   QuotationsCache *quotations_cache_;
+  quotations_logic::QuotationsRedis* quotations_redis_;
   struct threadrw_t *lock_;
 };
 

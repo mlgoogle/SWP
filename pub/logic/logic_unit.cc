@@ -266,7 +266,7 @@ bool SendUtils::SendMessage(int socket, struct PacketHead* packet,
 
   ret = SendFull(socket, reinterpret_cast<char*>(packet_stream),
                  packet_stream_length);
-  net::PacketProsess::HexEncode(packet_stream, packet_stream_length);
+  //net::PacketProsess::HexEncode(packet_stream, packet_stream_length);
   if (ret != packet_stream_length) {
     LOG_ERROR2("Sent msg failed in %s:%d", file, line);
     r = false;
