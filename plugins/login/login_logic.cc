@@ -39,11 +39,13 @@ Loginlogic::Loginlogic() {
 
   if (!Init())
     assert(0);
+  
+  InitLog();
 }
 
 void Loginlogic::InitLog() {
   //初始化日志名
-  google::InitGoogleLogging("login");
+  google::InitGoogleLogging("actuals");
 
   //初始化info级别日志存储位置以及日志文件开头 ./info/info_20160808-105851.4743
   google::SetLogDestination(google::INFO, "./log/info_");
@@ -164,14 +166,14 @@ int32 Loginlogic::RegisterAccount(const int32 socket, PacketHead* packet) {
     err = rev.Deserialize();
     if (err < 0)
       break;
-    if (time(NULL) - rev.timestamp() > 15 * 60) {
+    if (time(NULL) - rev.timestamp() > 15000 * 60) {
       err = VERIFY_CODE_OVERDUE;
       break;
     }
     std::stringstream ss;
     ss << SMS_KEY << rev.timestamp() << rev.verify_code() << rev.phone_num();
 	base::MD5Sum md5(ss.str());
-    if (md5.GetHash() != rev.token()) {
+    if (md5.GetHash() != rev.verify_token()) {
       err = VERIFY_CODE_ERR;
       break;
 	}
@@ -219,6 +221,17 @@ int32 Loginlogic::ChangePasswd(const int32 socket, PacketHead* packet) {
     err = rev.Deserialize();
     if (err < 0)
       break;
+    if (time(NULL) - rev.timestamp() > 1500 * 60) {
+      err = VERIFY_CODE_OVERDUE;
+      break;
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << rev.timestamp() << rev.verify_code() << rev.phone_num();
+	base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != rev.verify_token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+	}
     /*UserInfo* p = data_share_mgr_->GetUser(rev.uid());
     if (p == NULL || !p->is_login()) {
       err = USER_NOT_IN_CACHE;
@@ -229,10 +242,11 @@ int32 Loginlogic::ChangePasswd(const int32 socket, PacketHead* packet) {
       err = CHANGE_OLD_PWD_ERR;
       break;
 	  } else */{
-      if (rev.type() == ChangePasswdRecv::passwdLogin)
+	  int32 type = rev.type();
+      if (type == ChangePasswdRecv::PASSWD_LOGIN)
         SendPacket(server_fd_, packet);
-	  else if (rev.type() == ChangePasswdRecv::passwdExchange)
-        err = login_mysql_->ChangePasswdUpdate(rev.phone_num(), rev.passwd());
+	  else if (type == ChangePasswdRecv::PASSWD_TRADE)
+		err = login_mysql_->ChangePasswdUpdate(rev.phone_num(), rev.passwd());
       if (err < 0)
         break;
       //p->set_passwd(rev.new_passwd());

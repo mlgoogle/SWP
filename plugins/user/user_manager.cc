@@ -45,6 +45,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->HeartPacket(socket, packet);
       break;
     }
+    case USER_INFO_REQ: {
+	  interface->UserInfo(socket, packet);
+	  break;
+    }
     case ACCOUNT_INFO_REQ: {
 	  interface->AccountInfo(socket, packet);
 	  break;
@@ -93,23 +97,22 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 	  interface->UserWithdrawList(socket, packet);
 	  break;
     }
+		
 		/*case USER_WITHDRAW_DETAIL_REQ: {
 	  interface->UserWithdrawDetail(socket, packet);
 	  break;
 	  }*/
+
     case OBTAIN_VERIFY_CODE_REQ: {
 	  interface->ObtainVerifyCode(socket, packet);
 	  break;
     }
-		/*case CHANGE_USER_INFO_REQ: {
-	  interface->ChangeUserInfo(socket, packet);
-	  break;
-	  }*/
-		/*case DEVICE_TOKEN_REQ: {
-      interface->DeviceToken(socket, packet);
+		
+    case CHANGE_USER_INFO_REQ: {
+      interface->ChangeUserInfo(socket, packet);
       break;
-	  }*/
-		/*case WX_PLACE_ORDER_REQ: {
+    }
+	case WX_PLACE_ORDER_REQ: {
       interface->WXPlaceOrder(socket, packet);
       break;
     }
@@ -121,7 +124,15 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->WXPayServerResponse(socket, packet);
       break;
     }
-    case ALIPAY_SEVER_REQ: {
+		/*case CHANGE_USER_INFO_REQ: {
+	  interface->ChangeUserInfo(socket, packet);
+	  break;
+	  }*/
+		/*case DEVICE_TOKEN_REQ: {
+      interface->DeviceToken(socket, packet);
+      break;
+	  }*/
+		/*    case ALIPAY_SEVER_REQ: {
       interface->AlipayServer(socket, packet);
       break;
     }

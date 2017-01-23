@@ -18,7 +18,6 @@ RegisterAccountRecv::RegisterAccountRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
   timestamp_ = 0;
-  verify_code_ = 0;
   user_type_ = 0;
 }
 
@@ -31,12 +30,12 @@ int32 RegisterAccountRecv::Deserialize() {
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetBigInteger(L"vCode", &verify_code_);
+      r = dic->GetString(L"vCode", &verify_code_);
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::verify_code_ parse error";
       r = dic->GetBigInteger(L"timestamp", &timestamp_);
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::timestamp_ parse error";
-      r = dic->GetString(L"token", &token_);
-      LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
+      r = dic->GetString(L"vToken", &verify_token_);
+      LOG_IF(ERROR, !r) << "RegisterAccount::verify_token_ parse error";
       r = dic->GetString(L"phone", &phone_num_);
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::phone parse error";
       r = dic->GetString(L"pwd", &passwd_);
@@ -189,6 +188,10 @@ int32 ChangePasswdRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::phone_num_ parse error";
       r = dic->GetString(L"vCode", &verify_code_);
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::verify_code_ parse error";
+      r = dic->GetBigInteger(L"timestamp", &timestamp_);
+      LOG_IF(ERROR, !r) << "ChangePasswdRecv::timestamp_ parse error";
+      r = dic->GetString(L"vToken", &verify_token_);
+      LOG_IF(ERROR, !r) << "ChangePasswdRecv::verify_token_ parse error";
       r = dic->GetString(L"pwd", &passwd_);
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::pwd parse error";
     } else {

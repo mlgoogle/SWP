@@ -62,7 +62,40 @@ bool Userlogic::Init() {
   }
   UserInterface::GetInstance()->InitConfig(config);
   InitShareData();
+  
+  InitLog();
+
   return true;
+}
+	
+void Userlogic::InitLog() {
+  //初始化日志名
+  google::InitGoogleLogging("actuals");
+
+  //初始化info级别日志存储位置以及日志文件开头 ./info/info_20160808-105851.4743
+  google::SetLogDestination(google::INFO, "./log/info_");
+  google::SetLogDestination(google::WARNING, "./log/waring_");
+  google::SetLogDestination(google::ERROR, "./log/error_");
+
+  //配置输出到标准输出的级别 INFO级别及以上输出到标准输出
+  google::SetStderrLogging(google::INFO);
+
+  //设置输出到屏幕的日志显示相应颜色
+  FLAGS_colorlogtostderr = true;
+
+  //实时输出日志
+  FLAGS_logbufsecs = 0;
+
+  //最大日志大小（MB）
+  FLAGS_max_log_size = 100;
+
+  //当磁盘被写满时，停止日志输出
+  FLAGS_stop_logging_if_full_disk = true;
+
+  //捕捉 core dumped
+  google::InstallFailureSignalHandler();
+
+  LOG(INFO)<< "glog has init finished";
 }
 
 bool Userlogic::InitShareData() {
@@ -101,8 +134,16 @@ bool Userlogic::OnUserConnect(struct server *srv, const int socket) {
 
 bool Userlogic::OnUserMessage(struct server *srv, const int socket,
                               const void *msg, const int len) {
-  bool r = false;
-  int32 err = 0;
+  if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
+    return false;
+
+  PacketHead *packet = NULL;
+  net::PacketProcess::UnpackStream unpack(msg, len, &packet);
+  if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
+    LOG_ERROR2("UnpackStream Error socket:%d", socket);
+    return false;
+  }
+
   char* msg_c = new char[len + 1];
   memset(msg_c, 0, len+1);
   memcpy(msg_c, msg, len);
@@ -110,8 +151,8 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
   PacketHead packet_head(msg_c);
   delete[] msg_c;
   msg_c = NULL;
-  if (packet_head.type() == USER_TYPE) {
-    err = user_manager_->AssignPacket(socket, &packet_head);
+  if (packet->type() == USER_TYPE) {
+    user_manager_->AssignPacket(socket, packet);
     return true;
   }
   return false;

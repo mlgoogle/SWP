@@ -45,14 +45,13 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
   return true;
 }
 
-bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
+base_logic::DictionaryValue* PacketProsess::UnpackStream(const void *packet_stream, int32 len,
                                  struct PacketHead **packet_head) {
 
   int32 temp;
-  BUILDUNPACKET();
-  bool r = false;
   int error_code;
   std::string error_str;
+  BUILDUNPACKET();
   base_logic::ValueSerializer *engine =
       base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
   if (engine == NULL) {
@@ -60,12 +59,9 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
     return false;
   }
 
-  base_logic::DictionaryValue *value =
-      (base_logic::DictionaryValue*)engine->Deserialize(&body_stream, &error_code, &error_str);
-
   struct PacketControl *packet_control = new struct PacketControl;
   FILLPACKET();
-  return r;
+  return (base_logic::DictionaryValue*)engine->Deserialize(&body_stream, &error_code, &error_str);
 }
 
 void PacketProsess::DeletePacket(const void *packet_stream, int32 len,

@@ -62,12 +62,12 @@ int32 LoginMysql::UserLoginSelect(std::string phone, const char* client_ip,  Dic
   return err;
 }
 
-int32 LoginMysql::ChangePasswdUpdate(std::string phone_num, std::string passwd) {
+int32 LoginMysql::ChangePasswdUpdate(std::string phone, std::string passwd) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_ChangePasswdUpdate('" << phone_num << "','" << passwd << "');";
+    ss << "call proc_ChangePasswdUpdate(" << phone << ",'" << passwd << "');";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(ss.str());
     if (!r)
@@ -149,8 +149,8 @@ void LoginMysql::CallUserLoginSelect(void* param, Value* value) {
         userinfo->SetBigInteger(L"uid", atoll(rows[0]));
       if (rows[1] != NULL)
         userinfo->SetString(L"screenName", rows[1]);
-      if (rows[3] != NULL)
-        userinfo->SetBigInteger(L"gender", atoll(rows[3]));
+      if (rows[2] != NULL)
+        userinfo->SetCharInteger(L"gender", atoi(rows[2]));
 	  dict->Set(L"userinfo", userinfo);
     }
   } else {

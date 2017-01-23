@@ -77,12 +77,12 @@ share_guide.o : ${SRC_PUB_COMM}/share_guide.cc  ${SRC_PUB_COMM}/share_guide.h
 data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_share_mgr.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_SHARE}/data_share_mgr.cc ${INCLUDE_PATHS}
 
-#wx_order.o : ${SRC_PUB_PAY}/wxpay/wx_order.cc  ${SRC_PUB_PAY}/wxpay/wx_order.h 
-#	${CXX} ${CXXFLAGS} -c ${SRC_PUB_PAY}/wxpay/wx_order.cc ${INCLUDE_PATHS}
+wx_order.o : ${SRC_PUB_PAY}/wxpay/wx_order.cc  ${SRC_PUB_PAY}/wxpay/wx_order.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_PAY}/wxpay/wx_order.cc ${INCLUDE_PATHS}
 
 ${OUT_PUT} : user_init.o user_logic.o proto_buf.o user_manager.o \
 		user_interface.o user_proto.o user_mysql.o util.o data_engine.o \
-		mysql_pool.o data_mysql_engine.o user_info.o share_guide.o data_share_mgr.o #wx_order.o 
+		mysql_pool.o data_mysql_engine.o user_info.o share_guide.o data_share_mgr.o wx_order.o 
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
 		-lcurl ${LIB_DIR}/third_party/glog/lib/libglog.a \
 		${LIB_DIR}/third_party/gtpush/lib/libgtpushsdk_gcc4.1.2_64.a \

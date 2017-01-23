@@ -42,6 +42,7 @@ class Userlogic {
 
  private:
   bool Init();
+  void InitLog();
   static void* AutoReconnectToServer(void* arg);
   
   UserManager* user_manager_; //负责user插件消息管理

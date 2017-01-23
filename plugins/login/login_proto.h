@@ -13,16 +13,16 @@ class RegisterAccountRecv : public PacketHead {
   RegisterAccountRecv(PacketHead packet);
   int32 Deserialize();
   
-  inline int64 verify_code() { return verify_code_; }
+  inline std::string verify_code() { return verify_code_; }
   inline int64 timestamp() { return timestamp_; }
-  inline std::string token() { return token_; }
+  inline std::string verify_token() { return verify_token_; }
   inline std::string phone_num() { return phone_num_; }
   inline std::string passwd() { return passwd_; }
   inline int64 user_type() { return user_type_; }
  private:
-  int64 verify_code_;
+  std::string verify_code_;
   int64 timestamp_;
-  std::string token_;
+  std::string verify_token_;
   int64 user_type_;
   std::string phone_num_;
   std::string passwd_;
@@ -55,19 +55,26 @@ class Heartbeat:public PacketHead {
 	
 class ChangePasswdRecv:public PacketHead {
  public:
-  enum PasswdType {passwdLogin, passwdExchange};
+  enum PasswdType {
+	PASSWD_LOGIN = 0, //登录
+	PASSWD_TRADE, //交易 提现
+  };
   
   ChangePasswdRecv(PacketHead packet);
   int32 Deserialize();
   
   inline int64 type() { return type_; }
-  inline std::string phone_num() { return phone_num_; };
+  inline std::string phone_num() { return phone_num_; }
   inline std::string verify_code() { return verify_code_; };
+  inline int64 timestamp() { return timestamp_; }
+  inline std::string verify_token() { return verify_token_; }
   inline std::string passwd() { return passwd_; }
  private:
   int64 type_;
   std::string phone_num_;
   std::string verify_code_;
+  int64 timestamp_;
+  std::string verify_token_;
   std::string passwd_;
 };
 

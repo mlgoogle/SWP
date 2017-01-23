@@ -15,6 +15,33 @@
 #include "pub/util/util.h"
 
 namespace user {
+UserInfoRecv::UserInfoRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+}
+
+int32 UserInfoRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      					      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetString(L"uidStr", &uid_str_);
+      LOG_IF(ERROR, !r) << "UserInfoRecv::uid_str_ parse error";
+    } else {
+      LOG(ERROR)<< "UserInfoRecv Deserialize error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+      									  serializer);
+  return err;
+}
+
 AccountInfoRecv::AccountInfoRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
@@ -63,9 +90,9 @@ int32 OrderListRecv::Deserialize() {
       r = dic->GetString(L"flowType", &flow_type_);
       LOG_IF(ERROR, !r) << "OrderDetailRecv::flow_type_ parse error";
       r = dic->GetInteger(L"startPos", &start_pos_);
-      LOG_IF(ERROR, !r) << "CreditListRecv::start_pos_ parse error";
+      LOG_IF(ERROR, !r) << "OrderDetailRecv::start_pos_ parse error";
       r = dic->GetInteger(L"count", &count_);
-      LOG_IF(ERROR, !r) << "CreditListRecv::count_ parse error";
+      LOG_IF(ERROR, !r) << "OrderDetailRecv::count_ parse error";
     } else {
       LOG(ERROR)<< "OrderDetailRecv Deserialize error";
       err = JSON_FORMAT_ERR;
@@ -177,7 +204,6 @@ int32 BindBankcardRecv::Deserialize() {
 UnbindBankcardRecv::UnbindBankcardRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
-  uid_ = 0;
 }
 
 int32 UnbindBankcardRecv::Deserialize() {
@@ -189,10 +215,16 @@ int32 UnbindBankcardRecv::Deserialize() {
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetBigInteger(L"uid", &uid_);
-      LOG_IF(ERROR, !r) << "UnbindBankcardRecv::uid_ parse error";
+      r = dic->GetString(L"phone", &phone_num_);
+      LOG_IF(ERROR, !r) << "UnbindBankcardRecv::phone_num_ parse error";
       r = dic->GetBigInteger(L"bid", &bankcard_id_);
       LOG_IF(ERROR, !r) << "UnbindBankcardRecv::bankcard_id_ parse error";
+      r = dic->GetString(L"vCode", &verify_code_);
+      LOG_IF(ERROR, !r) << "UnbindBankcardRecv::verify_code_ parse error";
+      r = dic->GetBigInteger(L"timestamp", &timestamp_);
+      LOG_IF(ERROR, !r) << "UnbindBankcardRecv::timestamp_ parse error";
+      r = dic->GetString(L"vToken", &verify_token_);
+      LOG_IF(ERROR, !r) << "UnbindBankcardRecv::verify_token_ parse error";
     } else {
       LOG(ERROR)<< "UnbindBankcardRecv Deserialize error";
       err = JSON_FORMAT_ERR;
@@ -278,11 +310,11 @@ int32 CreditListRecv::Deserialize() {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid", &uid_);
       LOG_IF(ERROR, !r) << "CreditListRecv::uid_ parse error";
-      r = dic->GetInteger(L"status", &status_);
+      r = dic->GetString(L"status", &status_);
       LOG_IF(ERROR, !r) << "CreditListRecv::status_ parse error";
-      r = dic->GetInteger(L"startPos", &start_pos_);
+      r = dic->GetBigInteger(L"startPos", &start_pos_);
       LOG_IF(ERROR, !r) << "CreditListRecv::start_pos_ parse error";
-      r = dic->GetInteger(L"count", &count_);
+      r = dic->GetBigInteger(L"count", &count_);
       LOG_IF(ERROR, !r) << "CreditListRecv::count_ parse error";
     } else {
       LOG(ERROR)<< "CreditListRecv Deserialize error";
@@ -365,6 +397,7 @@ UserWithdrawListRecv::UserWithdrawListRecv(PacketHead packet) {
   uid_ = 0;
   start_pos_ = 0;
   count_ = 10;
+  status_ = "1,2,3";
 }  
 
 int32 UserWithdrawListRecv::Deserialize() {
@@ -378,80 +411,14 @@ int32 UserWithdrawListRecv::Deserialize() {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid", &uid_);
       LOG_IF(ERROR, !r) << "UserWithdrawListRecv::uid_ parse error";
-      r = dic->GetInteger(L"status", &status_);
+      r = dic->GetString(L"status", &status_);
       LOG_IF(ERROR, !r) << "UserWithdrawListRecv::status_ parse error";
-      r = dic->GetInteger(L"startPos", &start_pos_);
+      r = dic->GetBigInteger(L"startPos", &start_pos_);
       LOG_IF(ERROR, !r) << "UserWithdrawListRecv::start_pos_ parse error";
-      r = dic->GetInteger(L"count", &count_);
+      r = dic->GetBigInteger(L"count", &count_);
       LOG_IF(ERROR, !r) << "UserWithdrawListRecv::count_ parse error";
     } else {
       LOG(ERROR)<< "UserWithdrawListRecv Deserialize error";
-      err = JSON_FORMAT_ERR;
-      break;
-    }
-  }while (0);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-                                                serializer);
-  return err;
-}
-
-SMSCodeLoginRecv::SMSCodeLoginRecv(PacketHead packet) {
-  head_ = packet.head();
-  body_str_ = packet.body_str();
-  timestamp_ = 0;
-  verify_code_ = 0;
-  user_type_ = 0;
-}
-
-int32 SMSCodeLoginRecv::Deserialize() {
-  int32 err = 0;
-  bool r = false;
-  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_, false);
-  std::string err_str;
-  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
-  do {
-    if (dic != NULL) {
-      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
-      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::timestamp_ parse error";
-      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
-      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::verify_code_ parse error";
-      r = dic->GetBigInteger(L"user_type_", &user_type_);
-      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::user_type_ parse error";
-      r = dic->GetString(L"phone_num_", &phone_num_);
-      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::phone_num_ parse error";
-      r = dic->GetString(L"token_", &token_);
-      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::token_ parse error";
-    } else {
-      LOG(ERROR)<< "SMSCodeLoginRecv Deserialize error";
-      err = JSON_FORMAT_ERR;
-      break;
-    }
-  }while (0);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-                                                serializer);
-  return err;
-}
-
-Heartbeat::Heartbeat(PacketHead packet) {
-  head_ = packet.head();
-  body_str_ = packet.body_str();
-  uid_ = -1;
-}
-
-int32 Heartbeat::Deserialize() {
-  int32 err = 0;
-  bool r = false;
-  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_, false);
-  std::string err_str;
-  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
-  do {
-    if (dic != NULL) {
-      r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
-    } else {
-      LOG(ERROR)<< "Heartbeat Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -490,34 +457,39 @@ int32 ObtainVerifyCodeRecv::Deserialize() {
                                                 serializer);
   return err;
 }
-
-DeviceTokenRecv::DeviceTokenRecv(PacketHead packet) {
+	
+ChangeUserInfoRecv::ChangeUserInfoRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
   uid_ = 0;
+  gender_ = 0;
 }
 
-int32 DeviceTokenRecv::Deserialize() {
+int32 ChangeUserInfoRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_, false);
+      											base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "DeviceTokenRecv::uid_ parse error";
-      r = dic->GetString(L"device_token_", &device_token_);
-      LOG_IF(ERROR, !r) << "DeviceTokenRecv::device_token_ parse error";
+      r = dic->GetBigInteger(L"uid", &uid_);
+      LOG_IF(ERROR, !r) << "ChangeUserInfoRecv::uid_ parse error";
+      r = dic->GetString(L"screenName", &nickname_);
+      LOG_IF(ERROR, !r) << "ChangeUserInfoRecv::nickname_ parse error";
+      r = dic->GetBigInteger(L"gender", &gender_);
+      LOG_IF(ERROR, !r) << "ChangeUserInfoRecv::gender_ parse error";
+      r = dic->GetString(L"avatarLarge", &head_url_);
+      LOG_IF(ERROR, !r) << "ChangeUserInfoRecv::head_url_ parse error";
     } else {
-      LOG(ERROR)<< "DeviceTokenRecv Deserialize error";
+      LOG(ERROR)<< "ChangeUserInfoRecv Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
   }while (0);
   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-                                                serializer);
+      									  serializer);
   return err;
 }
 
@@ -537,11 +509,11 @@ int32 WxPlaceOrderRecv::Deserialize() {
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetBigInteger(L"uid_", &uid_);
+      r = dic->GetBigInteger(L"uid", &uid_);
       LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::uid_ parse error";
-      r = dic->GetString(L"title_", &title_);
+      r = dic->GetString(L"title", &title_);
       LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::title_ parse error";
-      r = dic->GetBigInteger(L"price_", &price_);
+      r = dic->GetReal(L"price", &price_);
       LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::price_ parse error";
     } else {
       LOG(ERROR)<< "WxPlaceOrderRecv Deserialize error";
@@ -571,11 +543,11 @@ int32 WXPayClientRecv::Deserialize() {
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetBigInteger(L"uid_", &uid_);
+      r = dic->GetBigInteger(L"uid", &uid_);
       LOG_IF(ERROR, !r) << "WXPayClientRecv::uid_ parse error";
-      r = dic->GetBigInteger(L"recharge_id_", &recharge_id_);
+      r = dic->GetBigInteger(L"rid", &recharge_id_);
       LOG_IF(ERROR, !r) << "WXPayClientRecv::recharge_id_ parse error";
-      r = dic->GetBigInteger(L"pay_result_", &pay_result_);
+      r = dic->GetBigInteger(L"payResult", &pay_result_);
       LOG_IF(ERROR, !r) << "WXPayClientRecv::pay_result_ parse error";
     } else {
       LOG(ERROR)<< "WxPlaceOrderRecv Deserialize error";
@@ -656,6 +628,102 @@ int32 WXPayServerRecv::Deserialize() {
 
     } else {
       LOG(ERROR)<< "WxPlaceOrderRecv json Deserialize error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+SMSCodeLoginRecv::SMSCodeLoginRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  timestamp_ = 0;
+  verify_code_ = 0;
+  user_type_ = 0;
+}
+
+int32 SMSCodeLoginRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::timestamp_ parse error";
+      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::verify_code_ parse error";
+      r = dic->GetBigInteger(L"user_type_", &user_type_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::user_type_ parse error";
+      r = dic->GetString(L"phone_num_", &phone_num_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::phone_num_ parse error";
+      r = dic->GetString(L"token_", &token_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::token_ parse error";
+    } else {
+      LOG(ERROR)<< "SMSCodeLoginRecv Deserialize error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+Heartbeat::Heartbeat(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = -1;
+}
+
+int32 Heartbeat::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "Heartbeat Deserialize error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+DeviceTokenRecv::DeviceTokenRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}
+
+int32 DeviceTokenRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "DeviceTokenRecv::uid_ parse error";
+      r = dic->GetString(L"device_token_", &device_token_);
+      LOG_IF(ERROR, !r) << "DeviceTokenRecv::device_token_ parse error";
+    } else {
+      LOG(ERROR)<< "DeviceTokenRecv Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }

@@ -7,6 +7,16 @@
 
 #include "pub/net/proto_buf.h"
 namespace user {
+class UserInfoRecv : public PacketHead {
+ public:
+  UserInfoRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline std::string uid_str() { return uid_str_; }
+ private:
+  std::string uid_str_; // "1,2,3,4"
+};
+	
 class AccountInfoRecv : public PacketHead {
  public:
   AccountInfoRecv(PacketHead packet);
@@ -65,7 +75,7 @@ class BindBankcardRecv : public PacketHead {
   int32 Deserialize();
 
   inline int64 uid() { return uid_; }
-  inline int32 bank_id() { return bank_id_; }
+  inline int64 bank_id() { return bank_id_; }
   inline std::string branch_bank() { return branch_bank_; }
   inline std::string bankcard_num() { return bankcard_num_; }
   inline std::string bank_username() { return bank_username_; }
@@ -83,12 +93,18 @@ class UnbindBankcardRecv : public PacketHead {
   UnbindBankcardRecv(PacketHead packet);
   int32 Deserialize();
 
-  inline int64 uid() { return uid_; }
+  inline std::string phone_num() { return phone_num_; }
   inline int64 bankcard_id() { return bankcard_id_; }
+  inline std::string verify_code() { return verify_code_; }
+  inline int64 timestamp() { return timestamp_; }
+  inline std::string verify_token() { return verify_token_; }
   
  private:
-  int64 uid_;
+  std::string phone_num_;
   int64 bankcard_id_;
+  std::string verify_code_;
+  int64 timestamp_;
+  std::string verify_token_;
 };
 
 class ChangeDefaultBankcardRecv : public PacketHead {
@@ -110,7 +126,7 @@ class BankAccountInfoRecv : public PacketHead {
   int32 Deserialize();
 
   inline std::string bankcard_num() { return bankcard_num_; }
-
+	
  private:
   std::string bankcard_num_;
 };
@@ -121,15 +137,15 @@ class CreditListRecv : public PacketHead {
   int32 Deserialize();
 
   inline int64 uid() { return uid_; }
-  inline int32 status() { return status_; }
-  inline int32 start_pos() { return start_pos_; }
-  inline int32 count() { return count_; }
+  inline std::string status() { return status_; }
+  inline int64 start_pos() { return start_pos_; }
+  inline int64 count() { return count_; }
   
  private:
   int64 uid_;
-  int32 status_;
-  int32 start_pos_;
-  int32 count_;
+  std::string status_;
+  int64 start_pos_;
+  int64 count_;
 };
 
 class CreditDetailRecv : public PacketHead {
@@ -168,17 +184,80 @@ class UserWithdrawListRecv : public PacketHead {
   int32 Deserialize();
 
   inline int64 uid() { return uid_; }
-  inline int32 status() { return status_; }
+  inline std::string status() { return status_; }
   inline int64 start_pos() { return start_pos_; }
   inline int64 count() { return count_; }
   
  private:
   int64 uid_;
-  int32 status_;
-  int32 start_pos_;
-  int32 count_;
+  std::string status_;
+  int64 start_pos_;
+  int64 count_;
 };
- 
+	
+class ChangeUserInfoRecv : public PacketHead {
+ public:
+  ChangeUserInfoRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string nickname() { return nickname_; }
+  inline int64 gender() { return gender_; }
+  inline std::string head_url() { return head_url_; }
+
+ private:
+  int64 uid_;
+  std::string nickname_;
+  int64 gender_;
+  std::string head_url_;
+};
+
+class WxPlaceOrderRecv : public PacketHead {
+ public:
+  WxPlaceOrderRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline double price() { return price_; }
+  inline std::string title() { return title_; }
+ private:
+  int64 uid_;
+  std::string title_; //应用名-商品名 eg.V领队-高级服务
+  double price_; // 订单总价  单位 分
+};
+
+class WXPayClientRecv : public PacketHead {
+ public:
+  WXPayClientRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline int64 recharge_id() { return recharge_id_; }
+  inline int64 pay_result() { return pay_result_; }
+ private:
+  int64 uid_;
+  int64 recharge_id_;
+  int64 pay_result_; //1-成功 2-取消
+};
+
+class WXPayServerRecv : public PacketHead {
+ public:
+  WXPayServerRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 total_fee() { return total_fee_; }
+  inline int64 recharge_id() { return recharge_id_; }
+  inline int64 pay_result() { return pay_result_; }
+  inline std::string appid() { return appid_; }
+  inline std::string mch_id() { return mch_id_; }
+ private:
+  std::string appid_;
+  std::string mch_id_;
+  std::string xml_str_;
+  int64 recharge_id_;
+  int64 pay_result_; //1 - 支付成功
+  int64 total_fee_;
+  std::string transaction_id_;
+  std::string time_end_;
+};
+
 class SMSCodeLoginRecv : public PacketHead {
  public:
   SMSCodeLoginRecv(PacketHead packet);
@@ -227,52 +306,6 @@ class DeviceTokenRecv : public PacketHead {
  private:
   int64 uid_;
   std::string device_token_;
-};
-
-class WxPlaceOrderRecv : public PacketHead {
- public:
-  WxPlaceOrderRecv(PacketHead packet);
-  int32 Deserialize();
-  inline int64 uid() { return uid_; }
-  inline int64 price() { return price_; }
-  inline std::string title() { return title_; }
- private:
-  int64 uid_;
-  std::string title_; //应用名-商品名 eg.V领队-高级服务
-  int64 price_; // 订单总价  单位 分
-};
-
-class WXPayClientRecv : public PacketHead {
- public:
-  WXPayClientRecv(PacketHead packet);
-  int32 Deserialize();
-  inline int64 uid() { return uid_; }
-  inline int64 recharge_id() { return recharge_id_; }
-  inline int64 pay_result() { return pay_result_; }
- private:
-  int64 uid_;
-  int64 recharge_id_;
-  int64 pay_result_; //1-成功 2-取消
-};
-
-class WXPayServerRecv : public PacketHead {
- public:
-  WXPayServerRecv(PacketHead packet);
-  int32 Deserialize();
-  inline int64 total_fee() { return total_fee_; }
-  inline int64 recharge_id() { return recharge_id_; }
-  inline int64 pay_result() { return pay_result_; }
-  inline std::string appid() { return appid_; }
-  inline std::string mch_id() { return mch_id_; }
- private:
-  std::string appid_;
-  std::string mch_id_;
-  std::string xml_str_;
-  int64 recharge_id_;
-  int64 pay_result_; //1 - 支付成功
-  int64 total_fee_;
-  std::string transaction_id_;
-  std::string time_end_;
 };
 
 class UserCashRecv : public PacketHead {

@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
 #include <time.h>
 #include <sys/socket.h>
 
@@ -15,7 +16,7 @@
 #include "user/user_proto.h"
 #include "user/user_opcode.h"
 #include "pub/util/util.h"
-//#include "pub/pay/wxpay/wx_order.h"
+#include "pub/pay/wxpay/wx_order.h"
 
 #define SHELL_SMS "./verify_code_sms.sh"
 #define SMS_KEY "yd1742653sd"
@@ -59,6 +60,40 @@ int32 UserInterface::CheckHeartLoss() {
     data_share_mgr_->CheckHeartLoss();
   } while (0);
 
+  return err;
+}
+	
+int32 UserInterface::UserInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserInfoRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+    	break;
+    DicValue dict;
+    //    UserInfo* u = data_share_mgr_->GetUser(rev.uid());
+    //    if (u != NULL) {
+    //      dict.SetBigInteger(L"uid_", u->uid());
+    //      dict.SetString(L"phone_num_", u->phone_num());
+    //      dict.SetString(L"nickname_", u->nickname());
+    //      dict.SetBigInteger(L"credit_lv_", u->credit_lv());
+    //      dict.SetBigInteger(L"praise_lv_", u->praise_lv());
+    //      dict.SetBigInteger(L"cash_lv_", u->cash_lv());
+    //      dict.SetString(L"head_url_", u->head_url());
+    //      dict.SetString(L"address_", u->usual_addr());
+    //      dict.SetReal(L"longitude_", u->usual_lon());
+    //      dict.SetReal(L"latitude_", u->usual_lat());
+    //      SendMsg(socket, packet, &dict, USER_INFO_RLY);
+    //      break;
+    //    }
+    err = user_mysql_->UserInfoSelect(rev.uid_str(), &dict);
+    if (err < 0)
+    	break;
+    SendMsg(socket, packet, &dict, USER_INFO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, USER_INFO_RLY);
+  }
   return err;
 }
 
@@ -163,7 +198,18 @@ int32 UserInterface::UnbindBankcard(const int32 socket, PacketHead* packet) {
     err = recv.Deserialize();
     if (err < 0)
       break;
-    err = user_mysql_->UnbindBankcardDelete(recv.uid(), recv.bankcard_id());
+    if (time(NULL) - recv.timestamp() > 15 * 60) {
+      err = VERIFY_CODE_OVERDUE;
+      break;
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << recv.timestamp() << recv.verify_code() << recv.phone_num();
+	base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != recv.verify_token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+	}
+    err = user_mysql_->UnbindBankcardDelete(recv.phone_num(), recv.bankcard_id());
     if (err < 0)
       break;
     SendMsg(socket, packet, NULL, UNBIND_BANKCARD_RLY);
@@ -207,6 +253,32 @@ int32 UserInterface::BankAccountInfo(const int32 socket, PacketHead* packet) {
   	SendError(socket, packet, err, BANK_ACCOUNT_INFO_RLY);
   return err;
 }
+	
+int UserInterface::split_string(const std::string &in, const char ch, std::vector<std::string> &out) { //last is ,??????????
+  if (in.size() == 0)
+    return 0;
+  out.clear();
+
+  size_t old_pos = 0, new_pos = 0;
+  std::string tmp;
+  while (true) {
+    new_pos = in.find(ch, old_pos);
+    if (new_pos != std::string::npos) {
+      tmp = in.substr(old_pos, new_pos - old_pos);
+      if (tmp != "")
+      	out.push_back(tmp);
+      old_pos = ++new_pos;
+    } else if (old_pos <= in.size()) {
+      tmp = in.substr(old_pos);
+      if (tmp != "")
+      	out.push_back(tmp);
+      break;
+    } else
+      break;
+  }
+
+  return 0;
+}
 
 int32 UserInterface::CreditList(const int32 socket, PacketHead* packet) {
   int32 err = 0;
@@ -215,8 +287,30 @@ int32 UserInterface::CreditList(const int32 socket, PacketHead* packet) {
     err = recv.Deserialize();
     if (err < 0)
       break;
+	
+	std::string db_status;
+	std::vector<std::string> split_status;
+	split_string(recv.status(), ',', split_status);
+	for (std::vector<std::string>::iterator it = split_status.begin();
+		 it != split_status.end(); ++it) {
+		if (*it == CREDIT_INPROCESS) {
+		  db_status += DB_CREDIT_INPROCESS_STR;
+		  db_status += DB_CREDIT_CLIENT_SUCCESS_STR;
+		} else if (*it == CREDIT_SUCCESS)
+		  db_status += DB_CREDIT_SERVER_SUCCESS_STR;
+		else if (*it == CREDIT_FAIL) {
+		  db_status += DB_CREDIT_CLIENT_FAIL_STR;
+		  db_status += DB_CREDIT_SERVER_FAIL_STR;
+		} else {
+		  err = CREDIT_STATUS_ERR;
+		  break;
+		}
+	}
+    if (err < 0)
+      break;
+
     DicValue dic;
-    err = user_mysql_->CreditListSelect(recv.uid(), recv.status(),
+    err = user_mysql_->CreditListSelect(recv.uid(), db_status.substr(0, db_status.size() - 1),
 									recv.start_pos(), recv.count(), &dic);
     if (err < 0)
       break;
@@ -317,7 +411,7 @@ int32 UserInterface::ObtainVerifyCode(const int32 socket, PacketHead* packet) {
 
   	ss << SMS_KEY << timestamp_ << rand_code_ << rev.phone_num();
   	base::MD5Sum md5(ss.str());
-  	dic.SetString(L"token", md5.GetHash().c_str());
+  	dic.SetString(L"vToken", md5.GetHash().c_str());
   	LOG(INFO) << "token:" << ss.str();
   	LOG(INFO) << "md5 token:" << md5.GetHash();
   	ss.str("");
@@ -338,60 +432,27 @@ int32 UserInterface::ObtainVerifyCode(const int32 socket, PacketHead* packet) {
   }
   return err;
 }
-
-int32 UserInterface::CloseSocket(const int fd) {
-  data_share_mgr_->UserOffline(fd);
-  return 0;
-}
-
-int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
+	
+int32 UserInterface::ChangeUserInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  Heartbeat rev(*packet);
   do {
+    ChangeUserInfoRecv rev(*packet);
     err = rev.Deserialize();
     if (err < 0)
       break;
-    data_share_mgr_->UserHeart(rev.uid());
-  } while (0);
-  return err;
-}
-
-int32 UserInterface::AlipayServer(const int32 socket, PacketHead* packet) {
-  LOG(INFO) << "alipay server req";
-  return 0;
-}
-
-int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
-  LOG(INFO) << "alipay client req";
-  return 0;
-}
-
-
-	/*int32 UserInterface::DeviceToken(const int32 socket, PacketHead* packet) {
-  int32 err = 0;
-  LOG(INFO) << "DeviceToken";
-  do {
-    DeviceTokenRecv rev(*packet);
-    err = rev.Deserialize();
-    LOG(INFO) << "DeviceToken Deserialize err:" << err;
+    err = user_mysql_->ChangeUserInfoUpdate(rev.uid(), rev.nickname(),
+											rev.head_url(), rev.gender());
     if (err < 0)
       break;
-    int result = data_share_mgr_->AddDeviceToken(rev.uid(), rev.device_token());
-    LOG(INFO) << "AddDeviceToken result:" << result;
-    if (result >= 0)
-      err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
-    if (err < 0)
-      break;
-    SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
+    SendMsg(socket, packet, NULL, CHANGE_USER_INFO_RLY);
   } while (0);
   if (err < 0) {
-    LOG(INFO) << "DeviceToken SendError err:" << err;
-    SendError(socket, packet, err, DEVICE_TOKEN_RLY);
+    SendError(socket, packet, err, CHANGE_USER_INFO_RLY);
   }
   return err;
-  }*/
-
-	/*int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
+}
+	
+int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
     WxPlaceOrderRecv recv(*packet);
@@ -403,7 +464,7 @@ int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     std::string recharge_id;
-    recharge_dic.GetString(L"recharge_id_", &recharge_id);
+    recharge_dic.GetString(L"rid", &recharge_id);
     std::string ip;
     int port;
     //访问微信下单接口
@@ -412,7 +473,7 @@ int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
       wx_order.set_spbill_create_ip(ip);
     wx_order.set_body(recv.title());
     wx_order.set_out_trade_no(recharge_id);
-    wx_order.set_total_fee(recv.price());
+    wx_order.set_total_fee(recv.price() * 100);
     std::string wx_result = wx_order.PlaceOrder();
     base_logic::ValueSerializer* deserializer =
         base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &wx_result);
@@ -494,7 +555,7 @@ int32 UserInterface::WXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
   do {
-	  LOG(ERROR) << "aaaaaaaa wx pay server";
+	LOG(ERROR) << "aaaaaaaa wx pay server";
     WXPayServerRecv recv(*packet);
     err = recv.Deserialize();
     if (err < 0)
@@ -512,16 +573,68 @@ int32 UserInterface::WXPayServerResponse(const int32 socket,
       user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 4, &dic);
     }
     int64 user_id = 0;
-    dic.GetBigInteger(L"uid_", &user_id);
-    UserInfo* user = data_share_mgr_->GetUser(user_id);
+    /*dic.GetBigInteger(L"uid_", &user_id);
+	UserInfo* user = data_share_mgr_->GetUser(user_id);
     if (user != NULL && user->is_login()) {
       SendMsg(user->socket_fd(), packet, &dic, WXPAY_SERVER_RLY);
-    }
+	  }*/
   } while (0);
   return err;
 }
 
-int32 UserInterface::CheckSMSCode(const int32 socket, PacketHead* packet) {
+int32 UserInterface::CloseSocket(const int fd) {
+  data_share_mgr_->UserOffline(fd);
+  return 0;
+}
+
+int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  Heartbeat rev(*packet);
+  do {
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    data_share_mgr_->UserHeart(rev.uid());
+  } while (0);
+  return err;
+}
+
+int32 UserInterface::AlipayServer(const int32 socket, PacketHead* packet) {
+  LOG(INFO) << "alipay server req";
+  return 0;
+}
+
+int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
+  LOG(INFO) << "alipay client req";
+  return 0;
+}
+
+
+	/*int32 UserInterface::DeviceToken(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  LOG(INFO) << "DeviceToken";
+  do {
+    DeviceTokenRecv rev(*packet);
+    err = rev.Deserialize();
+    LOG(INFO) << "DeviceToken Deserialize err:" << err;
+    if (err < 0)
+      break;
+    int result = data_share_mgr_->AddDeviceToken(rev.uid(), rev.device_token());
+    LOG(INFO) << "AddDeviceToken result:" << result;
+    if (result >= 0)
+      err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
+  } while (0);
+  if (err < 0) {
+    LOG(INFO) << "DeviceToken SendError err:" << err;
+    SendError(socket, packet, err, DEVICE_TOKEN_RLY);
+  }
+  return err;
+  }*/
+
+	/*int32 UserInterface::CheckSMSCode(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
     CheckSMSCodeRecv rev(*packet);

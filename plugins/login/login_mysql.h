@@ -24,7 +24,7 @@ class LoginMysql {
   int32 UserLoginSelect(std::string phone_num, const char* client_ip, DicValue* dic);
 
   int32 UserDetailSelect(std::string uids, DicValue* dic);
-  int32 ChangePasswdUpdate(std::string phone_num, std::string passwd);
+  int32 ChangePasswdUpdate(std::string phone, std::string passwd);
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type, DicValue* dic);
 
   static void CallUserLoginSelect(void* param, Value* value);

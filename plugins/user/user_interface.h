@@ -12,7 +12,6 @@
 
 #include "user/user_mysql.h"
 namespace user {
-
 class UserInterface {
  private:
   UserInterface();
@@ -27,6 +26,8 @@ class UserInterface {
 
   int32 HeartPacket(const int32 socket, PacketHead* packet);
 
+  int32 UserInfo(const int32 socket, PacketHead* packet);
+  
   int32 AccountInfo(const int32 socket, PacketHead* packet);
 
   int32 OrderList(const int32 socket, PacketHead* packet);
@@ -56,14 +57,14 @@ class UserInterface {
   int32 ObtainVerifyCode(const int32 socket, PacketHead* packet);
 
   int32 ChangeUserInfo(const int32 socket, PacketHead* packet);
-
-  int32 DeviceToken(const int32 socket, PacketHead* packet);
-
+  
   int32 WXPlaceOrder(const int32 socket, PacketHead* packet);
 
   int32 WXPayClientResponse(const int32 socket, PacketHead* packet);
 
   int32 WXPayServerResponse(const int32 socket, PacketHead* packet);
+
+  int32 DeviceToken(const int32 socket, PacketHead* packet);
 
   int32 AlipayServer(const int32 socket, PacketHead* packet);
 
@@ -90,6 +91,7 @@ class UserInterface {
   int32 InitShareType();
   int32 InitShareDetails();
   int32 InitShareSkills();
+  int split_string(const std::string &in, const char ch, std::vector<std::string> &out);
 
   static UserInterface* instance_;
   UserMysql* user_mysql_;
