@@ -99,6 +99,9 @@ schduler_engine.o : ./schduler_engine.cc ./schduler_engine.h
 	
 quotations_proto_buf.o : ./quotations_proto_buf.cc ./quotations_proto_buf.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./quotations_proto_buf.cc $(INCLUDE_PATHS)
+	
+quotations_redis.o : ./quotations_redis.cc ./quotations_redis.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./quotations_redis.cc $(INCLUDE_PATHS)
 
 logic_unit.o :  $(USER_DIR)/logic/logic_unit.cc $(USER_DIR)/logic/logic_unit.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_unit.cc $(INCLUDE_PATHS)
@@ -109,8 +112,24 @@ swp_infos.o :  $(USER_DIR)/logic/swp_infos.cc $(USER_DIR)/logic/swp_infos.h
 packet_processing.o :  $(USER_DIR)/net/packet_processing.cc $(USER_DIR)/net/packet_processing.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/packet_processing.cc $(INCLUDE_PATHS)
 
+data_engine.o :  $(USER_DIR)/storage/data_engine.cc $(USER_DIR)/storage/data_engine.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/data_engine.cc $(INCLUDE_PATHS)
+	
+data_mysql_engine.o :  $(USER_DIR)/storage/data_mysql_engine.cc $(USER_DIR)/storage/data_mysql_engine.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/data_mysql_engine.cc $(INCLUDE_PATHS)
+	
+data_redis_engine.o :  $(USER_DIR)/storage/data_redis_engine.cc $(USER_DIR)/storage/data_redis_engine.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/data_redis_engine.cc $(INCLUDE_PATHS)
+	
+mysql_pool.o :  $(USER_DIR)/storage/mysql_pool.cc $(USER_DIR)/storage/mysql_pool.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/mysql_pool.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : quotations_init.o  quotations_logic.o schduler_engine.o  swp_infos.o logic_unit.o packet_processing.o\
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
+redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/redis_pool.cc $(INCLUDE_PATHS)
+	
+
+$(PLUGIN) : quotations_init.o  quotations_logic.o schduler_engine.o quotations_proto_buf.o quotations_redis.o\
+	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o mysql_pool.o redis_pool.o\
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
 	$^ -o $@

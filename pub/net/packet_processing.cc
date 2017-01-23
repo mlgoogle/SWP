@@ -40,8 +40,11 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 
   BUILDPAKCET(body_stream.length());
 
+  LOG_DEBUG2("%s",body_stream.c_str());
+
   *packet_stream = reinterpret_cast<void *>(const_cast<char *>(out.GetData()));
   *packet_stream_length = PACKET_HEAD_LENGTH + body_stream.length();
+  if (engine) {delete engine; engine = NULL;}
   return true;
 }
 
@@ -59,9 +62,16 @@ base_logic::DictionaryValue* PacketProsess::UnpackStream(const void *packet_stre
     return false;
   }
 
+  LOG_DEBUG2("%s",body_stream.c_str());
+
+  base_logic::DictionaryValue *value =
+      (base_logic::DictionaryValue*)engine->Deserialize(&body_stream, &error_code, &error_str);
+
   struct PacketControl *packet_control = new struct PacketControl;
   FILLPACKET();
-  return (base_logic::DictionaryValue*)engine->Deserialize(&body_stream, &error_code, &error_str);
+  (*packet_head) = (struct PacketHead*)(packet_control);
+  if (engine) {delete engine; engine = NULL;}
+  return true;
 }
 
 void PacketProsess::DeletePacket(const void *packet_stream, int32 len,
