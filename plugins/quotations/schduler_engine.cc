@@ -33,17 +33,28 @@ void QuotationsManager::Init() {
   InitThreadrw(&lock_);
 }
 
+void QuotationsManager::InitFoxreData() {
+  InitRedisData("SINA:SINA:fx_seurcnh",FORXE_TYPE);
+  InitRedisData("SINA:SINA:fx_sjpycnh",FORXE_TYPE);
+  InitRedisData("SINA:SINA:fx_susdcnh",FORXE_TYPE);
+}
+
 void QuotationsManager::InitGoodsData() {
-  std::string hash_name = "JH:DEFAULT:AG";
+  InitRedisData("JH:DEFAULT:AG",GOODS_TYPE);
+}
+
+void QuotationsManager::InitRedisData(const std::string& hash_name,
+                                      int32 atype) {
   std::list<swp_logic::Quotations> list;
   quotations_redis_->ReadHisTimeGoodsData(hash_name, list);
   while (list.size() > 0) {
     swp_logic::Quotations quotations = list.front();
     list.pop_front();
-    quotations.set_type(GOODS_TYPE);
+    quotations.set_type(atype);
     SetQuotationsUnit(quotations);
   }
 }
+
 
 void QuotationsManager::InitRedis(
     quotations_logic::QuotationsRedis* quotations_redis) {
@@ -54,24 +65,48 @@ void QuotationsManager::SetQuotationsUnit(swp_logic::Quotations& quotation) {
   bool r = false;
   QUOTATIONS_MAP exchange_quotations;
   QUOTATIONS_LIST quotations_list;
+
+  LAST_QUOTATIONS_MAP last_exchange_quotations;
+  swp_logic::Quotations temp_quotations;
+
   std::string key;
   key = quotation.platform() + ":" + quotation.exchange_name() + ":"
       + quotation.symbol();
+  //读取上一分钟报价
+  r = base::MapGet<LAST_QUOTATIONS_ALL_MAP, LAST_QUOTATIONS_ALL_MAP::iterator,
+      int32, LAST_QUOTATIONS_MAP>(quotations_cache_->last_quotations_map_,
+                                  quotation.type(), last_exchange_quotations);
+  r = base::MapGet<LAST_QUOTATIONS_MAP, LAST_QUOTATIONS_MAP::iterator,
+      std::string, swp_logic::Quotations>(last_exchange_quotations, key,
+                                          temp_quotations);
+  //存储最近一次报价，存储实时报价数据，但list中存储分时数据
+  int64 last_unix_time = temp_quotations.current_unix_time() / 60 * 60;
+  int64 current_unix_time = quotation.current_unix_time() / 60 * 60;
+  last_exchange_quotations[key] = quotation;
+  quotations_cache_->last_quotations_map_[quotation.type()] =
+      last_exchange_quotations;
+  if (last_unix_time == current_unix_time) {
+    LOG_DEBUG2("last time %lld",temp_quotations.current_unix_time()/60*60);
+    return;
+  }
+
   r = base::MapGet<QUOTATIONS_ALL_MAP, QUOTATIONS_ALL_MAP::iterator, int32,
       QUOTATIONS_MAP>(quotations_cache_->quotations_map_, quotation.type(),
                       exchange_quotations);
   r = base::MapGet<QUOTATIONS_MAP, QUOTATIONS_MAP::iterator, std::string,
       QUOTATIONS_LIST>(exchange_quotations, key, quotations_list);
-  LOG_MSG2("exchange_name:{%s} platform:{%s} symbol:{%s} change:{%f}  pchg:{%f} high_price:{%f} low_price:{%f} opening_today_price:{%f} closed_yesterday_price:{%f} current_price:{%f} current_unix_time:{%lld}",
-      quotation.exchange_name().c_str(), quotation.platform().c_str(),quotation.symbol().c_str(),
-      quotation.change(),quotation.pchg(),quotation.high_price(),quotation.low_price(),
-      quotation.opening_today_price(),quotation.closed_yesterday_price(),quotation.current_price(),
-      quotation.current_unix_time());
+
+  /*LOG_MSG2("exchange_name:{%s} platform:{%s} symbol:{%s} change:{%f}  pchg:{%f} high_price:{%f} low_price:{%f} opening_today_price:{%f} closed_yesterday_price:{%f} current_price:{%f} current_unix_time:{%lld}",
+   quotation.exchange_name().c_str(), quotation.platform().c_str(),quotation.symbol().c_str(),
+   quotation.change(),quotation.pchg(),quotation.high_price(),quotation.low_price(),
+   quotation.opening_today_price(),quotation.closed_yesterday_price(),quotation.current_price(),
+   quotation.current_unix_time());*/
 
   quotations_list.push_back(quotation);
   quotations_list.sort(swp_logic::Quotations::cmp);
   exchange_quotations[key] = quotations_list;
   quotations_cache_->quotations_map_[quotation.type()] = exchange_quotations;
+
 }
 
 void QuotationsManager::SetQuotations(swp_logic::Quotations& quotation) {
@@ -87,15 +122,15 @@ void QuotationsManager::TimeEvent(int opcode, int time) {
   }
 }
 
-void QuotationsManager::SendTimeLine(const int socket,
+void QuotationsManager::SendTimeLine(const int socket, const int32 atype,
                                      const std::string& exchange_name,
                                      const std::string& platform_name,
-                                     const std::string& good_type) {
+                                     const std::string& symbol) {
   net_reply::TimeLine time_line;
   std::list<swp_logic::Quotations> list;
   int32 base_num = 5;
-  std::string key = platform_name + ":" + exchange_name + ":" + good_type;
-  GetGoodsTimeLine(key, list);
+  std::string key = platform_name + ":" + exchange_name + ":" + symbol;
+  GetTimeLine(atype, key, list);
   list.sort(swp_logic::Quotations::cmp);
   while (list.size() > 0) {
     swp_logic::Quotations quotations = list.front();
@@ -147,8 +182,8 @@ void QuotationsManager::SendRealTime(const int socket,
 
     //查找对应的行情数据
     std::string key = real_time_unit.platform_name() + ":"
-        + real_time_unit.exchange_name() + ":" + real_time_unit.good_type();
-    GetGoodsRealTime(key, &quotations);
+        + real_time_unit.exchange_name() + ":" + real_time_unit.symbol();
+    GetRealTime(real_time_unit.atype(), key, &quotations);
 
     net_reply::RealTimeUnit* r_real_time_unit = new net_reply::RealTimeUnit;
     r_real_time_unit->set_change(quotations.change());
@@ -175,31 +210,33 @@ void QuotationsManager::SendRealTime(const int socket,
   send_message(socket, &packet_control);
 }
 
-void QuotationsManager::GetGoodsTimeLine(
-    const std::string& good_type, std::list<swp_logic::Quotations>& list) {
+void QuotationsManager::GetTimeLine(const int32 atype,
+                                    const std::string& symbol,
+                                    std::list<swp_logic::Quotations>& list) {
   bool r = false;
   base_logic::RLockGd lk(lock_);
   QUOTATIONS_MAP exchange_quotations;
   QUOTATIONS_LIST quotations_list;
   r = base::MapGet<QUOTATIONS_ALL_MAP, QUOTATIONS_ALL_MAP::iterator, int32,
-      QUOTATIONS_MAP>(quotations_cache_->quotations_map_, GOODS_TYPE,
+      QUOTATIONS_MAP>(quotations_cache_->quotations_map_, atype,
                       exchange_quotations);
   if (!r)
     return;
 
   r = base::MapGet<QUOTATIONS_MAP, QUOTATIONS_MAP::iterator, std::string,
-      QUOTATIONS_LIST>(exchange_quotations, good_type, quotations_list);
+      QUOTATIONS_LIST>(exchange_quotations, symbol, quotations_list);
 
   quotations_list.sort(swp_logic::Quotations::cmp);
 //遍历
-  int64 start_pan = 1483826400;
+  int64 start_pan = ((time(NULL) * 24 * 60 * 60) * 24 * 60 * 60)
+      - (8 * 60 * 60);  //当前为东八区
   int i = 0;
   QUOTATIONS_LIST::iterator it = quotations_list.begin();
   for (; it != quotations_list.end(); it++) {
     i++;
     swp_logic::Quotations quotations = (*it);
     //LOG_MSG2("count:{%d} index:{%d} unix_time:{%lld}", quotations_list.size(),
-      //  i,quotations.current_unix_time());
+    //  i,quotations.current_unix_time());
     if (quotations.current_unix_time() > start_pan)
       list.push_back(quotations);
     else
@@ -207,29 +244,30 @@ void QuotationsManager::GetGoodsTimeLine(
   }
 }
 
-void QuotationsManager::GetGoodsRealTime(const std::string& good_type,
-                                         swp_logic::Quotations* quotations) {
+void QuotationsManager::GetRealTime(const int32 atype,
+                                    const std::string& symbol,
+                                    swp_logic::Quotations* quotations) {
   bool r = false;
   base_logic::WLockGd lk(lock_);
-  QUOTATIONS_MAP exchange_quotations;
-  QUOTATIONS_LIST quotations_list;
+  LAST_QUOTATIONS_MAP exchange_quotations;
   swp_logic::Quotations qs;
-  r = base::MapGet<QUOTATIONS_ALL_MAP, QUOTATIONS_ALL_MAP::iterator, int32,
-      QUOTATIONS_MAP>(quotations_cache_->quotations_map_, GOODS_TYPE,
-                      exchange_quotations);
+  r = base::MapGet<LAST_QUOTATIONS_ALL_MAP, LAST_QUOTATIONS_ALL_MAP::iterator,
+      int32, LAST_QUOTATIONS_MAP>(quotations_cache_->last_quotations_map_,
+                                  atype, exchange_quotations);
   if (!r)
     return;
 
-  r = base::MapGet<QUOTATIONS_MAP, QUOTATIONS_MAP::iterator, std::string,
-      QUOTATIONS_LIST>(exchange_quotations, good_type, quotations_list);
+  r = base::MapGet<LAST_QUOTATIONS_MAP, LAST_QUOTATIONS_MAP::iterator,
+      std::string, swp_logic::Quotations>(exchange_quotations, symbol, qs);
   if (!r)
     return;
-  (*quotations) = quotations_list.front();
+  (*quotations) = qs;
 }
 
 void QuotationsManager::LoginQuotationsCenter(const int socket) {
   quotations_logic::net_other::Login login;
   login.set_aid(10001);
+  login.set_atype(4);
   login.set_passowrd("1234567x");
   struct PacketControl packet_control;
   MAKE_HEAD(packet_control, LOGIN_QUOTATIONS, 1, 0, 0, 0);
