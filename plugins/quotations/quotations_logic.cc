@@ -149,7 +149,7 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::RealTime real_time;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  real_time.set_htt_packet(packet_control->body_);
+  real_time.set_http_packet(packet_control->body_);
   if (real_time.goods_infos_ != NULL)
     quotations_logic::QuotationsEngine::GetSchdulerManager()->SendRealTime(
         socket, real_time.goods_infos_);

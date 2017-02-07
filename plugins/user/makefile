@@ -2,16 +2,17 @@
 
 OUT_PUT = ${SO_DIR}/user/user.so 
 
-SRC_DIR = ../../
+SRC_DIR = ../..
 LIB_DIR = ./../../../baselib
-SRC_PLUGINS = ${SRC_DIR}plugins
-SO_DIR = ${SRC_DIR}bin/plugins
-SRC_PUB_NET = ${SRC_DIR}pub/net
-SRC_PUB_UTIL = ${SRC_DIR}pub/util
-SRC_PUB_STORAGE = ${SRC_DIR}pub/storage
-SRC_PUB_SHARE = ${SRC_DIR}pub/share
-SRC_PUB_COMM = ${SRC_DIR}pub/comm
-SRC_PUB_PAY = ${SRC_DIR}pub/pay
+SRC_PLUGINS = ${SRC_DIR}/plugins
+SO_DIR = ${SRC_DIR}/bin/plugins
+SRC_PUB = ${SRC_DIR}/pub
+SRC_PUB_NET = ${SRC_PUB}/net
+SRC_PUB_UTIL = ${SRC_PUB}/util
+SRC_PUB_STORAGE = ${SRC_PUB}/storage
+SRC_PUB_SHARE = ${SRC_PUB}/share
+SRC_PUB_COMM = ${SRC_PUB}/comm
+SRC_PUB_PAY = ${SRC_PUB}/pay
 
 LINK_DYNAMIC = -Wl,-Bdynamic -lpthread
 LINK_STATIC = -Wl,-Bstatic -L${LIB_DIR}/third_party/glog/lib/libglog.a
@@ -22,6 +23,7 @@ CXXFLAGS += -g -O0 -Wextra -w -shared -fPIC
 INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${SRC_PLUGINS} \
 		-I${SRC_DIR} \
+		-I${SRC_PUB} \
 		-I${LIB_DIR}/public \
 		-I${LIB_DIR}/base \
 		-I${LIB_DIR}/third_party/glog/include \
@@ -53,8 +55,8 @@ user_proto.o : ./user_proto.cc  ./user_proto.h
 user_mysql.o : ./user_mysql.cc  ./user_mysql.h
 	${CXX} ${CXXFLAGS} -c ./user_mysql.cc ${INCLUDE_PATHS}
 
-proto_buf.o : ${SRC_PUB_NET}/proto_buf.cc  ${SRC_PUB_NET}/proto_buf.h 
-	${CXX} ${CXXFLAGS} -c ${SRC_PUB_NET}/proto_buf.cc ${INCLUDE_PATHS}
+#proto_buf.o : ${SRC_PUB_NET}/proto_buf.cc  ${SRC_PUB_NET}/proto_buf.h 
+#	${CXX} ${CXXFLAGS} -c ${SRC_PUB_NET}/proto_buf.cc ${INCLUDE_PATHS}
 
 util.o : ${SRC_PUB_UTIL}/util.cc  ${SRC_PUB_UTIL}/util.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_UTIL}/util.cc ${INCLUDE_PATHS}
@@ -80,7 +82,7 @@ data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_sha
 wx_order.o : ${SRC_PUB_PAY}/wxpay/wx_order.cc  ${SRC_PUB_PAY}/wxpay/wx_order.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_PAY}/wxpay/wx_order.cc ${INCLUDE_PATHS}
 
-${OUT_PUT} : user_init.o user_logic.o proto_buf.o user_manager.o \
+${OUT_PUT} : user_init.o user_logic.o user_manager.o \
 		user_interface.o user_proto.o user_mysql.o util.o data_engine.o \
 		mysql_pool.o data_mysql_engine.o user_info.o share_guide.o data_share_mgr.o wx_order.o 
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \

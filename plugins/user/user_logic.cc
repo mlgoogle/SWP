@@ -21,7 +21,8 @@
 
 #include "user/user_interface.h"
 #include "user/user_opcode.h"
-#include "pub/comm/comm_head.h"
+#include "net/comm_head.h"
+#include "net/packet_processing.h"
 
 
 #define DEFAULT_CONFIG_PATH "./plugins/user/user_config.xml"
@@ -138,20 +139,12 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
     return false;
 
   PacketHead *packet = NULL;
-  net::PacketProcess::UnpackStream unpack(msg, len, &packet);
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
-    LOG_ERROR2("UnpackStream Error socket:%d", socket);
+    //    LOG_ERROR2("UnpackStream Error socket:%d", socket);
     return false;
   }
 
-  char* msg_c = new char[len + 1];
-  memset(msg_c, 0, len+1);
-  memcpy(msg_c, msg, len);
-  LOG(INFO) << "OnUserMessage:len-" << len;
-  PacketHead packet_head(msg_c);
-  delete[] msg_c;
-  msg_c = NULL;
-  if (packet->type() == USER_TYPE) {
+  if (packet->type == USER_TYPE) {
     user_manager_->AssignPacket(socket, packet);
     return true;
   }
@@ -174,7 +167,7 @@ bool Userlogic::OnBroadcastConnect(struct server *srv, const int socket,
 bool Userlogic::OnBroadcastMessage(struct server *srv, const int socket,
                                    const void *msg, const int len
                                    ) {
-  bool r = false;
+  /*  bool r = false;
   int32 err = 0;
   char* msg_c = new char[len + 1];
   memcpy(msg_c, msg, len);
@@ -183,7 +176,7 @@ bool Userlogic::OnBroadcastMessage(struct server *srv, const int socket,
   PacketHead packet_head(msg_c);
   delete[] msg_c;
   msg_c = NULL;
-  user_manager_->AssignPacket(socket, &packet_head);
+  user_manager_->AssignPacket(socket, &packet_head);*/
   return true;
 }
 

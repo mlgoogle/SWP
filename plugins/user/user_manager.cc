@@ -39,109 +39,109 @@ UserManager::~UserManager() {
 int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   UserInterface* interface = UserInterface::GetInstance();
-  LOG(INFO)<< "AssignPacket opcode" << (int)packet->operate_code();
-  switch (packet->operate_code()) {
+  LOG(INFO)<< "AssignPacket opcode" << (int)packet->operate_code;
+  switch (packet->operate_code) {
     case PACKET_HEART_REQ: {
-      interface->HeartPacket(socket, packet);
+      interface->OnHeartPacket(socket, packet);
       break;
     }
     case USER_INFO_REQ: {
-	  interface->UserInfo(socket, packet);
+	  interface->OnUserInfo(socket, packet);
 	  break;
     }
     case ACCOUNT_INFO_REQ: {
-	  interface->AccountInfo(socket, packet);
+	  interface->OnAccountInfo(socket, packet);
 	  break;
     }
     case ORDER_LIST_REQ: {
-	  interface->OrderList(socket, packet);
+	  interface->OnOrderList(socket, packet);
 	  break;
     }
     case ORDER_DETAIL_REQ: {
-	  interface->OrderDetail(socket, packet);
+	  interface->OnOrderDetail(socket, packet);
 	  break;
     }
     case BANKCARD_LIST_REQ: {
-	  interface->BankcardList(socket, packet);
+	  interface->OnBankcardList(socket, packet);
 	  break;
     }
     case BIND_BANKCARD_REQ: {
-	  interface->BindBankcard(socket, packet);
+	  interface->OnBindBankcard(socket, packet);
 	  break;
     }
     case UNBIND_BANKCARD_REQ: {
-	  interface->UnbindBankcard(socket, packet);
+	  interface->OnUnbindBankcard(socket, packet);
 	  break;
     }
     case CHANGE_DEFAULT_BANKCARD_REQ: {
-	  interface->ChangeDefaultBankcard(socket, packet);
+	  interface->OnChangeDefaultBankcard(socket, packet);
 	  break;
     }
     case BANK_ACCOUNT_INFO_REQ: {
-      interface->BankAccountInfo(socket, packet);
+      interface->OnBankAccountInfo(socket, packet);
       break;
     }
     case CREDIT_LIST_REQ: {
-	  interface->CreditList(socket, packet);
+	  interface->OnCreditList(socket, packet);
 	  break;
     }
     case CREDIT_DETAIL_REQ: {
-	  interface->CreditDetail(socket, packet);
+	  interface->OnCreditDetail(socket, packet);
 	  break;
     }
     case USER_WITHDRAW_REQ: {
-	  interface->UserWithdraw(socket, packet);
+	  interface->OnUserWithdraw(socket, packet);
 	  break;
     }
     case USER_WITHDRAW_LIST_REQ: {
-	  interface->UserWithdrawList(socket, packet);
+	  interface->OnUserWithdrawList(socket, packet);
 	  break;
     }
 		
 		/*case USER_WITHDRAW_DETAIL_REQ: {
-	  interface->UserWithdrawDetail(socket, packet);
+	  interface->OnUserWithdrawDetail(socket, packet);
 	  break;
 	  }*/
 
     case OBTAIN_VERIFY_CODE_REQ: {
-	  interface->ObtainVerifyCode(socket, packet);
+	  interface->OnObtainVerifyCode(socket, packet);
 	  break;
     }
 		
     case CHANGE_USER_INFO_REQ: {
-      interface->ChangeUserInfo(socket, packet);
+      interface->OnChangeUserInfo(socket, packet);
       break;
     }
 	case WX_PLACE_ORDER_REQ: {
-      interface->WXPlaceOrder(socket, packet);
+      interface->OnWXPlaceOrder(socket, packet);
       break;
     }
     case WXPAY_CLIENT_REQ: {
-      interface->WXPayClientResponse(socket, packet);
+      interface->OnWXPayClientResponse(socket, packet);
       break;
     }
     case WXPAY_SERVER_REQ: {
-      interface->WXPayServerResponse(socket, packet);
+      interface->OnWXPayServerResponse(socket, packet);
       break;
     }
 		/*case CHANGE_USER_INFO_REQ: {
-	  interface->ChangeUserInfo(socket, packet);
+	  interface->OnChangeUserInfo(socket, packet);
 	  break;
 	  }*/
 		/*case DEVICE_TOKEN_REQ: {
-      interface->DeviceToken(socket, packet);
+      interface->OnDeviceToken(socket, packet);
       break;
 	  }*/
 		/*    case ALIPAY_SEVER_REQ: {
-      interface->AlipayServer(socket, packet);
+      interface->OnAlipayServer(socket, packet);
       break;
     }
     case ALIPAY_CLIENT_REQ: {
-      interface->AlipayClient(socket, packet);
+      interface->OnAlipayClient(socket, packet);
       break;
     }
     case CHECK_SMS_CODE_REQ: {
-      interface->CheckSMSCode(socket, packet);
+      interface->OnCheckSMSCode(socket, packet);
       break;
 	  }*/
   }

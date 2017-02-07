@@ -47,31 +47,30 @@ UserInterface::~UserInterface() {
 
 void UserInterface::InitConfig(config::FileConfig* config) {
   user_mysql_ = new UserMysql(config);
-//  data_share_mgr_ = share::DataShareMgr::GetInstance();
+//  data_share_mgr_ = share::OnDataShareMgr::GetInstance();
 }
 
 void UserInterface::InitShareDataMgr(share::DataShareMgr* data) {
   data_share_mgr_ = data;
 }
 
-int32 UserInterface::CheckHeartLoss() {
+  /*int32 UserInterface::CheckHeartLoss() {
   int32 err = 0;
   do {
     data_share_mgr_->CheckHeartLoss();
   } while (0);
 
   return err;
-}
-	
-int32 UserInterface::UserInfo(const int32 socket, PacketHead* packet) {
+  }*/
+  
+int32 UserInterface::OnUserInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    UserInfoRecv rev(*packet);
-    err = rev.Deserialize();
-    if (err < 0)
-    	break;
+  net_request::UserInfo user_info;
+	struct PacketControl* packet_control = (struct PacketControl*) (packet);
+	user_info.set_http_packet(packet_control->body_);
     DicValue dict;
-    //    UserInfo* u = data_share_mgr_->GetUser(rev.uid());
+    //    UserInfo* u = data_share_mgr_->GetUser(user_info.uid());
     //    if (u != NULL) {
     //      dict.SetBigInteger(L"uid_", u->uid());
     //      dict.SetString(L"phone_num_", u->phone_num());
@@ -86,9 +85,9 @@ int32 UserInterface::UserInfo(const int32 socket, PacketHead* packet) {
     //      SendMsg(socket, packet, &dict, USER_INFO_RLY);
     //      break;
     //    }
-    err = user_mysql_->UserInfoSelect(rev.uid_str(), &dict);
+    err = user_mysql_->UserInfoSelect(user_info.uid_str(), &dict);
     if (err < 0)
-    	break;
+      break;
     SendMsg(socket, packet, &dict, USER_INFO_RLY);
   } while (0);
   if (err < 0) {
@@ -97,15 +96,14 @@ int32 UserInterface::UserInfo(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::AccountInfo(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnAccountInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    AccountInfoRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::AccountInfo account_info;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    account_info.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->AccountInfoSelect(recv.uid(), &dic);
+    err = user_mysql_->AccountInfoSelect(account_info.uid(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, ACCOUNT_INFO_RLY);
@@ -115,16 +113,15 @@ int32 UserInterface::AccountInfo(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::OrderList(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnOrderList(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    OrderListRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::OrderList order_list;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    order_list.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->OrderListSelect(recv.uid(), recv.flow_type(),
-							recv.start_pos(), recv.count(), &dic);
+    err = user_mysql_->OrderListSelect(order_list.uid(), order_list.flow_type(),
+              order_list.start_pos(), order_list.count(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, ORDER_LIST_RLY);
@@ -134,16 +131,15 @@ int32 UserInterface::OrderList(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::OrderDetail(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnOrderDetail(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    OrderDetailRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::OrderDetail order_detail;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    order_detail.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->OrderDetailSelect(recv.uid(),
-						recv.flow_id(), recv.flow_type(), &dic);
+    err = user_mysql_->OrderDetailSelect(order_detail.uid(),
+            order_detail.flow_id(), order_detail.flow_type(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, ORDER_DETAIL_RLY);
@@ -153,15 +149,14 @@ int32 UserInterface::OrderDetail(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::BankcardList(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnBankcardList(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    BankcardListRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::BankcardList bankcard_list;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    bankcard_list.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->BankcardListSelect(recv.uid(), &dic);
+    err = user_mysql_->BankcardListSelect(bankcard_list.uid(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, BANKCARD_LIST_RLY);
@@ -171,17 +166,16 @@ int32 UserInterface::BankcardList(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::BindBankcard(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnBindBankcard(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    BindBankcardRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
-	DicValue dic;
-    err = user_mysql_->BindBankcardInsertAndSelect(recv.uid(), recv.bank_id(),
-										  recv.branch_bank(),
-										  recv.bankcard_num(), recv.bank_username(), &dic);
+    net_request::BindBankcard bind_bankcard;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    bind_bankcard.set_http_packet(packet_control->body_);
+    DicValue dic;
+    err = user_mysql_->BindBankcardInsertAndSelect(bind_bankcard.uid(), bind_bankcard.bank_id(),
+                      bind_bankcard.branch_bank(),
+                      bind_bankcard.bankcard_num(), bind_bankcard.bank_username(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, BIND_BANKCARD_RLY);
@@ -191,25 +185,24 @@ int32 UserInterface::BindBankcard(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::UnbindBankcard(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnUnbindBankcard(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    UnbindBankcardRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
-    if (time(NULL) - recv.timestamp() > 15 * 60) {
+    net_request::UnbindBankcard unbind_bankcard;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    unbind_bankcard.set_http_packet(packet_control->body_);
+    if (time(NULL) - unbind_bankcard.timestamp() > 15 * 60) {
       err = VERIFY_CODE_OVERDUE;
       break;
     }
     std::stringstream ss;
-    ss << SMS_KEY << recv.timestamp() << recv.verify_code() << recv.phone_num();
-	base::MD5Sum md5(ss.str());
-    if (md5.GetHash() != recv.verify_token()) {
+    ss << SMS_KEY << unbind_bankcard.timestamp() << unbind_bankcard.verify_code() << unbind_bankcard.phone_num();
+        base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != unbind_bankcard.verify_token()) {
       err = VERIFY_CODE_ERR;
       break;
-	}
-    err = user_mysql_->UnbindBankcardDelete(recv.phone_num(), recv.bankcard_id());
+    }
+    err = user_mysql_->UnbindBankcardDelete(unbind_bankcard.phone_num(), unbind_bankcard.bankcard_id());
     if (err < 0)
       break;
     SendMsg(socket, packet, NULL, UNBIND_BANKCARD_RLY);
@@ -218,15 +211,14 @@ int32 UserInterface::UnbindBankcard(const int32 socket, PacketHead* packet) {
     SendError(socket, packet, err, UNBIND_BANKCARD_RLY);
   return err;
 }
-	
-int32 UserInterface::ChangeDefaultBankcard(const int32 socket, PacketHead* packet) {
+  
+int32 UserInterface::OnChangeDefaultBankcard(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    ChangeDefaultBankcardRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
-    err = user_mysql_->ChangeDefaultBankcard(recv.uid(), recv.bankcard_id());
+    net_request::ChangeDefaultBankcard change_default_bankcard;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    change_default_bankcard.set_http_packet(packet_control->body_);
+    err = user_mysql_->ChangeDefaultBankcard(change_default_bankcard.uid(), change_default_bankcard.bankcard_id());
     if (err < 0)
       break;
     SendMsg(socket, packet, NULL, CHANGE_DEFAULT_BANKCARD_RLY);
@@ -235,26 +227,25 @@ int32 UserInterface::ChangeDefaultBankcard(const int32 socket, PacketHead* packe
     SendError(socket, packet, err, CHANGE_DEFAULT_BANKCARD_RLY);
   return err;
 }
-	
-int32 UserInterface::BankAccountInfo(const int32 socket, PacketHead* packet) {
+  
+int32 UserInterface::OnBankAccountInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-  	BankAccountInfoRecv recv(*packet);
-  	err = recv.Deserialize();
-  	if (err < 0)
-  		break;
-  	DicValue dic;
-  	err = user_mysql_->BankAccountInfoSelect(recv.bankcard_num(), &dic);
-  	if (err < 0)
-  		break;
-  	SendMsg(socket, packet, &dic, BANK_ACCOUNT_INFO_RLY);
+    net_request::BankAccountInfo bank_account_info;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    bank_account_info.set_http_packet(packet_control->body_);
+    DicValue dic;
+    err = user_mysql_->BankAccountInfoSelect(bank_account_info.bankcard_num(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, BANK_ACCOUNT_INFO_RLY);
   } while (0);
   if (err < 0)
-  	SendError(socket, packet, err, BANK_ACCOUNT_INFO_RLY);
+    SendError(socket, packet, err, BANK_ACCOUNT_INFO_RLY);
   return err;
 }
-	
-int UserInterface::split_string(const std::string &in, const char ch, std::vector<std::string> &out) { //last is ,??????????
+  
+int UserInterface::SplitString(const std::string &in, const char ch, std::vector<std::string> &out) { //last is ,??????????
   if (in.size() == 0)
     return 0;
   out.clear();
@@ -266,12 +257,12 @@ int UserInterface::split_string(const std::string &in, const char ch, std::vecto
     if (new_pos != std::string::npos) {
       tmp = in.substr(old_pos, new_pos - old_pos);
       if (tmp != "")
-      	out.push_back(tmp);
+        out.push_back(tmp);
       old_pos = ++new_pos;
     } else if (old_pos <= in.size()) {
       tmp = in.substr(old_pos);
       if (tmp != "")
-      	out.push_back(tmp);
+        out.push_back(tmp);
       break;
     } else
       break;
@@ -280,38 +271,37 @@ int UserInterface::split_string(const std::string &in, const char ch, std::vecto
   return 0;
 }
 
-int32 UserInterface::CreditList(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnCreditList(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    CreditListRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
-	
-	std::string db_status;
-	std::vector<std::string> split_status;
-	split_string(recv.status(), ',', split_status);
-	for (std::vector<std::string>::iterator it = split_status.begin();
-		 it != split_status.end(); ++it) {
-		if (*it == CREDIT_INPROCESS) {
-		  db_status += DB_CREDIT_INPROCESS_STR;
-		  db_status += DB_CREDIT_CLIENT_SUCCESS_STR;
-		} else if (*it == CREDIT_SUCCESS)
-		  db_status += DB_CREDIT_SERVER_SUCCESS_STR;
-		else if (*it == CREDIT_FAIL) {
-		  db_status += DB_CREDIT_CLIENT_FAIL_STR;
-		  db_status += DB_CREDIT_SERVER_FAIL_STR;
-		} else {
-		  err = CREDIT_STATUS_ERR;
-		  break;
-		}
-	}
+    net_request::CreditList credit_list;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    credit_list.set_http_packet(packet_control->body_);
+  
+    std::string db_status;
+    std::vector<std::string> split_status;
+    SplitString(credit_list.status(), ',', split_status);
+    for (std::vector<std::string>::iterator it = split_status.begin();
+       it != split_status.end(); ++it) {
+      if (*it == CREDIT_INPROCESS) {
+        db_status += DB_CREDIT_INPROCESS_STR;
+        db_status += DB_CREDIT_CLIENT_SUCCESS_STR;
+      } else if (*it == CREDIT_SUCCESS)
+        db_status += DB_CREDIT_SERVER_SUCCESS_STR;
+      else if (*it == CREDIT_FAIL) {
+        db_status += DB_CREDIT_CLIENT_FAIL_STR;
+        db_status += DB_CREDIT_SERVER_FAIL_STR;
+      } else {
+        err = CREDIT_STATUS_ERR;
+        break;
+      }
+    }
     if (err < 0)
       break;
 
     DicValue dic;
-    err = user_mysql_->CreditListSelect(recv.uid(), db_status.substr(0, db_status.size() - 1),
-									recv.start_pos(), recv.count(), &dic);
+    err = user_mysql_->CreditListSelect(credit_list.uid(), db_status.substr(0, db_status.size() - 1),
+                  credit_list.start_pos(), credit_list.count(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, CREDIT_LIST_RLY);
@@ -320,16 +310,15 @@ int32 UserInterface::CreditList(const int32 socket, PacketHead* packet) {
     SendError(socket, packet, err, CREDIT_LIST_RLY);
   return err;
 }
-	
-int32 UserInterface::CreditDetail(const int32 socket, PacketHead* packet) {
+  
+  /*int32 UserInterface::OnCreditDetail(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    CreditDetailRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::CreditDetail credit_detail;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    credit_detail.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->CreditDetailSelect(recv.uid(), recv.recharge_id(), &dic);
+    err = user_mysql_->CreditDetailSelect(credit_detail.uid(), credit_detail.recharge_id(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, CREDIT_DETAIL_RLY);
@@ -337,18 +326,17 @@ int32 UserInterface::CreditDetail(const int32 socket, PacketHead* packet) {
   if (err < 0)
     SendError(socket, packet, err, CREDIT_DETAIL_RLY);
   return err;
-}
-	
-int32 UserInterface::UserWithdraw(const int32 socket, PacketHead* packet) {
+  }*/
+  
+int32 UserInterface::OnUserWithdraw(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    UserWithdrawRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::UserWithdraw user_withdraw;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    user_withdraw.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->UserWithdrawInsertAndSelect(recv.uid(), recv.money(),
-									recv.bankcard_id(), recv.passwd(), &dic);
+    err = user_mysql_->UserWithdrawInsertAndSelect(user_withdraw.uid(), user_withdraw.money(),
+                  user_withdraw.bankcard_id(), user_withdraw.passwd(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, USER_WITHDRAW_RLY);
@@ -358,16 +346,15 @@ int32 UserInterface::UserWithdraw(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::UserWithdrawList(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnUserWithdrawList(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    UserWithdrawListRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::UserWithdrawList user_withdraw_list;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    user_withdraw_list.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->UserWithdrawListSelect(recv.uid(), recv.status(),
-											  recv.start_pos(), recv.count(), &dic);
+    err = user_mysql_->UserWithdrawListSelect(user_withdraw_list.uid(), user_withdraw_list.status(),
+                        user_withdraw_list.start_pos(), user_withdraw_list.count(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, USER_WITHDRAW_LIST_RLY);
@@ -377,10 +364,10 @@ int32 UserInterface::UserWithdrawList(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-	/*int32 UserInterface::UserWithdrawDetail(const int32 socket, PacketHead* packet) {
+  /*int32 UserInterface::OnUserWithdrawDetail(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    UserWithdrawDetailRecv recv(*packet);
+    UserWithdrawDetail recv;
     err = recv.Deserialize();
     if (err < 0)
       break;
@@ -395,53 +382,51 @@ int32 UserInterface::UserWithdrawList(const int32 socket, PacketHead* packet) {
   return err;
   }*/
 
-int32 UserInterface::ObtainVerifyCode(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnObtainVerifyCode(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-  	ObtainVerifyCodeRecv rev(*packet);
-  	err = rev.Deserialize();
-  	if (err < 0)
-  		break;
-  	std::stringstream ss;
-  	int64 timestamp_ = time(NULL);
-  	int64 rand_code_ = util::Random(100000, 999999);
+    net_request::ObtainVerifyCode obtain_verify_code;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    obtain_verify_code.set_http_packet(packet_control->body_);
+    std::stringstream ss;
+    int64 timestamp_ = time(NULL);
+    int64 rand_code_ = util::Random(100000, 999999);
 
-  	DicValue dic;
-  	dic.SetBigInteger(L"timestamp", timestamp_);
+    DicValue dic;
+    dic.SetBigInteger(L"timestamp", timestamp_);
 
-  	ss << SMS_KEY << timestamp_ << rand_code_ << rev.phone_num();
-  	base::MD5Sum md5(ss.str());
-  	dic.SetString(L"vToken", md5.GetHash().c_str());
-  	LOG(INFO) << "token:" << ss.str();
-  	LOG(INFO) << "md5 token:" << md5.GetHash();
-  	ss.str("");
-  	ss.clear();
-  	ss << rev.phone_num() << ":" << rev.verify_type();
-  	data_share_mgr_->UpdateSMSToken(ss.str(), md5.GetHash());
-  	SendMsg(socket, packet, &dic, OBTAIN_VERIFY_CODE_RLY);
+    ss << SMS_KEY << timestamp_ << rand_code_ << obtain_verify_code.phone_num();
+    base::MD5Sum md5(ss.str());
+    dic.SetString(L"vToken", md5.GetHash().c_str());
+    LOG(INFO) << "token:" << ss.str();
+    LOG(INFO) << "md5 token:" << md5.GetHash();
+    ss.str("");
+    ss.clear();
+    ss << obtain_verify_code.phone_num() << ":" << obtain_verify_code.verify_type();
+    data_share_mgr_->UpdateSMSToken(ss.str(), md5.GetHash());
+    SendMsg(socket, packet, &dic, OBTAIN_VERIFY_CODE_RLY);
 
-  	ss.str("");
-  	ss.clear();
-  	ss << SHELL_SMS << " " << rev.phone_num() << " " << rand_code_ << " "
-  	   << rev.verify_type();
-  	LOG(INFO) << ss.str();
-  	system(ss.str().c_str());
+    ss.str("");
+    ss.clear();
+    ss << SHELL_SMS << " " << obtain_verify_code.phone_num() << " " << rand_code_ << " "
+       << obtain_verify_code.verify_type();
+    LOG(INFO) << ss.str();
+    system(ss.str().c_str());
   } while (0);
   if (err < 0) {
-  	SendError(socket, packet, err, OBTAIN_VERIFY_CODE_RLY);
+    SendError(socket, packet, err, OBTAIN_VERIFY_CODE_RLY);
   }
   return err;
 }
-	
-int32 UserInterface::ChangeUserInfo(const int32 socket, PacketHead* packet) {
+  
+int32 UserInterface::OnChangeUserInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    ChangeUserInfoRecv rev(*packet);
-    err = rev.Deserialize();
-    if (err < 0)
-      break;
-    err = user_mysql_->ChangeUserInfoUpdate(rev.uid(), rev.nickname(),
-											rev.head_url(), rev.gender());
+    net_request::ChangeUserInfo change_user_info;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    change_user_info.set_http_packet(packet_control->body_);
+    err = user_mysql_->ChangeUserInfoUpdate(change_user_info.uid(), change_user_info.nickname(),
+                      change_user_info.head_url(), change_user_info.gender());
     if (err < 0)
       break;
     SendMsg(socket, packet, NULL, CHANGE_USER_INFO_RLY);
@@ -451,15 +436,16 @@ int32 UserInterface::ChangeUserInfo(const int32 socket, PacketHead* packet) {
   }
   return err;
 }
-	
-int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
+  
+int32 UserInterface::OnWXPlaceOrder(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    WxPlaceOrderRecv recv(*packet);
-    err = recv.Deserialize();
+    net_request::WXPlaceOrder wx_place_order;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    wx_place_order.set_http_packet(packet_control->body_);
     //记录订单信息
     DicValue recharge_dic;
-    err = user_mysql_->RechargeInfoInsertAndSelect(recv.uid(), recv.price(),
+    err = user_mysql_->RechargeInfoInsertAndSelect(wx_place_order.uid(), wx_place_order.price(),
                                                    &recharge_dic);
     if (err < 0)
       break;
@@ -471,9 +457,9 @@ int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
     WXOrder wx_order;
     if (util::GetIPAddress(socket, &ip, &port))
       wx_order.set_spbill_create_ip(ip);
-    wx_order.set_body(recv.title());
+    wx_order.set_body(wx_place_order.title());
     wx_order.set_out_trade_no(recharge_id);
-    wx_order.set_total_fee(recv.price() * 100);
+    wx_order.set_total_fee(wx_place_order.price() * 100);
     std::string wx_result = wx_order.PlaceOrder();
     base_logic::ValueSerializer* deserializer =
         base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &wx_result);
@@ -524,24 +510,23 @@ int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::WXPayClientResponse(const int32 socket,
+int32 UserInterface::OnWXPayClientResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
   do {
-    WXPayClientRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-      break;
+    net_request::WXPayClient wx_pay_client;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    wx_pay_client.set_http_packet(packet_control->body_);
     DicValue dic;
-    err = user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
-                                                     recv.pay_result(), &dic);
+    err = user_mysql_->ChangeRechargeStatusAndSelect(wx_pay_client.recharge_id(),
+                                                     wx_pay_client.pay_result(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, WXPAY_CLIENT_RLY);
-    if (recv.pay_result() == 1) {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 1, &dic);
+    if (wx_pay_client.pay_result() == 1) {
+      user_mysql_->ChangeRechargeStatusAndSelect(wx_pay_client.recharge_id(), 1, &dic);
     } else {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 2, &dic);
+      user_mysql_->ChangeRechargeStatusAndSelect(wx_pay_client.recharge_id(), 2, &dic);
     }
     SendMsg(socket, packet, &dic, WXPAY_SERVER_RLY);
   } while (0);
@@ -551,71 +536,68 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
   return err;
 }
 
-int32 UserInterface::WXPayServerResponse(const int32 socket,
+int32 UserInterface::OnWXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
   do {
-	LOG(ERROR) << "aaaaaaaa wx pay server";
-    WXPayServerRecv recv(*packet);
-    err = recv.Deserialize();
-    if (err < 0)
-		break;
+    LOG(ERROR) << "aaaaaaaa wx pay server";
+    net_request::WXPayServer wx_pay_server;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    wx_pay_server.set_http_packet(packet_control->body_);
     //支付成功
     DicValue dic;
-    if (recv.appid() != APPID && recv.mch_id() != MCH_ID) {
-      LOG(ERROR) << "WXPAY SERVER RESULT appid:[" << recv.appid() << "]";
-      LOG(ERROR) << "WXPAY SERVER RESULT mch_id:[" << recv.mch_id() << "]";
+    if (wx_pay_server.appid() != APPID && wx_pay_server.mch_id() != MCH_ID) {
+      LOG(ERROR) << "WXPAY SERVER RESULT appid:[" << wx_pay_server.appid() << "]";
+      LOG(ERROR) << "WXPAY SERVER RESULT mch_id:[" << wx_pay_server.mch_id() << "]";
       break;
     }
-    if (recv.pay_result() == 1) {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 3, &dic);
+    if (wx_pay_server.pay_result() == 1) {
+      user_mysql_->ChangeRechargeStatusAndSelect(wx_pay_server.recharge_id(), 3, &dic);
     } else {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 4, &dic);
+      user_mysql_->ChangeRechargeStatusAndSelect(wx_pay_server.recharge_id(), 4, &dic);
     }
     int64 user_id = 0;
     /*dic.GetBigInteger(L"uid_", &user_id);
-	UserInfo* user = data_share_mgr_->GetUser(user_id);
+  UserInfo* user = data_share_mgr_->GetUser(user_id);
     if (user != NULL && user->is_login()) {
       SendMsg(user->socket_fd(), packet, &dic, WXPAY_SERVER_RLY);
-	  }*/
+    }*/
   } while (0);
   return err;
 }
 
-int32 UserInterface::CloseSocket(const int fd) {
+int32 UserInterface::OnCloseSocket(const int fd) {
   data_share_mgr_->UserOffline(fd);
   return 0;
 }
 
-int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnHeartPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  Heartbeat rev(*packet);
-  do {
-    err = rev.Deserialize();
-    if (err < 0)
-      break;
-    data_share_mgr_->UserHeart(rev.uid());
-  } while (0);
+  /*do {
+    net_request::HeartPacket heart_packet;
+    struct PacketControl* packet_control = (struct PacketControl*) (packet);
+    heart_packet.set_http_packet(packet_control->body_);
+    data_share_mgr_->UserHeart(heart_packet.uid());
+    } while (0);*/
   return err;
 }
 
-int32 UserInterface::AlipayServer(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnAlipayServer(const int32 socket, PacketHead* packet) {
   LOG(INFO) << "alipay server req";
   return 0;
 }
 
-int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
+int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
   LOG(INFO) << "alipay client req";
   return 0;
 }
 
 
-	/*int32 UserInterface::DeviceToken(const int32 socket, PacketHead* packet) {
+  /*int32 UserInterface::OnDeviceToken(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   LOG(INFO) << "DeviceToken";
   do {
-    DeviceTokenRecv rev(*packet);
-    err = rev.Deserialize();
+    DeviceToken rev;
     LOG(INFO) << "DeviceToken Deserialize err:" << err;
     if (err < 0)
       break;
@@ -634,11 +616,10 @@ int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
   return err;
   }*/
 
-	/*int32 UserInterface::CheckSMSCode(const int32 socket, PacketHead* packet) {
+  /*int32 UserInterface::OnCheckSMSCode(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    CheckSMSCodeRecv rev(*packet);
-    err = rev.Deserialize();
+    CheckSMSCode rev;
     if (err < 0)
       break;
     if (time(NULL) - rev.timestamp() > 15 * 60) {
@@ -668,18 +649,18 @@ int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
 
 void UserInterface::SendPacket(const int socket, PacketHead* packet) {
 
-  char* s = new char[packet->packet_length()];
+  char* s = new char[packet->packet_length];
   LOG(INFO) << "packet body:" << packet->body_str();
   memset(s, 0, packet->packet_length());
   memcpy(s, &packet->head(), HEAD_LENGTH);
   memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),
          packet->body_str().length());
-  int total = util::SendFull(socket, s, packet->packet_length());
+  int total = util::OnSendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
   LOG_IF(ERROR, total != packet->packet_length())
       << "send packet wrong:opcode[" << packet->operate_code() << "]"
-	  << total << "," << packet->packet_length();
+    << total << "," << packet->packet_length();
 }
 
 void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,

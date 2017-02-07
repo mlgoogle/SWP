@@ -7,8 +7,9 @@
 
 #include "public/basic/basictypes.h"
 #include "public/config/config.h"
-#include "pub/net/proto_buf.h"
-#include "pub/share/data_share_mgr.h"
+#include "net/proto_buf.h"
+#include "share/data_share_mgr.h"
+#include "net/comm_head.h"
 
 #include "user/user_mysql.h"
 namespace user {
@@ -24,64 +25,64 @@ class UserInterface {
  public:
   void InitConfig(config::FileConfig* config);
 
-  int32 HeartPacket(const int32 socket, PacketHead* packet);
+  int32 OnHeartPacket(const int32 socket, PacketHead* packet);
 
-  int32 UserInfo(const int32 socket, PacketHead* packet);
+  int32 OnUserInfo(const int32 socket, PacketHead* packet);
   
-  int32 AccountInfo(const int32 socket, PacketHead* packet);
+  int32 OnAccountInfo(const int32 socket, PacketHead* packet);
 
-  int32 OrderList(const int32 socket, PacketHead* packet);
+  int32 OnOrderList(const int32 socket, PacketHead* packet);
 
-  int32 OrderDetail(const int32 socket, PacketHead* packet);
+  int32 OnOrderDetail(const int32 socket, PacketHead* packet);
 
-  int32 BankcardList(const int32 socket, PacketHead* packet);
+  int32 OnBankcardList(const int32 socket, PacketHead* packet);
 
-  int32 BindBankcard(const int32 socket, PacketHead* packet);
+  int32 OnBindBankcard(const int32 socket, PacketHead* packet);
 
-  int32 UnbindBankcard(const int32 socket, PacketHead* packet);
+  int32 OnUnbindBankcard(const int32 socket, PacketHead* packet);
 
-  int32 ChangeDefaultBankcard(const int32 socket, PacketHead* packet);
+  int32 OnChangeDefaultBankcard(const int32 socket, PacketHead* packet);
   
-  int32 BankAccountInfo(const int32 socket, PacketHead* packet);
+  int32 OnBankAccountInfo(const int32 socket, PacketHead* packet);
 
-  int32 CreditList(const int32 socket, PacketHead* packet);
+  int32 OnCreditList(const int32 socket, PacketHead* packet);
 
-  int32 CreditDetail(const int32 socket, PacketHead* packet);
+  int32 OnCreditDetail(const int32 socket, PacketHead* packet);
 
-  int32 UserWithdraw(const int32 socket, PacketHead* packet);
+  int32 OnUserWithdraw(const int32 socket, PacketHead* packet);
 
-  int32 UserWithdrawList(const int32 socket, PacketHead* packet);
+  int32 OnUserWithdrawList(const int32 socket, PacketHead* packet);
 
-  int32 UserWithdrawDetail(const int32 socket, PacketHead* packet);
+  int32 OnUserWithdrawDetail(const int32 socket, PacketHead* packet);
 
-  int32 ObtainVerifyCode(const int32 socket, PacketHead* packet);
+  int32 OnObtainVerifyCode(const int32 socket, PacketHead* packet);
 
-  int32 ChangeUserInfo(const int32 socket, PacketHead* packet);
+  int32 OnChangeUserInfo(const int32 socket, PacketHead* packet);
   
-  int32 WXPlaceOrder(const int32 socket, PacketHead* packet);
+  int32 OnWXPlaceOrder(const int32 socket, PacketHead* packet);
 
-  int32 WXPayClientResponse(const int32 socket, PacketHead* packet);
+  int32 OnWXPayClientResponse(const int32 socket, PacketHead* packet);
 
-  int32 WXPayServerResponse(const int32 socket, PacketHead* packet);
+  int32 OnWXPayServerResponse(const int32 socket, PacketHead* packet);
 
-  int32 DeviceToken(const int32 socket, PacketHead* packet);
+  int32 OnDeviceToken(const int32 socket, PacketHead* packet);
 
-  int32 AlipayServer(const int32 socket, PacketHead* packet);
+  int32 OnAlipayServer(const int32 socket, PacketHead* packet);
 
-  int32 AlipayClient(const int32 socket, PacketHead* packet);
+  int32 OnAlipayClient(const int32 socket, PacketHead* packet);
   
-  int32 CheckSMSCode(const int32 socket, PacketHead* packet);
+  int32 OnCheckSMSCode(const int32 socket, PacketHead* packet);
 
-  int32 CheckHeartLoss();
+  int32 OnCheckHeartLoss();
 //更新共享数据，旅游分享和技能分享
-  int32 InitShareGuide();
+  int32 OnInitShareGuide();
   //定时监测订单状态
-  int32 NopayOrderStatusCheck();
-  int32 CloseSocket(const int fd);
+  int32 OnNopayOrderStatusCheck();
+  int32 OnCloseSocket(const int fd);
 
   void SendPacket(const int socket, PacketHead* packet);
 
-  void SendError(const int socket, PacketHead* packet, int32 err, int16 opcode);
+  void SendError(const int socket, PacketHead* packet, int32 Onerr, int16 opcode);
 
   void SendMsg(const int socket, PacketHead* packet, DicValue* dic,
                int16 opcode);
@@ -91,7 +92,7 @@ class UserInterface {
   int32 InitShareType();
   int32 InitShareDetails();
   int32 InitShareSkills();
-  int split_string(const std::string &in, const char ch, std::vector<std::string> &out);
+  int32 SplitString(const std::string &in, const char ch, std::vector<std::string> &out);
 
   static UserInterface* instance_;
   UserMysql* user_mysql_;
