@@ -41,6 +41,7 @@ bool Quotationslogic::Init() {
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitRedis(
       quotations_redis_);
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
+  quotations_logic::QuotationsEngine::GetSchdulerManager()->InitFoxreData();
   return true;
 }
 
@@ -149,10 +150,10 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::RealTime real_time;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  real_time.set_http_packet(packet_control->body_);
-  if (real_time.goods_infos_ != NULL)
+  real_time.set_htt_packet(packet_control->body_);
+  if (real_time.symbol_infos_ != NULL)
     quotations_logic::QuotationsEngine::GetSchdulerManager()->SendRealTime(
-        socket, real_time.goods_infos_);
+        socket, real_time.symbol_infos_);
   return true;
 }
 
@@ -160,11 +161,12 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::TimeLine time_line;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
+
   time_line.set_htt_packet(packet_control->body_);
 
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendTimeLine(
-      socket, time_line.exchange_name(), time_line.platform_name(),
-      time_line.good_type());
+      socket, time_line.atype(), time_line.exchange_name(),
+      time_line.platform_name(), time_line.symbol());
   return true;
 }
 

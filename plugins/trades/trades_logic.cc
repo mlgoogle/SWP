@@ -2,7 +2,10 @@
 //  Created on: 2016年12月30日 Author: kerry
 
 #include "trades/trades_logic.h"
+#include "trades/schduler_engine.h"
+#include "trades/trades_proto_buf.h"
 #include "basic/native_library.h"
+#include "trades/operator_code.h"
 #include "config/config.h"
 #include "core/common.h"
 #include "logic/logic_comm.h"
@@ -21,7 +24,11 @@ Tradeslogic::Tradeslogic() {
     assert(0);
 }
 
-Tradeslogic::~Tradeslogic() {}
+Tradeslogic::~Tradeslogic() {
+  if (trades_db_){delete trades_db_; trades_db_ = NULL;}
+  trades_logic::TradesEngine::FreeSchdulerManager();
+  trades_logic::TradesEngine::FreeTradesEngine();
+}
 
 bool Tradeslogic::Init() {
   bool r = false;
@@ -30,6 +37,10 @@ bool Tradeslogic::Init() {
   if (config == NULL)
     return false;
   r = config->LoadConfig(path);
+  trades_logic::TradesEngine::GetSchdulerManager();
+  trades_db_ = new trades_logic::TradesDB(config);
+  trades_logic::TradesEngine::GetSchdulerManager()->InitDB(trades_db_);
+  trades_logic::TradesEngine::GetSchdulerManager()->InitGoodsData();
   return true;
 }
 
@@ -55,7 +66,17 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
     return false;
 
+  if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
+    LOG_ERROR2("UnpackStream Error socket %d", socket);
+    return false;
+  }
+
+
   switch (packet->operate_code) {
+    case R_TRADES_GOODS_DATA:{
+      OnPlatformsGoods(srv, socket, packet);
+      break;
+    }
   default:
     break;
   }
@@ -94,5 +115,16 @@ bool Tradeslogic::OnTimeout(struct server *srv, char *id, int opcode,
   }
   return true;
 }
+
+bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
+                                  struct PacketHead *packet) {
+  trades_logic::net_request::Goods goods;
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  goods.set_http_packet(packet_control->body_);
+  trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(socket, goods.pid());
+  return true;
+
+}
+
 
 } // namespace trades_logic

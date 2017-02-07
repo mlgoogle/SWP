@@ -32,5 +32,4 @@ typedef std::map<int64, ShareIdMap> ShareTypeMap;
 typedef std::map<int32, int64> SaltMap;
 
 
-
 #endif  // PUB_NET_TYPEDEF_H_

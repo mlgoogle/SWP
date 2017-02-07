@@ -10,45 +10,43 @@
 #include "basic/basictypes.h"
 #include "logic/base_values.h"
 
-
 enum PACKET_TYPE {
   ERROR_TYPE = 0,
   USER_TYPE = 1,
   CHAT_TYPE = 2,
   LOGIN_TYPE = 3,
-  QUOTATIONS_TYPE = 4
+  QUOTATIONS_TYPE = 4,
+  TRADES_TYPE = 5,
 };
 
-
 enum PRS {
-    NOZIP_AND_NOENCRYPT = 0,
-    ZIP_AND_NOENCRYPT = 1,
-    NOZIP_AND_ENCRYPT = 2,
-    ZIP_AND_ENCRYPT = 3
+  NOZIP_AND_NOENCRYPT = 0,
+  ZIP_AND_NOENCRYPT = 1,
+  NOZIP_AND_ENCRYPT = 2,
+  ZIP_AND_ENCRYPT = 3
 };
 
 enum operatorcode {
-    HEART_PACKET = 0x64
+  HEART_PACKET = 0x64
 
 };
 
 //  packet_length 长度为原始数据长度
-struct PacketHead{
-    int16 packet_length;
-    int8  is_zip_encrypt;
-    int8  type;
-    int16 signature;
-    int16 operate_code;
-    int16 data_length;
-    int32 timestamp;
-    int64 session_id;
-    int32 reserved;
+struct PacketHead {
+  int16 packet_length;
+  int8 is_zip_encrypt;
+  int8 type;
+  int16 signature;
+  int16 operate_code;
+  int16 data_length;
+  int32 timestamp;
+  int64 session_id;
+  int32 reserved;
 };
 
 struct PacketControl : public PacketHead {
   base_logic::DictionaryValue* body_;
 };
-
 
 #define PACKET_HEAD_LENGTH (sizeof(int16) * 4 + sizeof(int8) * 2 + \
     sizeof(int32) * 2 + sizeof(int64))

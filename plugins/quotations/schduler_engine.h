@@ -10,14 +10,18 @@
 #include "thread/base_thread_lock.h"
 
 typedef std::list<swp_logic::Quotations> QUOTATIONS_LIST;
-typedef std::map<std::string, QUOTATIONS_LIST> QUOTATIONS_MAP; /*现货ID，行情*/ /*平台名称:交易所:现货ID 如:JH:TJPME:AG*/
-typedef std::map<int64,QUOTATIONS_MAP> QUOTATIONS_ALL_MAP; /*股票,现货,期货 QUOTATIONS_MAP*/
+typedef std::map<std::string, QUOTATIONS_LIST> QUOTATIONS_MAP; /*现货ID，行情*//*平台名称:交易所:现货ID 如:JH:TJPME:AG*/
+typedef std::map<int64, QUOTATIONS_MAP> QUOTATIONS_ALL_MAP; /*股票,现货,期货 QUOTATIONS_MAP*/
+
+typedef std::map<std::string, swp_logic::Quotations> LAST_QUOTATIONS_MAP;  //最近一次报价
+typedef std::map<int64, LAST_QUOTATIONS_MAP> LAST_QUOTATIONS_ALL_MAP;
 
 namespace quotations_logic {
 
 class QuotationsCache {
  public:
-  QUOTATIONS_ALL_MAP  quotations_map_;
+  QUOTATIONS_ALL_MAP quotations_map_;
+  LAST_QUOTATIONS_ALL_MAP last_quotations_map_;
 };
 
 class QuotationsManager {
@@ -31,24 +35,32 @@ class QuotationsManager {
 
   void SendRealTime(const int socket, base_logic::ListValue* value);
 
-  void SendTimeLine(const int socket, const std::string& exchange_name,
+  void SendTimeLine(const int socket,
+                    const int32 atype,
+                    const std::string& exchange_name,
                     const std::string& platform_name,
-                    const std::string& good_type);
+                    const std::string& symbol);
 
   void TimeEvent(int opcode, int time);
 
   void InitRedis(quotations_logic::QuotationsRedis* quotations_redis);
 
   void InitGoodsData();
+
+  void InitFoxreData();
+
+  void InitRedisData(const std::string& hash_name, int32 atype);
  private:
   void SetQuotationsUnit(swp_logic::Quotations& quotation);
 
-  void GetGoodsRealTime(const std::string& good_type, swp_logic::Quotations* quotations);
+  void GetRealTime(const int32 atype, const std::string& symbol,
+                        swp_logic::Quotations* quotations);
 
-  void GetGoodsTimeLine(const std::string& good_type, std::list<swp_logic::Quotations>& list);
+  void GetTimeLine(const int32 atype, const std::string& symbol,
+                        std::list<swp_logic::Quotations>& list);
 
  private:
-  void  Init();
+  void Init();
  private:
   QuotationsCache *quotations_cache_;
   quotations_logic::QuotationsRedis* quotations_redis_;
