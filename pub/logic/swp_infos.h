@@ -14,7 +14,8 @@
 enum {
   STOCK_TYPE = 1,
   GOODS_TYPE = 2,
-  FUTURES_TYPE = 3
+  FUTURES_TYPE = 3,
+  FORXE_TYPE = 4,
 };
 
 namespace swp_logic {
