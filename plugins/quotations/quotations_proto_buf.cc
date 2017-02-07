@@ -18,7 +18,7 @@ void RealTime::set_http_packet(base_logic::DictionaryValue* value) {
   int64 current_unix_time = 0.0;
   double high_price = 0.0;
   double low_price = 0.0;
-  int64  type = 0.0;
+  int64 type = 0.0;
   std::string exchange_name;
   std::string platform_name;
   std::string symbol;
@@ -76,17 +76,17 @@ void RealTime::set_http_packet(base_logic::DictionaryValue* value) {
 
 namespace net_request {
 
-
-
 void TimeLine::set_htt_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   int64 id = 0;
   std::string token;
   std::string exchange_name;
   std::string platform_name;
-  std::string good_type;
+  std::string symbol;
+  int64 temp_atype;
+  int32 atype;
 
-  r = value->GetBigInteger(L"id",& id);
+  r = value->GetBigInteger(L"id", &id);
   if (r)
     set_id(id);
 
@@ -94,25 +94,6 @@ void TimeLine::set_htt_packet(base_logic::DictionaryValue* value) {
   if (r)
     set_token(token);
 
-  r = value->GetString(L"exchangeName",&exchange_name);
-  if (r)
-    set_exchange_name(exchange_name);
-
-  r = value->GetString(L"platformName", &platform_name);
-  if (r)
-    set_platform_name(platform_name);
-
-  r = value->GetString(L"goodType", &good_type);
-  if (r)
-    set_good_type(good_type);
-}
-
-
-void RealTimeUnit::set_htt_packet(base_logic::DictionaryValue* value) {
-  bool r = false;
-  std::string exchange_name;
-  std::string platform_name;
-  std::string good_type;
   r = value->GetString(L"exchangeName", &exchange_name);
   if (r)
     set_exchange_name(exchange_name);
@@ -121,9 +102,41 @@ void RealTimeUnit::set_htt_packet(base_logic::DictionaryValue* value) {
   if (r)
     set_platform_name(platform_name);
 
-  r = value->GetString(L"goodType", &good_type);
+  r = value->GetString(L"symbol", &symbol);
   if (r)
-    set_good_type(good_type);
+    set_symbol(symbol);
+
+  r = value->GetBigInteger(L"aType", &temp_atype);
+   if (r) {
+     atype = temp_atype;
+     set_atype(atype);
+   }
+}
+
+void RealTimeUnit::set_htt_packet(base_logic::DictionaryValue* value) {
+  bool r = false;
+  std::string exchange_name;
+  std::string platform_name;
+  std::string symbol;
+  int64 temp_atype;
+  int32 atype;
+  r = value->GetString(L"exchangeName", &exchange_name);
+  if (r)
+    set_exchange_name(exchange_name);
+
+  r = value->GetString(L"platformName", &platform_name);
+  if (r)
+    set_platform_name(platform_name);
+
+  r = value->GetString(L"symbol", &symbol);
+  if (r)
+    set_symbol(symbol);
+
+  r = value->GetBigInteger(L"aType", &temp_atype);
+  if (r) {
+    atype = temp_atype;
+    set_atype(atype);
+  }
 }
 
 void RealTime::set_htt_packet(base_logic::DictionaryValue* value) {
@@ -139,9 +152,8 @@ void RealTime::set_htt_packet(base_logic::DictionaryValue* value) {
   if (r)
     set_token(token);
 
-  r = value->GetList(L"goodsinfos", &goods_infos_);
+  r = value->GetList(L"symbolInfos", &symbol_infos_);
 }
-
 
 }
 

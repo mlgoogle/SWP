@@ -224,6 +224,7 @@ class Login {
   Login()
       : aid_(NULL),
         password_(NULL),
+        atype_(NULL),
         value_(NULL) {
   }
 
@@ -236,6 +237,11 @@ class Login {
       delete password_;
       password_ = NULL;
     }
+
+    if (atype_) {
+      delete atype_;
+      atype_ = NULL;
+    }
   }
 
   void set_aid(const int64 aid) {
@@ -246,18 +252,24 @@ class Login {
     password_ = new base_logic::StringValue(password);
   }
 
+  void set_atype(const int32 atype) {
+    atype_ = new base_logic::FundamentalValue(atype);
+  }
   base_logic::DictionaryValue* get() {
     value_ = new base_logic::DictionaryValue();
     if (aid_ != NULL)
       value_->Set(L"aid", aid_);
     if (password_ != NULL)
       value_->Set(L"password", password_);
+    if (atype_ != NULL)
+      value_->Set(L"atype",atype_);
     return value_;
   }
 
  public:
   base_logic::FundamentalValue* aid_;
   base_logic::StringValue* password_;
+  base_logic::FundamentalValue* atype_;
   base_logic::DictionaryValue* value_;
 
 };
@@ -271,14 +283,16 @@ class RealTimeUnit {
   RealTimeUnit()
    :exchange_name_(NULL)
    ,platform_name_(NULL)
-   ,good_type_(NULL){
+   ,atype_(NULL)
+   ,symbol_(NULL){
 
   }
 
   ~RealTimeUnit() {
     if (exchange_name_) {delete exchange_name_; exchange_name_ = NULL;}
     if (platform_name_) {delete platform_name_; platform_name_ = NULL;}
-    if (good_type_) {delete good_type_; good_type_ = NULL;}
+    if (symbol_) {delete symbol_; symbol_ = NULL;}
+    if (atype_) {delete atype_; atype_ = NULL;}
   }
 
   void set_htt_packet(base_logic::DictionaryValue* value);
@@ -291,8 +305,12 @@ class RealTimeUnit {
     platform_name_ = new base_logic::StringValue(platform_name);
   }
 
-  void set_good_type(const std::string& good_type) {
-    good_type_ = new base_logic::StringValue(good_type);
+  void set_atype(const int32 atype) {
+    atype_ = new base_logic::FundamentalValue(atype);
+  }
+
+  void set_symbol(const std::string& symbol) {
+    symbol_ = new base_logic::StringValue(symbol);
   }
 
   const std::string exchange_name() const {
@@ -307,16 +325,23 @@ class RealTimeUnit {
     return platform_name;
   }
 
-  const std::string good_type() const {
-    std::string good_type;
-    good_type_->GetAsString(&good_type);
-    return good_type;
+  const std::string symbol() const {
+    std::string symbol;
+    symbol_->GetAsString(&symbol);
+    return symbol;
+  }
+
+  const int32 atype() const {
+    int32 atype;
+    atype_->GetAsInteger(&atype);
+    return atype;
   }
 
  public:
   base_logic::StringValue* exchange_name_;
   base_logic::StringValue* platform_name_;
-  base_logic::StringValue* good_type_;
+  base_logic::StringValue* symbol_;
+  base_logic::FundamentalValue* atype_;
 };
 
 
@@ -325,12 +350,12 @@ class RealTime {
   RealTime()
    :id_(NULL)
    ,token_(NULL)
-   ,goods_infos_(NULL){}
+   ,symbol_infos_(NULL){}
 
   ~RealTime(){
     if (id_) {delete id_; id_ = NULL;}
     if (token_){delete token_; token_ = NULL;}
-    if (goods_infos_){delete goods_infos_; goods_infos_ = NULL;}
+    if (symbol_infos_){delete symbol_infos_; symbol_infos_ = NULL;}
   }
 
   void set_htt_packet(base_logic::DictionaryValue* value);
@@ -358,7 +383,7 @@ class RealTime {
  public:
   base_logic::FundamentalValue* id_;
   base_logic::StringValue* token_;
-  base_logic::ListValue* goods_infos_;
+  base_logic::ListValue* symbol_infos_;
 };
 
 
@@ -369,14 +394,16 @@ class TimeLine {
    ,token_(NULL)
    ,exchange_name_(NULL)
    ,platform_name_(NULL)
-   ,good_type_(NULL){}
+   ,symbol_(NULL)
+   ,atype_(NULL){}
 
   ~TimeLine(){
     if (id_) {delete id_; id_ = NULL;}
     if (token_) {delete token_; token_ = NULL;}
     if (exchange_name_) {delete exchange_name_; exchange_name_ = NULL;}
     if (platform_name_) {delete platform_name_; platform_name_ = NULL;}
-    if (good_type_) {delete good_type_; good_type_ = NULL;}
+    if (symbol_) {delete symbol_; symbol_ = NULL;}
+    if (atype_) {delete atype_; atype_ = NULL;}
   }
 
   void set_htt_packet(base_logic::DictionaryValue* value);
@@ -397,14 +424,24 @@ class TimeLine {
     platform_name_ = new base_logic::StringValue(platform_name);
   }
 
-  void set_good_type(const std::string& good_type) {
-    good_type_ = new base_logic::StringValue(good_type);
+  void set_symbol(const std::string& symbol) {
+    symbol_ = new base_logic::StringValue(symbol);
+  }
+
+  void set_atype(const int32 atype){
+    atype_ = new base_logic::FundamentalValue(atype);
   }
 
   const int64 id() const {
     int64 id = 0;
     id_->GetAsBigInteger(&id);
     return id;
+  }
+
+  const int32 atype() const {
+    int32 atype = 0;
+    atype_->GetAsInteger(&atype);
+    return atype;
   }
 
   const std::string token() const {
@@ -425,10 +462,10 @@ class TimeLine {
     return platform_name;
   }
 
-  const std::string good_type() const {
-    std::string good_type;
-    good_type_->GetAsString(&good_type);
-    return good_type;
+  const std::string symbol() const {
+    std::string symbol;
+    symbol_->GetAsString(&symbol);
+    return symbol;
   }
 
  public:
@@ -436,7 +473,8 @@ class TimeLine {
   base_logic::StringValue* token_;
   base_logic::StringValue*  exchange_name_;
   base_logic::StringValue*  platform_name_;
-  base_logic::StringValue*  good_type_;
+  base_logic::StringValue* symbol_;
+  base_logic::FundamentalValue* atype_;
 };
 
 }
