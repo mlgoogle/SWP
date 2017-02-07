@@ -6,8 +6,9 @@
 
 #include "basic/basictypes.h"
 #include "core/common.h"
-//#include "net/comm_head.h"
-//#include "net/packet_processing.h"
+#include "trades/trades_db.h"
+#include "net/comm_head.h"
+#include "net/packet_processing.h"
 
 namespace trades_logic {
 
@@ -43,7 +44,11 @@ public:
   bool OnTimeout(struct server *srv, char *id, int opcode, int time);
 
 private:
+  bool OnPlatformsGoods(struct server* srv, int socket, struct PacketHead *packet);
+private:
   bool Init();
+private:
+  trades_logic::TradesDB*  trades_db_;
 };
 } // namespace trades_logic
 
