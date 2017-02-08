@@ -13,11 +13,31 @@
 typedef std::map<int32,trades_logic::GoodsInfo> GOODS_MAP;
 typedef std::map<int32,GOODS_MAP> PLAT_GOODS_MAP; /*对应平台能交易的商品*/
 
+
+typedef std::map<int64,trades_logic::TradesPosition> TRADES_MAP; /*交易记录 uid或pid<->Trades*/
+typedef std::map<int32,TRADES_MAP>  GOODS_TRADES_MAP;/*交易标的  商品ID<->交易记录*/
+typedef std::map<int64,GOODS_TRADES_MAP> PLAT_TRADES_MAP;
+
+//当前报价
+typedef std::map<std::string, swp_logic::Quotations> QUOTATIONS_MAP;
+typedef std::map<int64, QUOTATIONS_MAP> QUOTATIONS_ALL_MAP;
+
+
+//定时渠道
+typedef std::map<int64, trades_logic::TimeTask> TASKINFO_MAP;
+typedef std::list<trades_logic::TimeTask> TASKINFO_LIST;
+
 namespace trades_logic {
 
 class TradesCache {
  public:
-  PLAT_GOODS_MAP  trades_map_;
+  PLAT_GOODS_MAP         trades_map_;
+  PLAT_TRADES_MAP        plat_trades_map_;
+  TRADES_MAP             all_trades_map_;
+  QUOTATIONS_ALL_MAP     quotations_map_;
+
+  TASKINFO_LIST          task_temp_list_;
+  TASKINFO_MAP           task_temp_map_;
 };
 
 class TradesManager {
@@ -36,7 +56,17 @@ class TradesManager {
 
   void SendGoods(const int socket,const int32 pid);
 
+  void OpenPosition(trades_logic::TradesPosition& trades_position);
 
+  void SetTimePosition(trades_logic::TradesPosition& trades_position);
+
+  void SetQuotations(swp_logic::Quotations& quotation);
+
+  void GetQuotations(const std::string& key, swp_logic::Quotations& quotation);
+
+  void GetQuotationsNoLock(const std::string& key, swp_logic::Quotations& quotation);
+
+  bool DistributionTask();
  private:
   void  Init();
   void SetGoodsUnit(trades_logic::GoodsInfo& goods_info);

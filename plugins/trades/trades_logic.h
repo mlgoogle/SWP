@@ -45,6 +45,12 @@ public:
 
 private:
   bool OnPlatformsGoods(struct server* srv, int socket, struct PacketHead *packet);
+
+  bool OnOpenPosition(struct server* srv, int socket, struct PacketHead* packet);
+
+  bool OnQutations(struct server* srv, int socket,
+                                    struct PacketHead *packet);
+
 private:
   bool Init();
 private:

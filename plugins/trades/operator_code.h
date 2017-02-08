@@ -13,5 +13,9 @@ namespace trades_logic {
 #define R_TRADES_GOODS_DATA    TRADES_TYPE * 1000 + 1
 #define S_TRADES_GOODS_DATA    TRADES_TYPE * 1000 + 2
 
+#define R_TRADES_OPEN_POSITION TRADES_TYPE * 1000 + 3
+#define S_TRADES_OPEN_POSITION TRADES_TYPE * 1000 + 4
+
+
 }
 #endif

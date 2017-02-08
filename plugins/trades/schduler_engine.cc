@@ -61,6 +61,114 @@ void TradesManager::SetGoodsUnit(trades_logic::GoodsInfo& goods_info) {
 
 }
 
+void TradesManager::OpenPosition(
+    trades_logic::TradesPosition& trades_position) {
+  trades_logic::GoodsInfo good_info;
+  {
+    base_logic::RLockGd lk(lock_);
+    //获取对应交易的商品
+    bool r = false;
+    GOODS_MAP goods_map;
+    r =
+        base::MapGet<PLAT_GOODS_MAP, PLAT_GOODS_MAP::iterator, int32, GOODS_MAP>(
+            trades_cache_->trades_map_, 10002, goods_map);
+    if (!r)
+      return;
+
+    r = base::MapGet<GOODS_MAP, GOODS_MAP::iterator, int32,
+        trades_logic::GoodsInfo>(goods_map, 1002, good_info);
+    if (!r)
+      return;
+  }
+  swp_logic::Quotations quotation;
+  trades_position.set_open_position_time(time(NULL));
+  trades_position.set_close_position_time(time(NULL));
+  //获取当前行情
+  std::string key = good_info.platform_name() + ":" + good_info.exchange_name() + ":"
+        + good_info.symbol();
+
+  GetQuotations(key, quotation);
+  trades_position.set_open_price(quotation.current_price());
+  trades_position.set_open_charge(good_info.open());
+  //建仓总成本
+  double open_all_cost = good_info.deposit() * trades_position.amount();
+  //建仓成本
+  double open_const = open_all_cost * trades_position.open_charge();
+
+  //写入数据库 扣除用户费用及记录收入总金额
+  trades_position.set_open_cost(open_const);
+  //放入定时队列中
+  SetTimePosition(trades_position);
+  //加入结束时间
+
+}
+
+
+bool TradesManager::DistributionTask(){
+  base_logic::WLockGd lk(lock_);
+  time_t current_time = time(NULL);
+  trades_cache_->task_temp_list_.sort(trades_logic::TimeTask::cmp);
+  std::list<trades_logic::TradesPosition> result_list;
+  //获取当前行情
+  while(trades_cache_->task_temp_list_.size() > 0) {
+    trades_logic::TimeTask time_task = trades_cache_->task_temp_list_.front();
+    trades_cache_->task_temp_list_.pop_front();
+    if (current_time >= time_task.end_time()) {
+      //时间到平仓
+      TRADES_MAP::iterator trades_map_it = trades_cache_->all_trades_map_.find(time_task.id());
+      trades_logic::TradesPosition trades_position = trades_map_it->second;
+      double close_price = 7.123;
+      trades_position.check_buy_sell(close_price);
+      //写入结果数据库中,批量写入
+      result_list.push_back(trades_position);
+    }else{
+      break;
+    }
+  }
+  //批量写入数据库，做金额操作
+  return true;
+}
+
+
+void TradesManager::SetTimePosition(
+    trades_logic::TradesPosition& trades_position) {
+  base_logic::WLockGd lk(lock_);
+  PLAT_TRADES_MAP::iterator plat_trades_it = trades_cache_->plat_trades_map_
+      .find(1002);
+  GOODS_TRADES_MAP& goods_map = plat_trades_it->second;
+  GOODS_TRADES_MAP::iterator goods_trades_it = goods_map.find(
+      trades_position.code_id());
+  TRADES_MAP& trades_map = goods_trades_it->second;
+  trades_map[trades_position.position_id()] = trades_position;
+  trades_cache_->all_trades_map_[trades_position.position_id()] =
+      trades_position;
+}
+
+void TradesManager::GetQuotationsNoLock(const std::string& key, swp_logic::Quotations& quotation) {
+  QUOTATIONS_ALL_MAP::iterator quotations_all_it = trades_cache_->quotations_map_
+      .find(quotation.type());
+  QUOTATIONS_MAP& quotations = quotations_all_it->second;
+
+  QUOTATIONS_MAP::iterator quotations_it = quotations.find(key);
+  quotations[key] = quotation;
+}
+
+void TradesManager::GetQuotations(const std::string& key, swp_logic::Quotations& quotation) {
+  base_logic::RLockGd lk(lock_);
+  GetQuotationsNoLock(key, quotation);
+}
+
+void TradesManager::SetQuotations(swp_logic::Quotations& quotation) {
+  base_logic::WLockGd lk(lock_);
+  QUOTATIONS_ALL_MAP::iterator quotations_it = trades_cache_->quotations_map_
+      .find(quotation.type());
+  QUOTATIONS_MAP& quotations = quotations_it->second;
+  std::string key;
+  key = quotation.platform() + ":" + quotation.exchange_name() + ":"
+      + quotation.symbol();
+  quotations[key] = quotation;
+}
+
 void TradesManager::SendGoods(const int socket, const int32 pid) {
   base_logic::WLockGd lk(lock_);
   GOODS_MAP goods_map;
@@ -92,6 +200,7 @@ void TradesManager::SendGoods(const int socket, const int32 pid) {
     goods_unit->set_symbol(goods.symbol());
     goods_unit->set_unit(goods.unit());
     goods_unit->set_name(goods.name());
+    goods_unit->set_id(goods.id());
     net_reply_goods.set_unit(goods_unit->get());
     if (net_reply_goods.Size() % base_num == 0 && net_reply_goods.Size() != 0) {
       struct PacketControl packet_control;
@@ -109,6 +218,7 @@ void TradesManager::SendGoods(const int socket, const int32 pid) {
     send_message(socket, &packet_control);
   }
 }
+
 
 void TradesManager::TimeEvent(int opcode, int time) {
   switch (opcode) {
