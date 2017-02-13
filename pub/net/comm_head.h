@@ -14,6 +14,7 @@ enum PACKET_TYPE {
   ERROR_TYPE = 0,
   QUOTATIONS_TYPE = 4,
   TRADES_TYPE = 5,
+  HISTORY_TYPE = 6,
 };
 
 enum PRS {

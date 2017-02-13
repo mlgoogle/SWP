@@ -16,6 +16,8 @@
 
 #define DEFAULT_CONFIG_PATH "./plugins/trades/trades_config.xml"
 
+#define TIME_DISTRIBUTION_TASK 10000
+
 namespace trades_logic {
 
 Tradeslogic *Tradeslogic::instance_ = NULL;
@@ -26,7 +28,10 @@ Tradeslogic::Tradeslogic() {
 }
 
 Tradeslogic::~Tradeslogic() {
-  if (trades_db_){delete trades_db_; trades_db_ = NULL;}
+  if (trades_db_) {
+    delete trades_db_;
+    trades_db_ = NULL;
+  }
   trades_logic::TradesEngine::FreeSchdulerManager();
   trades_logic::TradesEngine::FreeTradesEngine();
 }
@@ -62,7 +67,7 @@ bool Tradeslogic::OnTradesConnect(struct server *srv, const int socket) {
 }
 
 bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
-                                        const void *msg, const int len) {
+                                  const void *msg, const int len) {
   bool r = false;
   struct PacketHead *packet = NULL;
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
@@ -73,14 +78,22 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
     return false;
   }
 
-
   switch (packet->operate_code) {
-    case R_TRADES_GOODS_DATA:{
+    case R_TRADES_GOODS_DATA: {
       OnPlatformsGoods(srv, socket, packet);
       break;
     }
-  default:
-    break;
+    case R_TRADES_OPEN_POSITION: {
+      OnOpenPosition(srv, socket, packet);
+      break;
+    }
+
+    case R_TRADES_CURRENT_POSITION:{
+      OnCurrentPosition(srv, socket, packet);
+      break;
+    }
+    default:
+      break;
   }
   return true;
 }
@@ -118,7 +131,7 @@ bool Tradeslogic::OnBroadcastMessage(struct server *srv, const int socket,
 }
 
 bool Tradeslogic::OnQutations(struct server* srv, int socket,
-                                  struct PacketHead *packet) {
+                              struct PacketHead *packet) {
   trades_logic::net_other::RealTime real_time;
   swp_logic::Quotations quotations;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
@@ -135,8 +148,7 @@ bool Tradeslogic::OnQutations(struct server* srv, int socket,
   quotations.set_platform_name(real_time.platform_name());
   quotations.set_symbol(real_time.symbol());
   quotations.set_type(real_time.type());
-  trades_logic::TradesEngine::GetSchdulerManager()->SetQuotations(
-      quotations);
+  trades_logic::TradesEngine::GetSchdulerManager()->SetQuotations(quotations);
   return true;
 }
 
@@ -146,6 +158,7 @@ bool Tradeslogic::OnBroadcastClose(struct server *srv, const int socket) {
 
 bool Tradeslogic::OnIniTimer(struct server *srv) {
   if (srv->add_time_task != NULL) {
+    srv->add_time_task(srv, "trades", TIME_DISTRIBUTION_TASK, 3, -1);
   }
   return true;
 }
@@ -153,23 +166,29 @@ bool Tradeslogic::OnIniTimer(struct server *srv) {
 bool Tradeslogic::OnTimeout(struct server *srv, char *id, int opcode,
                             int time) {
   switch (opcode) {
-  default:
-    break;
+    case TIME_DISTRIBUTION_TASK: {
+      trades_logic::TradesEngine::GetSchdulerManager()->DistributionTask();
+      break;
+    }
+    default:
+      break;
   }
   return true;
 }
 
 bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
-                                  struct PacketHead *packet) {
+                                   struct PacketHead *packet) {
   trades_logic::net_request::Goods goods;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   goods.set_http_packet(packet_control->body_);
-  trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(socket, goods.pid());
+  trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(socket,
+                                                              goods.pid());
   return true;
 
 }
 
-bool Tradeslogic::OnOpenPosition(struct server* srv, int socket, struct PacketHead* packet) {
+bool Tradeslogic::OnOpenPosition(struct server* srv, int socket,
+                                 struct PacketHead* packet) {
   trades_logic::net_request::OpenPosition open_position;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   open_position.set_http_packet(packet_control->body_);
@@ -180,8 +199,19 @@ bool Tradeslogic::OnOpenPosition(struct server* srv, int socket, struct PacketHe
   trades_position.set_close_type(trades_logic::TIMER_TYPE);
   trades_position.set_amount(open_position.amount());
   trades_position.set_code_id(open_position.code_id());
+  trades_logic::TradesEngine::GetSchdulerManager()->OnTimePosition(
+      socket, trades_position);
   return true;
 }
 
+bool Tradeslogic::OnCurrentPosition(struct server* srv, int socket,
+                                    struct PacketHead* packet) {
+  trades_logic::net_request::CurrentPosition current_position;
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  current_position.set_http_packet(packet_control->body_);
+  trades_logic::TradesEngine::GetSchdulerManager()->SendCurrentPosition(
+      socket, current_position.id());
+  return true;
+}
 
-} // namespace trades_logic
+}  // namespace trades_logic

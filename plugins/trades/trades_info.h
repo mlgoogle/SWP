@@ -85,10 +85,11 @@ class TimeTask {
   class Data {
    public:
     Data()
-     :refcount_(1)
-     ,id_(0)
-     ,start_time_(0)
-     ,end_time_(0){}
+        : refcount_(1),
+          id_(0),
+          start_time_(0),
+          end_time_(0) {
+    }
 
    public:
     int64 id_;
@@ -127,9 +128,12 @@ class TradesPosition {
     double difference = close_price - data_->open_price_;
     if (difference > 0)
       buy_sell = BUY_TYPE;
-    else
+    else if (difference < 0)
       buy_sell = SELL_TYPE;
-    data_->result_ = (buy_sell == BUY_TYPE) ? true : false;
+    if (difference == 0)
+      data_->result_ = false;
+    else
+      data_->result_ = (buy_sell == data_->buy_sell_) ? true : false;
     return data_->result_;
   }
 
@@ -179,6 +183,10 @@ class TradesPosition {
 
   void set_open_cost(const double open_cost) {
     data_->open_cost_ = open_cost;
+  }
+
+  void set_open_all_cost(const double open_all_cost) {
+    data_->open_all_cost_ = open_all_cost;
   }
 
   void set_open_charge(const double open_charge) {
@@ -253,8 +261,12 @@ class TradesPosition {
     return data_->open_price_;
   }
 
-  const double open_const() const {
+  const double open_cost() const {
     return data_->open_cost_;
+  }
+
+  const double open_all_cost() const {
+    return data_->open_all_cost_;
   }
 
   const double open_charge() const {
@@ -291,31 +303,33 @@ class TradesPosition {
 
  private:
   class Data {
+   public:
     Data()
-    :refcount_(1)
-    ,uid_(0)
-    ,position_id_(0)
-    ,code_id_(0)
-    ,buy_sell_(0)
-    ,close_type_(0)
-    ,is_deferred_(false)
-    ,result_(false)
-    ,amount_(0)
-    ,open_position_time_(0)
-    ,close_position_time_(0)
-    ,open_price_(0.0)
-    ,open_cost_(0.0)
-    ,open_charge_(0.0)
-    ,close_price_(0.0)
-    ,limit_(0.0)
-    ,stop_(0.0)
-    ,deferred_(0.0){
+        : refcount_(1),
+          uid_(0),
+          position_id_(0),
+          code_id_(0),
+          buy_sell_(0),
+          close_type_(0),
+          is_deferred_(false),
+          result_(false),
+          amount_(0),
+          open_position_time_(0),
+          close_position_time_(0),
+          open_price_(0.0),
+          open_cost_(0.0),
+          open_all_cost_(0.0),
+          open_charge_(0.0),
+          close_price_(0.0),
+          limit_(0.0),
+          stop_(0.0),
+          deferred_(0.0) {
     }
 
    public:
     int64 uid_;
     int64 position_id_;
-    int32 code_id_;
+    int32 code_id_; //属于哪个商品
     int32 buy_sell_;  // 1,买 2,卖
     int32 close_type_;
     bool is_deferred_;
@@ -325,6 +339,7 @@ class TradesPosition {
     int64 close_position_time_;
     double open_price_;
     double open_cost_;
+    double open_all_cost_;
     double open_charge_;
     double close_price_;
     double limit_;
@@ -395,7 +410,7 @@ class GoodsInfo {
   }
 
   const double deposit() const {
-    return data_->deferred_;
+    return data_->deposit_;
   }
 
   const double close() const {
@@ -410,11 +425,11 @@ class GoodsInfo {
     return data_->deferred_;
   }
 
-  const double max() const {
+  const int64 max() const {
     return data_->max_;
   }
 
-  const double min() const {
+  const int64 min() const {
     return data_->min_;
   }
 
@@ -424,6 +439,14 @@ class GoodsInfo {
 
   const std::string& platform_name() const {
     return data_->platform_name_;
+  }
+
+  const std::string& show_name() const {
+    return data_->show_name_;
+  }
+
+  const std::string show_symbol() const {
+    return data_->show_symbol_;
   }
 
   const int8 status() const {
@@ -467,7 +490,7 @@ class GoodsInfo {
   }
 
   void set_deposit(const double deposit) {
-    data_->deferred_ = deposit;
+    data_->deposit_ = deposit;
   }
 
   void set_close(const double close) {
@@ -482,11 +505,11 @@ class GoodsInfo {
     data_->deferred_ = deferred;
   }
 
-  void set_max(const double max) {
+  void set_max(const int64 max) {
     data_->max_ = max;
   }
 
-  void set_min(const double min) {
+  void set_min(const int64 min) {
     data_->min_ = min;
   }
 
@@ -496,6 +519,14 @@ class GoodsInfo {
 
   void set_platform_name(const std::string& platform_name) {
     data_->platform_name_ = platform_name;
+  }
+
+  void set_show_name(const std::string& show_name) {
+    data_->show_name_ = show_name;
+  }
+
+  void set_show_symbol(const std::string& show_symbol) {
+    data_->show_symbol_ = show_symbol;
   }
 
   void set_sort(const int8 sort) {
@@ -519,8 +550,8 @@ class GoodsInfo {
           deposit_(0.0),
           close_(0.0),
           open_(0.0),
-          min_(0.0),
-          max_(0.0),
+          min_(0),
+          max_(0),
           deferred_(0.0),
           sort_(0),
           status_(0) {
@@ -544,10 +575,12 @@ class GoodsInfo {
     double close_;
     double open_;
     double deferred_;
-    double max_;
-    double min_;
+    int64 max_;
+    int64 min_;
     std::string exchange_name_;
     std::string platform_name_;
+    std::string show_symbol_;
+    std::string show_name_;
 
     void AddRef() {
       __sync_fetch_and_add(&refcount_, 1);

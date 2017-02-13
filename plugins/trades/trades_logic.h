@@ -48,6 +48,8 @@ private:
 
   bool OnOpenPosition(struct server* srv, int socket, struct PacketHead* packet);
 
+  bool OnCurrentPosition(struct server* srv, int socket, struct PacketHead* packet);
+
   bool OnQutations(struct server* srv, int socket,
                                     struct PacketHead *packet);
 

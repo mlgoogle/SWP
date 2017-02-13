@@ -95,8 +95,8 @@ void GoodsInfo::ValueSerialization(base_logic::DictionaryValue* dict) {
   dict->GetReal(L"close", &data_->close_);
   dict->GetReal(L"open", &data_->open_);
   dict->GetReal(L"deferred", &data_->deferred_);
-  dict->GetReal(L"max", &data_->max_);
-  dict->GetReal(L"min", &data_->min_);
+  dict->GetBigInteger(L"max", &data_->max_);
+  dict->GetBigInteger(L"min", &data_->min_);
   dict->GetString(L"exchange_name", &data_->exchange_name_);
   dict->GetString(L"platform_name", &data_->platform_name_);
   int8 status = 1;
@@ -105,6 +105,9 @@ void GoodsInfo::ValueSerialization(base_logic::DictionaryValue* dict) {
   int8 sort = 1;
   if (dict->GetCharInteger(L"sort", &sort))
     data_->sort_ = sort;
+
+  dict->GetString(L"show_name",&data_->show_name_);
+  dict->GetString(L"show_symbol", &data_->show_symbol_);
 
 }
 

@@ -73,15 +73,28 @@ void RealTime::set_http_packet(base_logic::DictionaryValue* value) {
 
 }
 
-
 namespace net_request {
+
+void CurrentPosition::set_http_packet(base_logic::DictionaryValue* value) {
+  bool r = false;
+  int64 id = 0;
+  std::string token;
+  r = value->GetBigInteger(L"id", &id);
+  if (r)
+    set_id(id);
+
+  r = value->GetString(L"token", &token);
+  if (r)
+    set_token(token);
+}
+
 
 void OpenPosition::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   int64 id = 0;
   int64 big_buy_sell = 0;
   int32 buy_sell = 0;
-  double amount = 0.0;
+  int64 amount = 0;
   double price = 0.0;
   double limit = 0.0;
   double stop = 0.0;
@@ -99,7 +112,7 @@ void OpenPosition::set_http_packet(base_logic::DictionaryValue* value) {
     set_token(token);
 
   r = value->GetBigInteger(L"codeId", &big_code_id);
-  if (r){
+  if (r) {
     code_id = big_code_id;
     set_code_id(code_id);
   }
@@ -110,7 +123,7 @@ void OpenPosition::set_http_packet(base_logic::DictionaryValue* value) {
     set_buy_sell(buy_sell);
   }
 
-  r = value->GetReal(L"amount", &amount);
+  r = value->GetBigInteger(L"amount", &amount);
   if (r)
     set_amount(amount);
 

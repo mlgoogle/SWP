@@ -22,8 +22,10 @@ class TradesDB {
 
  public:
   bool OnFetchPlatformGoods(std::list<trades_logic::GoodsInfo>* list);
+  bool OnOpenPosition(trades_logic::TradesPosition& trades);
  public:
   static void CallFecthPlatformGoods(void* param, base_logic::Value* value);
+  static void CallOnOpenPosition(void* param, base_logic::Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

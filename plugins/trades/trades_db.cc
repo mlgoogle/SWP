@@ -19,7 +19,52 @@ TradesDB::~TradesDB() {
   }
 }
 
-bool TradesDB::OnFetchPlatformGoods(std::list<trades_logic::GoodsInfo>* list){
+bool TradesDB::OnOpenPosition(trades_logic::TradesPosition& trades) {
+  bool r = false;
+  base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+  std::string sql;
+  base_logic::DictionaryValue *info_value = NULL;
+  int32 result = 0;
+  /*call actuals.proc_OpenPosition(888,55721932,13,1,6,0.0,8,1486791795,1486792578,7.12,20,30,0.15,0,0.0,0.0,0.0,'SHTY30MIN','fx_sjpycnh','上海-东京30分钟')
+   */
+  sql = "call proc_OpenPosition("
+      + base::BasicUtil::StringUtil::Int64ToString(trades.uid()) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(trades.position_id()) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(trades.code_id()) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(trades.buy_sell()) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(trades.close_type()) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(trades.amount()) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(trades.open_position_time())
+      + ","
+      + base::BasicUtil::StringUtil::Int64ToString(trades.close_position_time())
+      + "," + base::BasicUtil::StringUtil::DoubleToString(trades.open_price())
+      + "," + base::BasicUtil::StringUtil::DoubleToString(trades.open_cost())
+      + ","
+      + base::BasicUtil::StringUtil::DoubleToString(trades.open_all_cost())
+      + "," + base::BasicUtil::StringUtil::DoubleToString(trades.open_charge())
+      + "," + base::BasicUtil::StringUtil::DoubleToString(trades.close_price())
+      + "," + base::BasicUtil::StringUtil::DoubleToString(trades.limit()) + ","
+      + base::BasicUtil::StringUtil::DoubleToString(trades.stop()) + ","
+      + base::BasicUtil::StringUtil::DoubleToString(trades.deferred()) + ",\'"
+      + trades.code() + "\',\'" + trades.symbol() + "\',\'" + trades.name() + "\');";
+
+  dict->SetString(L"sql", sql);
+  r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict),
+                              CallOnOpenPosition);
+  if (!r)
+    return false;
+  dict->GetDictionary(L"resultvalue", &info_value);
+
+  r = info_value->GetInteger(L"result", &result);
+  r = (r && result > 0) ? true : false;
+  if (dict) {
+    delete dict;
+    dict = NULL;
+  }
+  return r;
+}
+
+bool TradesDB::OnFetchPlatformGoods(std::list<trades_logic::GoodsInfo>* list) {
   bool r = false;
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
 
@@ -49,6 +94,24 @@ bool TradesDB::OnFetchPlatformGoods(std::list<trades_logic::GoodsInfo>* list){
     dict = NULL;
   }
   return true;
+}
+
+void TradesDB::CallOnOpenPosition(void* param, base_logic::Value* value) {
+  base_logic::DictionaryValue *dict = (base_logic::DictionaryValue *) (value);
+  base_logic::ListValue *list = new base_logic::ListValue();
+  base_storage::DBStorageEngine *engine =
+      (base_storage::DBStorageEngine *) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  base_logic::DictionaryValue *info_value = new base_logic::DictionaryValue();
+  info_value->SetInteger(L"result", 0);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW *) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        info_value->SetInteger(L"result", atoi(rows[0]));
+    }
+  }
+  dict->Set(L"resultvalue", (base_logic::Value *) (info_value));
 }
 
 void TradesDB::CallFecthPlatformGoods(void* param, base_logic::Value* value) {
@@ -124,15 +187,15 @@ void TradesDB::CallFecthPlatformGoods(void* param, base_logic::Value* value) {
       }
 
       if (rows[12] != NULL) {
-        double temp = 0.0;
-        bool r = base::BasicUtil::StringUtil::StringToDouble(
+        int64 temp = 0.0;
+        bool r = base::BasicUtil::StringUtil::StringToInt64(
             std::string(rows[12]), &temp);
-        info_value->SetReal(L"max", temp);
+        info_value->SetBigInteger(L"max", temp);
       }
 
       if (rows[13] != NULL) {
-        double temp = 0.0;
-        bool r = base::BasicUtil::StringUtil::StringToDouble(
+        int64 temp = 0.0;
+        bool r = base::BasicUtil::StringUtil::StringToInt64(
             std::string(rows[13]), &temp);
         info_value->SetBigInteger(L"min", temp);
       }
@@ -150,6 +213,12 @@ void TradesDB::CallFecthPlatformGoods(void* param, base_logic::Value* value) {
       if (rows[17] != NULL)
         info_value->SetCharInteger(L"sort",
                                    logic::SomeUtils::StringToIntChar(rows[16]));
+
+      if (rows[18] != NULL)
+        info_value->SetString(L"show_symbol", rows[18]);
+
+      if (rows[19] != NULL)
+        info_value->SetString(L"show_name", rows[19]);
 
       list->Append((base_logic::Value *) (info_value));
     }
