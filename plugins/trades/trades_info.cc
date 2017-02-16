@@ -7,6 +7,57 @@
 
 namespace trades_logic {
 
+
+TimeTask::TimeTask() {
+  data_ = new Data();
+}
+
+TimeTask::TimeTask(const TimeTask& time_task)
+: data_(time_task.data_) {
+  if (data_ != NULL) {
+    data_->AddRef();
+  }
+}
+
+TimeTask& TimeTask::operator =(const TimeTask& time_task) {
+  if (time_task.data_ != NULL) {
+    time_task.data_->AddRef();
+  }
+
+  if (data_ != NULL) {
+    data_->Release();
+  }
+
+  data_ = time_task.data_;
+  return (*this);
+}
+
+
+TradesPosition::TradesPosition() {
+  data_ = new Data();
+}
+
+TradesPosition::TradesPosition(const TradesPosition& trades_positions)
+: data_(trades_positions.data_) {
+  if (data_ != NULL) {
+    data_->AddRef();
+  }
+}
+
+TradesPosition& TradesPosition::operator =(const TradesPosition& trades_positions) {
+  if (trades_positions.data_ != NULL) {
+    trades_positions.data_->AddRef();
+  }
+
+  if (data_ != NULL) {
+    data_->Release();
+  }
+
+  data_ = trades_positions.data_;
+  return (*this);
+}
+
+
 GoodsInfo::GoodsInfo() {
   data_ = new Data();
 }

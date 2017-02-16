@@ -4,6 +4,7 @@
 #include "trades/trades_logic.h"
 #include "trades/schduler_engine.h"
 #include "trades/trades_proto_buf.h"
+#include "trades/trades_info.h"
 #include "basic/native_library.h"
 #include "trades/operator_code.h"
 #include "config/config.h"
@@ -41,6 +42,7 @@ bool Tradeslogic::Init() {
   trades_db_ = new trades_logic::TradesDB(config);
   trades_logic::TradesEngine::GetSchdulerManager()->InitDB(trades_db_);
   trades_logic::TradesEngine::GetSchdulerManager()->InitGoodsData();
+  base::SysRadom::GetInstance();
   return true;
 }
 
@@ -94,6 +96,47 @@ bool Tradeslogic::OnBroadcastConnect(struct server *srv, const int socket,
 
 bool Tradeslogic::OnBroadcastMessage(struct server *srv, const int socket,
                                      const void *msg, const int len) {
+  bool r = false;
+  struct PacketHead *packet = NULL;
+  if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
+    return false;
+
+  if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
+    LOG_ERROR2("UnpackStream Error socket %d", socket);
+    return false;
+  }
+
+  switch (packet->operate_code) {
+    case 1001: {
+      OnQutations(srv, socket, packet);
+      break;
+    }
+    default:
+      break;
+  }
+  return true;
+}
+
+bool Tradeslogic::OnQutations(struct server* srv, int socket,
+                                  struct PacketHead *packet) {
+  trades_logic::net_other::RealTime real_time;
+  swp_logic::Quotations quotations;
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  real_time.set_http_packet(packet_control->body_);
+  quotations.set_change(real_time.change());
+  quotations.set_closed_yesterday_price(real_time.closed_yesterday_price());
+  quotations.set_current_price(real_time.current_price());
+  quotations.set_current_unix_time(real_time.current_unix_time());
+  quotations.set_exchange_name(real_time.exchange_name());
+  quotations.set_high_price(real_time.high_price());
+  quotations.set_low_price(real_time.low_price());
+  quotations.set_opening_today_price(real_time.opening_today_price());
+  quotations.set_pchg(real_time.pchg());
+  quotations.set_platform_name(real_time.platform_name());
+  quotations.set_symbol(real_time.symbol());
+  quotations.set_type(real_time.type());
+  trades_logic::TradesEngine::GetSchdulerManager()->SetQuotations(
+      quotations);
   return true;
 }
 
@@ -124,6 +167,20 @@ bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
   trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(socket, goods.pid());
   return true;
 
+}
+
+bool Tradeslogic::OnOpenPosition(struct server* srv, int socket, struct PacketHead* packet) {
+  trades_logic::net_request::OpenPosition open_position;
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  open_position.set_http_packet(packet_control->body_);
+  trades_logic::TradesPosition trades_position;
+  trades_position.create_position_id();
+  trades_position.set_uid(open_position.id());
+  trades_position.set_buy_sell(open_position.buy_sell());
+  trades_position.set_close_type(trades_logic::TIMER_TYPE);
+  trades_position.set_amount(open_position.amount());
+  trades_position.set_code_id(open_position.code_id());
+  return true;
 }
 
 
