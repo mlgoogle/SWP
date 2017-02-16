@@ -192,8 +192,10 @@ bool GetIPAddress(const int socket, std::string* ip, int* port) {
   socklen_t len;
   len = sizeof(sa);
   if (!getpeername(socket, (struct sockaddr *) &sa, &len)) {
-    *ip = inet_ntoa(sa.sin_addr);
-    *port = ntohs(sa.sin_port);
+    if (ip)
+      *ip = inet_ntoa(sa.sin_addr);
+    if (port)
+      *port = ntohs(sa.sin_port);
     return true;
   }
   return false;

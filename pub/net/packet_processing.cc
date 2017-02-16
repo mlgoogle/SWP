@@ -7,6 +7,7 @@
 #include "protocol/data_packet.h"
 #include <list>
 #include <string>
+#include "glog/logging.h" ///////////////////
 
 #define DUMPPACKBUF 4096 * 10
 
@@ -28,15 +29,19 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 
   std::string body_stream;
   struct PacketControl *packet_control = (struct PacketControl *)(packet_head);
-  base_logic::DictionaryValue *value = packet_control->body_;
+  base_logic::DictionaryValue *value = packet_control != NULL ? packet_control->body_ : NULL;
 
-  base_logic::ValueSerializer *engine =
+  if (value) {
+    base_logic::ValueSerializer *engine =
       base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  if (engine == NULL) {
-    LOG_ERROR("engine create null");
-    return false;
+    if (engine == NULL) {
+      LOG_ERROR("engine create null");
+      return false;
+    }
+    r = engine->Serialize((*value), &body_stream);
+    delete engine;
+    engine = NULL;
   }
-  r = engine->Serialize((*value), &body_stream);
 
   BUILDPAKCET(body_stream.length());
 
@@ -44,11 +49,10 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 
   *packet_stream = reinterpret_cast<void *>(const_cast<char *>(out.GetData()));
   *packet_stream_length = PACKET_HEAD_LENGTH + body_stream.length();
-  if (engine) {delete engine; engine = NULL;}
   return true;
 }
 
-base_logic::DictionaryValue* PacketProsess::UnpackStream(const void *packet_stream, int32 len,
+bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
                                  struct PacketHead **packet_head) {
 
   int32 temp;

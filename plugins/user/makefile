@@ -4,6 +4,7 @@ OUT_PUT = ${SO_DIR}/user/user.so
 
 SRC_DIR = ../..
 LIB_DIR = ./../../../baselib
+THIRD_PATH = $(LIB_DIR)/third_party
 SRC_PLUGINS = ${SRC_DIR}/plugins
 SO_DIR = ${SRC_DIR}/bin/plugins
 SRC_PUB = ${SRC_DIR}/pub
@@ -23,11 +24,12 @@ CXXFLAGS += -g -O0 -Wextra -w -shared -fPIC
 INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${SRC_PLUGINS} \
 		-I${SRC_DIR} \
-		-I${SRC_PUB} \
 		-I${LIB_DIR}/public \
 		-I${LIB_DIR}/base \
-		-I${LIB_DIR}/third_party/glog/include \
-		-I${LIB_DIR}/third_party/gtpush/include
+		-I$(THIRD_PATH) \
+		-I${SRC_PUB} \
+		-I$(THIRD_PATH)/glog/include \
+		-I$(THIRD_PATH)/gtpush/include \
 
 all : ${OUT_PUT} del-temp-files
 
@@ -61,6 +63,12 @@ user_mysql.o : ./user_mysql.cc  ./user_mysql.h
 util.o : ${SRC_PUB_UTIL}/util.cc  ${SRC_PUB_UTIL}/util.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_UTIL}/util.cc ${INCLUDE_PATHS}
 
+logic_unit.o :  $(SRC_PUB)/logic/logic_unit.cc $(SRC_PUB)/logic/logic_unit.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(SRC_PUB)/logic/logic_unit.cc $(INCLUDE_PATHS)
+
+packet_processing.o :  $(SRC_PUB)/net/packet_processing.cc $(SRC_PUB)/net/packet_processing.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(SRC_PUB)/net/packet_processing.cc $(INCLUDE_PATHS)
+
 data_engine.o : ${SRC_PUB_STORAGE}/data_engine.cc  ${SRC_PUB_STORAGE}/data_engine.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_STORAGE}/data_engine.cc ${INCLUDE_PATHS}
 
@@ -69,6 +77,9 @@ mysql_pool.o : ${SRC_PUB_STORAGE}/mysql_pool.cc  ${SRC_PUB_STORAGE}/mysql_pool.h
 
 data_mysql_engine.o : ${SRC_PUB_STORAGE}/data_mysql_engine.cc  ${SRC_PUB_STORAGE}/data_mysql_engine.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_STORAGE}/data_mysql_engine.cc ${INCLUDE_PATHS}
+
+data_redis_engine.o :  $(SRC_PUB_STORAGE)/data_redis_engine.cc $(SRC_PUB_STORAGE)/data_redis_engine.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(SRC_PUB_STORAGE)/data_redis_engine.cc $(INCLUDE_PATHS)
 
 user_info.o : ${SRC_PUB_COMM}/user_info.cc  ${SRC_PUB_COMM}/user_info.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_COMM}/user_info.cc ${INCLUDE_PATHS}
@@ -82,9 +93,12 @@ data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_sha
 wx_order.o : ${SRC_PUB_PAY}/wxpay/wx_order.cc  ${SRC_PUB_PAY}/wxpay/wx_order.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_PAY}/wxpay/wx_order.cc ${INCLUDE_PATHS}
 
+unionpay_order.o : ${SRC_PUB_PAY}/unionpay/unionpay_order.cc  ${SRC_PUB_PAY}/unionpay/unionpay_order.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_PAY}/unionpay/unionpay_order.cc ${INCLUDE_PATHS}
+
 ${OUT_PUT} : user_init.o user_logic.o user_manager.o \
-		user_interface.o user_proto.o user_mysql.o util.o data_engine.o \
-		mysql_pool.o data_mysql_engine.o user_info.o share_guide.o data_share_mgr.o wx_order.o 
+		user_interface.o user_proto.o user_mysql.o util.o logic_unit.o packet_processing.o data_engine.o mysql_pool.o \
+		data_mysql_engine.o data_redis_engine.o user_info.o share_guide.o data_share_mgr.o wx_order.o unionpay_order.o
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
 		-lcurl ${LIB_DIR}/third_party/glog/lib/libglog.a \
 		${LIB_DIR}/third_party/gtpush/lib/libgtpushsdk_gcc4.1.2_64.a \

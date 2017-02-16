@@ -204,7 +204,7 @@ void* Userlogic::AutoReconnectToServer(void* arg) {
 }
 	
 bool Userlogic::OnInitTimer(struct server *srv) {
-  srv->add_time_task(srv, "user", CONNECT_CKECK, 15, -1);
+  srv->add_time_task(srv, "user", CONNECT_CKECK, 1, -1);
   srv->add_time_task(srv, "user", SHARE_DATA_INIT, 3, 1);
   srv->add_time_task(srv, "user", SHARE_DATA_INIT_TEN, 10*60, -1);
   srv->add_time_task(srv, "user", ORDER_STATUS_CHECK, 2*60, -1);

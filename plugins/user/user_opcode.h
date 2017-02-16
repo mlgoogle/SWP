@@ -8,7 +8,7 @@
 #include "pub/comm/comm_head.h"
 
 namespace user {
-#define PACKET_HEART_REQ 1000
+#define HEARTBEAT_REQ 1000
 	
 #define USER_INFO_REQ USER_TYPE*1000 + 1
 #define USER_INFO_RLY USER_TYPE*1000 + 2
@@ -67,6 +67,15 @@ namespace user {
 #define WXPAY_SERVER_REQ USER_TYPE*1000 + 37 //微信服务端支付成功
 #define WXPAY_SERVER_RLY USER_TYPE*1000 + 38 //微信服务端支付成功
 	
+#define UNIONPAY_PLACE_ORDER_REQ  USER_TYPE*1000 + 39 //银联下单
+#define UNIONPAY_PLACE_ORDER_RLY  USER_TYPE*1000 + 40 //银联下单
+
+#define UNIONPAY_CLIENT_REQ USER_TYPE*1000 + 41 //银联客服端支付成功
+#define UNIONPAY_CLIENT_RLY USER_TYPE*1000 + 42 //银联客服端支付成功
+
+#define UNIONPAY_SERVER_REQ USER_TYPE*1000 + 43 //银联服务端支付成功
+#define UNIONPAY_SERVER_RLY USER_TYPE*1000 + 44 //银联服务端支付成功
+  
 #define RANK
 
 #define ALIPAY_SEVER_REQ USER_TYPE*1000 + 23

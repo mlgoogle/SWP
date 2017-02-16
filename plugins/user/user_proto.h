@@ -6,10 +6,41 @@
 #define PLUGINS_USER_USER_PROTO_H_
 
 #include "pub/net/proto_buf.h"
+#include "glog/logging.h"
 namespace user {
 
 namespace net_request {
   
+class Heartbeat {
+ public:
+  Heartbeat()
+    : uid_(NULL) {
+  }
+  
+  ~Heartbeat() {
+    if (uid_) {
+      delete uid_;
+      uid_ = NULL;
+    }
+  }
+  
+  int32 set_http_packet(base_logic::DictionaryValue* value);
+  
+  void set_uid(const int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  const int64 uid() {
+    int64 uid = 0;
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+  
+ private:
+  base_logic::FundamentalValue* uid_;
+};
+
 class UserInfo {
  public:
   UserInfo()
@@ -23,7 +54,7 @@ class UserInfo {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid_str(const std::string& uid_str) {
     uid_str_ = new base_logic::StringValue(uid_str);
@@ -31,7 +62,8 @@ class UserInfo {
 
   const std::string uid_str() const {
     std::string uid_str;
-    uid_str_->GetAsString(&uid_str);
+    if (uid_str_)
+      uid_str_->GetAsString(&uid_str);
     return uid_str;
   }
   
@@ -51,7 +83,7 @@ class AccountInfo {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(const int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -59,7 +91,8 @@ class AccountInfo {
 
   const int64 uid() {
     int64 uid = 0;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
   return uid;
   }
   
@@ -91,7 +124,7 @@ class OrderList {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -111,25 +144,29 @@ class OrderList {
 
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
   return uid;
   }
 
   std::string flow_type() {
     std::string flow_type;
-    flow_type_->GetAsString(&flow_type);
+    if (flow_type_)
+      flow_type_->GetAsString(&flow_type);
     return flow_type;
   }
 
   int32 start_pos() {
     int32 start_pos;
-    start_pos_->GetAsInteger(&start_pos);
+    if (start_pos_)
+      start_pos_->GetAsInteger(&start_pos);
     return start_pos;
   }
   
   int32 count() {
     int32 count;
-    count_->GetAsInteger(&count);
+    if (count_)
+      count_->GetAsInteger(&count);
     return count;
   }
   
@@ -163,7 +200,7 @@ class OrderDetail {
     }
   }
 
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -179,17 +216,20 @@ class OrderDetail {
   
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
   int64 flow_id() {
     int64 flow_id;
-    flow_id_->GetAsBigInteger(&flow_id);
+    if (flow_id_)
+      flow_id_->GetAsBigInteger(&flow_id);
     return flow_id;
   }
   int32 flow_type() {
     int32 flow_type;
-    flow_type_->GetAsInteger(&flow_type);
+    if (flow_type_)
+      flow_type_->GetAsInteger(&flow_type);
     return flow_type;
   }
  private:
@@ -211,15 +251,16 @@ class BankcardList {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
 
-  void set_uid(int32 uid) {
+  void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
   }
   
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
 
@@ -260,13 +301,13 @@ class BindBankcard {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
-  void set_uid(int32 uid) {
+  void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
   }
   
-  void set_bank_id(int32 bank_id) {
+  void set_bank_id(int64 bank_id) {
     bank_id_ = new base_logic::FundamentalValue(bank_id);
   }
   
@@ -284,31 +325,36 @@ class BindBankcard {
   
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
   
-  int32 bank_id() {
-    int32 bank_id;
-    bank_id_->GetAsInteger(&bank_id);
+  int64 bank_id() {
+    int64 bank_id = 0;
+    if (bank_id_)
+      bank_id_->GetAsBigInteger(&bank_id);
     return bank_id;
   }
   
   std::string branch_bank() {
     std::string branch_bank;
-    branch_bank_->GetAsString(&branch_bank);
+    if (branch_bank_)
+      branch_bank_->GetAsString(&branch_bank);
     return branch_bank;
   }
   
   std::string bankcard_num() {
     std::string bankcard_num;
-    bankcard_num_->GetAsString(&bankcard_num);
+    if (bankcard_num_)
+      bankcard_num_->GetAsString(&bankcard_num);
     return bankcard_num;
   }
   
   std::string bank_username() {
     std::string bank_username;
-    bank_username_->GetAsString(&bank_username);
+    if (bank_username_)
+      bank_username_->GetAsString(&bank_username);
     return bank_username;
   }
   
@@ -324,10 +370,10 @@ class UnbindBankcard {
  public:
   UnbindBankcard()
     : phone_num_(NULL),
-      bankcard_id_(NULL),
+      bankcard_id_(NULL)/*,
       verify_code_(NULL),
       timestamp_(NULL),
-      verify_token_(NULL) {
+      verify_token_(NULL)*/ {
   }
   
   ~UnbindBankcard() {
@@ -339,13 +385,13 @@ class UnbindBankcard {
       delete bankcard_id_;
       bankcard_id_ = NULL;
     }
-    if (verify_code_) {
+    /*if (verify_code_) {
       delete verify_code_;
       verify_code_ = NULL;
-    }
+      }*/
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_phone_num(std::string& phone_num) {
     phone_num_ = new base_logic::StringValue(phone_num);
@@ -355,7 +401,7 @@ class UnbindBankcard {
     bankcard_id_ = new base_logic::FundamentalValue(bankcard_id);
   }
   
-  void set_verify_code(std::string& verify_code) {
+  /*void set_verify_code(std::string& verify_code) {
     verify_code_ = new base_logic::StringValue(verify_code);
   }
   
@@ -365,44 +411,49 @@ class UnbindBankcard {
   
   void set_verify_token(std::string& verify_token) {
     verify_token_ = new base_logic::StringValue(verify_token);
-  }
+    }*/
   
   std::string phone_num() {
     std::string phone_num;
-    phone_num_->GetAsString(&phone_num);
+    if (phone_num_)
+      phone_num_->GetAsString(&phone_num);
     return phone_num;
   }
   
   int64 bankcard_id() {
     int64 bankcard_id;
-    bankcard_id_->GetAsBigInteger(&bankcard_id);
+    if (bankcard_id_)
+      bankcard_id_->GetAsBigInteger(&bankcard_id);
     return bankcard_id;
   }
   
-  std::string verify_code() {
+  /*std::string verify_code() {
     std::string verify_code;
-    verify_code_->GetAsString(&verify_code);
+    if (verify_code_)
+      verify_code_->GetAsString(&verify_code);
     return verify_code;
   }
   
   int64 timestamp() {
     int64 timestamp;
-    timestamp_->GetAsBigInteger(&timestamp);
+    if (timestamp_)
+      timestamp_->GetAsBigInteger(&timestamp);
     return timestamp;
   }
   
   std::string verify_token() {
     std::string verify_token;
-    verify_token_->GetAsString(&verify_token);
+    if (verify_token_)
+      verify_token_->GetAsString(&verify_token);
     return verify_token;
-  }
+    }*/
   
  private:
   base_logic::StringValue* phone_num_;
   base_logic::FundamentalValue* bankcard_id_;
-  base_logic::StringValue* verify_code_;
+  /*base_logic::StringValue* verify_code_;
   base_logic::FundamentalValue* timestamp_;
-  base_logic::StringValue* verify_token_;
+  base_logic::StringValue* verify_token_;*/
 };
 
 class ChangeDefaultBankcard {
@@ -423,7 +474,7 @@ class ChangeDefaultBankcard {
     }
   }
 
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -435,13 +486,15 @@ class ChangeDefaultBankcard {
   
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
   
   int64 bankcard_id() {
     int64 bankcard_id;
-    bankcard_id_->GetAsBigInteger(&bankcard_id);
+    if (bankcard_id_)
+      bankcard_id_->GetAsBigInteger(&bankcard_id);
     return bankcard_id;
   }
   
@@ -463,7 +516,7 @@ class BankAccountInfo {
     }
   }
 
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_bankcard_num(std::string bankcard_num) {
     bankcard_num_ = new base_logic::StringValue(bankcard_num);
@@ -471,7 +524,8 @@ class BankAccountInfo {
   
   std::string bankcard_num() {
     std::string bankcard_num;
-    bankcard_num_->GetAsString(&bankcard_num);
+    if (bankcard_num_)
+      bankcard_num_->GetAsString(&bankcard_num);
     return bankcard_num;
   }
   
@@ -507,7 +561,7 @@ class CreditList {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -527,25 +581,29 @@ class CreditList {
 
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
 
   std::string status() {
     std::string status;
-    status_->GetAsString(&status);
+    if (status_)
+      status_->GetAsString(&status);
     return status;
   }
 
   int64 start_pos() {
     int64 start_pos;
-    start_pos_->GetAsBigInteger(&start_pos);
+    if (start_pos_)
+      start_pos_->GetAsBigInteger(&start_pos);
     return start_pos;
   }
   
   int64 count() {
     int64 count;
-    count_->GetAsBigInteger(&count);
+    if (count_)
+      count_->GetAsBigInteger(&count);
     return count;
   }
   
@@ -601,13 +659,13 @@ class UserWithdraw {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
 
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
   }
 
-  void set_money(int64 money) {
+  void set_money(double money) {
     money_ = new base_logic::FundamentalValue(money);
   }
 
@@ -621,25 +679,29 @@ class UserWithdraw {
   
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
   
   double money() {
     double money;
-    money_->GetAsReal(&money);
+    if (money_)
+      money_->GetAsReal(&money);
     return money;
   }
   
   int64 bankcard_id() {
     int64 bankcard_id;
-    bankcard_id_->GetAsBigInteger(&bankcard_id);
+    if (bankcard_id_)
+      bankcard_id_->GetAsBigInteger(&bankcard_id);
     return bankcard_id;
   }
   
   std::string passwd() {
     std::string passwd;
-    passwd_->GetAsString(&passwd);
+    if (passwd_)
+      passwd_->GetAsString(&passwd);
     return passwd;
   }
   
@@ -678,13 +740,15 @@ class UserWithdrawList {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
   }
 
   void set_status(std::string& status) {
+    if (status == "")
+      status = "1,2,3"; //所有记录
     status_ = new base_logic::StringValue(status);
   }
 
@@ -698,25 +762,29 @@ class UserWithdrawList {
 
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
 
   std::string status() {
     std::string status;
-    status_->GetAsString(&status);
+    if (status_)
+      status_->GetAsString(&status);
     return status;
   }
 
   int64 start_pos() {
     int64 start_pos;
-    start_pos_->GetAsBigInteger(&start_pos);
+    if (start_pos_)
+      start_pos_->GetAsBigInteger(&start_pos);
     return start_pos;
   }
   
   int64 count() {
     int64 count;
-    count_->GetAsBigInteger(&count);
+    if (count_)
+      count_->GetAsBigInteger(&count);
     return count;
   }
   
@@ -755,7 +823,7 @@ class ChangeUserInfo {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
 
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -775,25 +843,29 @@ class ChangeUserInfo {
 
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
   
   std::string nickname() {
     std::string nickname;
-    nickname_->GetAsString(&nickname);
+    if (nickname_)
+      nickname_->GetAsString(&nickname);
     return nickname;
   }
   
   int32 gender() {
     int32 gender;
-    gender_->GetAsInteger(&gender);
+    if (gender_)
+      gender_->GetAsInteger(&gender);
     return gender;
   }
   
   std::string head_url() {
     std::string head_url;
-    head_url_->GetAsString(&head_url);
+    if (head_url_)
+      head_url_->GetAsString(&head_url);
     return head_url;
   }
 
@@ -827,7 +899,7 @@ class WXPlaceOrder {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
     
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -843,19 +915,22 @@ class WXPlaceOrder {
 
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
 
   std::string title() {
     std::string title;
-    title_->GetAsString(&title);
+    if (title_)
+      title_->GetAsString(&title);
     return title;
   }
   
   double price() {
     double price;
-    price_->GetAsReal(&price);
+    if (price_)
+      price_->GetAsReal(&price);
     return price;
   }
   
@@ -888,7 +963,7 @@ class WXPayClient {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -904,19 +979,22 @@ class WXPayClient {
 
   int64 uid() {
     int64 uid;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
   
   int64 recharge_id() {
     int64 recharge_id;
-    recharge_id_->GetAsBigInteger(&recharge_id);
+    if (recharge_id_)
+      recharge_id_->GetAsBigInteger(&recharge_id);
     return recharge_id;
   }
   
   int64 pay_result() {
     int64 pay_result;
-    pay_result_->GetAsBigInteger(&pay_result);
+    if (pay_result_)
+      pay_result_->GetAsBigInteger(&pay_result);
     return pay_result;
   }
   
@@ -974,13 +1052,13 @@ class WXPayServer {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
     
-  void set_appid(std::string& appid) {
+  void set_appid(std::string appid) {
     appid_ = new base_logic::StringValue(appid);
   }
 
-  void set_mch_id(std::string& mch_id) {
+  void set_mch_id(std::string mch_id) {
     mch_id_ = new base_logic::StringValue(mch_id);
   }
 
@@ -1000,7 +1078,7 @@ class WXPayServer {
     pay_result_ = new base_logic::FundamentalValue(pay_result);
   }
 
-  void set_transaction_id(std::string& transaction_id) {
+  void set_transaction_id(std::string transaction_id) {
     transaction_id_ = new base_logic::StringValue(transaction_id);
   }
 
@@ -1010,31 +1088,36 @@ class WXPayServer {
 
   std::string appid() {
     std::string appid;
-    appid_->GetAsString(&appid);
+    if (appid_)
+      appid_->GetAsString(&appid);
     return appid;
   }
   
   std::string mch_id() {
     std::string mch_id;
-    mch_id_->GetAsString(&mch_id);
+    if (mch_id_)
+      mch_id_->GetAsString(&mch_id);
     return mch_id;
   }
   
   int64 total_fee() {
     int64 total_fee;
-    total_fee_->GetAsBigInteger(&total_fee);
+    if (total_fee_)
+      total_fee_->GetAsBigInteger(&total_fee);
     return total_fee;
   }
   
   int64 recharge_id() {
     int64 recharge_id;
-    recharge_id_->GetAsBigInteger(&recharge_id);
+    if (recharge_id_)
+      recharge_id_->GetAsBigInteger(&recharge_id);
     return recharge_id;
   }
 
   int64 pay_result() {
     int64 pay_result;
-    pay_result_->GetAsBigInteger(&pay_result);
+    if (pay_result_)
+      pay_result_->GetAsBigInteger(&pay_result);
     return pay_result;
   }
   
@@ -1047,6 +1130,70 @@ class WXPayServer {
   base_logic::FundamentalValue* pay_result_; //1 - 支付成功
   base_logic::StringValue* transaction_id_;
   base_logic::StringValue* time_end_;
+};
+
+class UnionpayPlaceOrder {
+ public:
+  UnionpayPlaceOrder()
+    : uid_(NULL),
+      title_(NULL),
+      price_(NULL) {
+  }
+  
+  ~UnionpayPlaceOrder() {
+    if (uid_) {
+      delete uid_;
+      uid_ = NULL;
+    }
+    if (title_) {
+      delete title_;
+      title_ = NULL;
+    }
+    if (price_) {
+      delete price_;
+      price_ = NULL;
+    }
+  }
+  
+  int32 set_http_packet(base_logic::DictionaryValue* value);
+    
+  void set_uid(int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  void set_title(std::string& title) {
+    title_ = new base_logic::StringValue(title);
+  }
+
+  void set_price(double price) {
+    price_ = new base_logic::FundamentalValue(price);
+  }
+
+  int64 uid() {
+    int64 uid;
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+
+  std::string title() {
+    std::string title;
+    if (title_)
+      title_->GetAsString(&title);
+    return title;
+  }
+  
+  double price() {
+    double price;
+    if (price_)
+      price_->GetAsReal(&price);
+    return price;
+  }
+  
+ private:
+  base_logic::FundamentalValue* uid_;
+  base_logic::StringValue* title_; //应用名-商品名 eg.V领队-高级服务
+  base_logic::FundamentalValue* price_; // 订单总价  单位 分
 };
 
 /*class SMSCodeLogin {
@@ -1064,35 +1211,6 @@ class WXPayServer {
   std::string phone_num_;
   std::string token_;
   };*/
-
-class Heartbeat {
- public:
-  Heartbeat()
-    : uid_(NULL) {
-  }
-  
-  ~Heartbeat() {
-    if (uid_) {
-      delete uid_;
-      uid_ = NULL;
-    }
-  }
-  
-  void set_http_packet(base_logic::DictionaryValue* value);
-  
-  void set_uid(const int64 uid) {
-    uid_ = new base_logic::FundamentalValue(uid);
-  }
-
-  const int64 uid() {
-    int64 uid = 0;
-    uid_->GetAsBigInteger(&uid);
-    return uid;
-  }
-  
- private:
-  base_logic::FundamentalValue* uid_;
-};
 
 class ObtainVerifyCode {
  public:
@@ -1112,7 +1230,7 @@ class ObtainVerifyCode {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_verify_type(int32 verify_type) {
     verify_type_ = new base_logic::FundamentalValue(verify_type);
@@ -1124,13 +1242,15 @@ class ObtainVerifyCode {
 
   int32 verify_type() {
     int32 verify_type;
-    verify_type_->GetAsInteger(&verify_type);
+    if (verify_type_)
+      verify_type_->GetAsInteger(&verify_type);
     return verify_type;
   }
   
   std::string phone_num() {
     std::string phone_num;
-    phone_num_->GetAsString(&phone_num);
+    if (phone_num_)
+      phone_num_->GetAsString(&phone_num);
     return phone_num;
   }
   
@@ -1168,7 +1288,7 @@ class DeviceToken {
     }
   }
   
-  void set_http_packet(base_logic::DictionaryValue* value);
+  int32 set_http_packet(base_logic::DictionaryValue* value);
   
   void set_uid(const int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
@@ -1180,13 +1300,15 @@ class DeviceToken {
 
   const int64 uid() {
     int64 uid = 0;
-    uid_->GetAsBigInteger(&uid);
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
     return uid;
   }
   
   const std::string device_token() {
     std::string device_token;
-    device_token_->GetAsString(&device_token);
+    if (device_token_)
+      device_token_->GetAsString(&device_token);
     return device_token;
   }
   
@@ -1224,6 +1346,12 @@ class DeviceToken {
   };*/
 
 } //namespace net_request
+ 
+namespace net_reply {
+  
+  
+
+}
  
 } //namespace user
 

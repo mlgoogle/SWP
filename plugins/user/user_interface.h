@@ -25,7 +25,7 @@ class UserInterface {
  public:
   void InitConfig(config::FileConfig* config);
 
-  int32 OnHeartPacket(const int32 socket, PacketHead* packet);
+  int32 OnHeartbeat(const int32 socket, PacketHead* packet);
 
   int32 OnUserInfo(const int32 socket, PacketHead* packet);
   
@@ -65,6 +65,12 @@ class UserInterface {
 
   int32 OnWXPayServerResponse(const int32 socket, PacketHead* packet);
 
+  int32 OnUnionpayPlaceOrder(const int32 socket, PacketHead* packet);
+
+  int32 OnUnionpayPayClientResponse(const int32 socket, PacketHead* packet);
+
+  int32 OnUnionpayPayServerResponse(const int32 socket, PacketHead* packet);
+
   int32 OnDeviceToken(const int32 socket, PacketHead* packet);
 
   int32 OnAlipayServer(const int32 socket, PacketHead* packet);
@@ -73,12 +79,12 @@ class UserInterface {
   
   int32 OnCheckSMSCode(const int32 socket, PacketHead* packet);
 
-  int32 OnCheckHeartLoss();
+  int32 CheckHeartLoss();
 //更新共享数据，旅游分享和技能分享
-  int32 OnInitShareGuide();
+  int32 InitShareGuide();
   //定时监测订单状态
-  int32 OnNopayOrderStatusCheck();
-  int32 OnCloseSocket(const int fd);
+  int32 NopayOrderStatusCheck();
+  int32 CloseSocket(const int fd);
 
   void SendPacket(const int socket, PacketHead* packet);
 

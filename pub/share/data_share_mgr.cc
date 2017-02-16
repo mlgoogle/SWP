@@ -51,7 +51,7 @@ UserInfo* DataShareMgr::GetUser(int64 uid) {
   DLOG(ERROR)<< "DataShareMgr GetFreeCoordinator lock";
   base_logic::RLockGd lk(lock_);
   DLOG(ERROR)<< "DataShareMgr GetFreeCoordinator locked";
-  Coordinator* info = NULL;
+  //Coordinator* info = NULL;
   //if (coordinator_map_.empty())
   //return info;
   /*CoordinatorMap::iterator it = coordinator_map_.begin();
@@ -68,18 +68,12 @@ UserInfo* DataShareMgr::GetUser(int64 uid) {
   return info;*/
   }
 
-	void DataShareMgr::AddUser(UserInfo* user) {
+void DataShareMgr::AddUser(UserInfo* user) {
   AddNick(user->uid(), user->nickname());
   DLOG(ERROR)<< "DataShareMgr AddUser lock";
   base_logic::WLockGd lk(lock_);
   DLOG(ERROR)<< "DataShareMgr AddUser locked";
   user_map_[user->uid()] = user;
-  /*if (user->user_type() == 1)
-    visitor_map_[user->uid()] = reinterpret_cast<Visitor*>(user);
-  else if (user->user_type() == 2)
-    guide_map_[user->uid()] = reinterpret_cast<Guide*>(user);
-  else if (user->user_type() == 3)
-  coordinator_map_[user->uid()] = reinterpret_cast<Coordinator*>(user);*/
   DLOG(ERROR)<< "DataShareMgr AddUser unlock";
 }
 
@@ -191,7 +185,7 @@ void DataShareMgr::CheckHeartLoss() {
   DLOG(ERROR) << "DataShareMgr CheckHeartLoss unlock";
   }
 
-	void DataShareMgr::UserHeart(int64 uid) {
+void DataShareMgr::Heartbeat(int64 uid) {
   DLOG(ERROR)<< "DataShareMgr UserHeart lock";
   base_logic::WLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr UserHeart locked";

@@ -25,15 +25,16 @@ UserMysql::~UserMysql() {
   }
   mysql_engine_ = NULL;
 }
-	
-int32 UserMysql::UserInfoSelect(std::string uids, DicValue* dic) {
+  
+int32 UserMysql::UserInfoSelect(std::string uids, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_UserInfoSelect('" << uids << "')";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallUserInfoSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -46,14 +47,15 @@ int32 UserMysql::UserInfoSelect(std::string uids, DicValue* dic) {
   return err;
 }
 
-int32 UserMysql::AccountInfoSelect(int64 uid, DicValue* dic) {
+int32 UserMysql::AccountInfoSelect(int64 uid, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_AccountInfoSelect(" << uid << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallAccountInfoSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallAccountInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -63,15 +65,16 @@ int32 UserMysql::AccountInfoSelect(int64 uid, DicValue* dic) {
 }
 
 int32 UserMysql::OrderListSelect(int64 uid, std::string flow_type, int32 start_pos,
-										int32 count, DicValue* dic) {
+                    int32 count, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_OrderListSelect(" << uid << ",'" << flow_type << "',"
-						<< start_pos << "," << count << ")";
+            << start_pos << "," << count << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallOrderListSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallOrderListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -81,15 +84,16 @@ int32 UserMysql::OrderListSelect(int64 uid, std::string flow_type, int32 start_p
 }
 
 int32 UserMysql::OrderDetailSelect(int64 uid, int64 flow_id, int32 flow_type,
-										DicValue* dic) {
+                    base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_OrderDetailSelect(" << uid << "," << flow_id << ","
-									<< flow_type << ")";
+                  << flow_type << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallOrderDetailSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallOrderDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -97,15 +101,16 @@ int32 UserMysql::OrderDetailSelect(int64 uid, int64 flow_id, int32 flow_type,
   } while (0);
   return err;
 }
-	
-int32 UserMysql::BankcardListSelect(int64 uid, DicValue* dic) {
+  
+int32 UserMysql::BankcardListSelect(int64 uid, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_BankcardListSelect(" << uid << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallBankcardListSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallBankcardListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -113,17 +118,18 @@ int32 UserMysql::BankcardListSelect(int64 uid, DicValue* dic) {
   } while (0);
   return err;
 }
-	
-int32 UserMysql::BindBankcardInsertAndSelect(int64 uid, int64 bank_id, std::string branch_bank,
-											 std::string bankcard_num, std::string bank_username, DicValue* dic) {
+  
+int32 UserMysql::BindBankcardInsertAndSelect(int64 uid, int32 bank_id, std::string branch_bank,
+                       std::string bankcard_num, std::string bank_username, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_BindBankcardInsertAndSelect(" << uid << "," << bank_id << ",'" << branch_bank
-	   << "','" << bankcard_num << "','" << bank_username << "')";
+     << "','" << bankcard_num << "','" << bank_username << "')";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallBindBankcardInsertAndSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallBindBankcardInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -135,11 +141,13 @@ int32 UserMysql::BindBankcardInsertAndSelect(int64 uid, int64 bank_id, std::stri
 int32 UserMysql::UnbindBankcardDelete(std::string phone_num, int32 bank_id) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_UnbindBankcardDelete(" << phone_num << "," << bank_id << ")";
+    base_logic::DictionaryValue dic;
+    dic.SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->WriteData(ss.str());
+    r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -147,15 +155,17 @@ int32 UserMysql::UnbindBankcardDelete(std::string phone_num, int32 bank_id) {
   } while (0);
   return err;
 }
-	
+  
 int32 UserMysql::ChangeDefaultBankcard(int64 uid, int32 bank_id) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_ChangeDefaultbankcardUpdate(" << uid << "," << bank_id << ")";
+    base_logic::DictionaryValue* dic;
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->WriteData(ss.str());
+    r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -163,15 +173,16 @@ int32 UserMysql::ChangeDefaultBankcard(int64 uid, int32 bank_id) {
   } while (0);
   return err;
 }
-	
-int32 UserMysql::BankAccountInfoSelect(std::string account, DicValue* dic) {
+  
+int32 UserMysql::BankAccountInfoSelect(std::string account, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_BankAccountInfoSelect('" << account << "')";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallBankAccountInfoSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallBankAccountInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -180,15 +191,16 @@ int32 UserMysql::BankAccountInfoSelect(std::string account, DicValue* dic) {
   return err;
 }
 
-int32 UserMysql::CreditListSelect(int64 uid, std::string status, int64 start_pos, int64 count, DicValue* dic) {
+int32 UserMysql::CreditListSelect(int64 uid, std::string status, int64 start_pos, int64 count, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_CreditListSelect(" << uid << ",'" << status
-	   << "'," << start_pos << "," << count << ")";
+     << "'," << start_pos << "," << count << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallCreditListSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallCreditListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -196,15 +208,16 @@ int32 UserMysql::CreditListSelect(int64 uid, std::string status, int64 start_pos
   } while (0);
   return err;
 }
-	
-int32 UserMysql::CreditDetailSelect(int64 uid, int64 recharge_id, DicValue* dic) {
+  
+int32 UserMysql::CreditDetailSelect(int64 uid, int64 recharge_id, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
-  do {			
+  do {      
     std::stringstream ss;
     ss << "call proc_CreditDetailSelect(" << uid << "," << recharge_id << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallCreditDetailSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallCreditDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -212,17 +225,18 @@ int32 UserMysql::CreditDetailSelect(int64 uid, int64 recharge_id, DicValue* dic)
   } while (0);
   return err;
 }
-	
+  
 int32 UserMysql::UserWithdrawInsertAndSelect(int64 uid, double money,
-						int64 bankcard_id, std::string passwd, DicValue* dic) {
+            int64 bankcard_id, std::string passwd, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_UserWithdrawInsertAndSelect(" << uid << "," << money
-			<< "," << bankcard_id << ",'" << passwd << "')";
+      << "," << bankcard_id << ",'" << passwd << "')";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallUserWithdrawInsertAndSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserWithdrawInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -232,7 +246,7 @@ int32 UserMysql::UserWithdrawInsertAndSelect(int64 uid, double money,
 }
 
 int32 UserMysql::UserWithdrawListSelect(int64 uid, std::string status,
-								int64 startPos, int64 count, DicValue* dic) {
+                int64 startPos, int64 count, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
@@ -243,9 +257,10 @@ int32 UserMysql::UserWithdrawListSelect(int64 uid, std::string status,
 
     std::stringstream ss;
     ss << "call proc_UserWithdrawListSelect(" << uid << ",'" << status
-				<< "'," << startPos << "," << count << ")";
+        << "'," << startPos << "," << count << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallUserWithdrawListSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserWithdrawListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -253,15 +268,16 @@ int32 UserMysql::UserWithdrawListSelect(int64 uid, std::string status,
   } while (0);
   return err;
 }
-	
-	/*int32 UserMysql::UserWithdrawDetailSelect(int64 uid, int64 withdraw_id, DicValue* dic) {
+  
+  /*int32 UserMysql::UserWithdrawDetailSelect(int64 uid, int64 withdraw_id, base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_UserWithdrawDetailSelect(" << uid << "," << withdraw_id << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallUserWithdrawDetailSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserWithdrawDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -269,17 +285,19 @@ int32 UserMysql::UserWithdrawListSelect(int64 uid, std::string status,
   } while (0);
   return err;
   }*/
-	
+  
 int32 UserMysql::ChangeUserInfoUpdate(int64 uid, std::string nickname,
-									  std::string headurl, int64 gender) {
+                    std::string headurl, int64 gender) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_ChangeUserInfoUpdate(" << uid << ",'"
        << nickname << "','" << headurl << "'," << gender << ")";
+    base_logic::DictionaryValue dic;
+    dic.SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->WriteData(ss.str());
+    r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -289,15 +307,16 @@ int32 UserMysql::ChangeUserInfoUpdate(int64 uid, std::string nickname,
 }
 
 int32 UserMysql::RechargeInfoInsertAndSelect(int64 uid, double price,
-      								 DicValue* dic) {
+                       base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_RechargeInfoInsertAndSelect(" << uid << "," << price
        << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic, CallRechargeInfoInsertAndSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallRechargeInfoInsertAndSelect);
     if (!r || dic->empty()) {
       err = SQL_EXEC_ERR;
       break;
@@ -305,18 +324,19 @@ int32 UserMysql::RechargeInfoInsertAndSelect(int64 uid, double price,
   } while (0);
   return err;
 }
-	
+  
 int32 UserMysql::ChangeRechargeStatusAndSelect(int64 rid, int64 result,
-      								   DicValue* dic) {
+                         base_logic::DictionaryValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_ChangeRechargeStatusAndSelect(" << rid << "," << result
        << ")";
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(), dic,
-							CallChangeRechargeStatusAndSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic),
+              CallChangeRechargeStatusAndSelect);
     if (!r || dic->empty()) {
       err = SQL_EXEC_ERR;
       break;
@@ -324,15 +344,17 @@ int32 UserMysql::ChangeRechargeStatusAndSelect(int64 rid, int64 result,
   } while (0);
   return err;
 }
-	
+  
 int32 UserMysql::DeviceTokenUpdate(int64 uid, std::string dt) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_DeviceTokenUpdate(" << uid << ",'" << dt << "')";
+    base_logic::DictionaryValue* dic;
+    dic->SetString(L"sql", ss.str());
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->WriteData(ss.str());
+    r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -340,486 +362,499 @@ int32 UserMysql::DeviceTokenUpdate(int64 uid, std::string dt) {
   } while (0);
   return err;
 }
-	
-void UserMysql::CallUserInfoSelect(void* param, Value* value) {
+  
+void UserMysql::CallUserInfoSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
     (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* info = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* info = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-    ListValue* list = new ListValue();
+    base_logic::ListValue* list = new base_logic::ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-      DicValue* dict = new DicValue();
+      base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
       if (rows[0] != NULL)
-      	dict->SetBigInteger(L"uid", atoll(rows[0]));
+        dict->SetBigInteger(L"uid", atoll(rows[0]));
       if (rows[1] != NULL)
-      	dict->SetString(L"phone", rows[1]);
+        dict->SetString(L"phone", rows[1]);
       if (rows[2] != NULL)
-      	dict->SetString(L"screenName", rows[2]);
+        dict->SetString(L"screenName", rows[2]);
       if (rows[3] != NULL)
-      	dict->SetString(L"avatarLarge", rows[3]);
+        dict->SetString(L"avatarLarge", rows[3]);
       if (rows[4] != NULL)
-      	dict->SetCharInteger(L"gender", atoi(rows[4]));
+        dict->SetCharInteger(L"gender", atoi(rows[4]));
       list->Append(dict);
     }
     info->Set(L"userinfoList", list);
   } else {
     LOG(WARNING)<< "CallUserInfoSelect count < 0";
   }
+    info->Remove(L"sql", &value);
 }
-	
-void UserMysql::CallAccountInfoSelect(void* param, Value* value) {
+  
+void UserMysql::CallAccountInfoSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-	  if (rows[0] != NULL) {
-		dict->SetReal(L"balance", atof(rows[0]));
-	  }
-	}
+    if (rows[0] != NULL) {
+      dict->SetReal(L"balance", atof(rows[0]));
+    }
+  }
   } else {
     LOG(WARNING)<<"CallAccountInfoSelect count < 0";
   }
+    dict->Remove(L"sql", &value);
 }
 
-void UserMysql::CallOrderListSelect(void* param, Value* value) {
+void UserMysql::CallOrderListSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* info = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* info = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-    ListValue* list = new ListValue();
+    base_logic::ListValue* list = new base_logic::ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-      DicValue* dict = new DicValue();
+      base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
       if (rows[0] != NULL)
-		dict->SetBigInteger(L"flowId", atoll(rows[0]));
+    dict->SetBigInteger(L"flowId", atoll(rows[0]));
       if (rows[1] != NULL)
-		dict->SetBigInteger(L"flowType", atoll(rows[1]));
+    dict->SetBigInteger(L"flowType", atoll(rows[1]));
       if (rows[2] != NULL)
         dict->SetString(L"flowName", rows[2]);
       if (rows[3] != NULL)
-		dict->SetBigInteger("inOut", atoll(rows[3]));
+    dict->SetBigInteger("inOut", atoll(rows[3]));
       if (rows[4] != NULL)
-		dict->SetReal("amount", atoll(rows[4]));
+    dict->SetReal("amount", atoll(rows[4]));
       if (rows[5] != NULL)
-		dict->SetReal("balance", atoll(rows[5]));
+    dict->SetReal("balance", atoll(rows[5]));
       if (rows[6] != NULL)
-		dict->SetReal("flowTime", atoll(rows[6]));
+    dict->SetReal("flowTime", atoll(rows[6]));
       if (rows[7] != NULL)
-		dict->SetString("comment", rows[7]);
-	  list->Append(dict); 
+    dict->SetString("comment", rows[7]);
+    list->Append(dict); 
     }
-	info->Set("orders", list);
+    info->Set("orders", list);
   } else {
     LOG(WARNING)<<"CallOrderListSelect count < 0";
   }
+    info->Remove(L"sql", &value);
 }
 
-void UserMysql::CallOrderDetailSelect(void* param, Value* value) {
+void UserMysql::CallOrderDetailSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-	DicValue* basic = new DicValue();
-	int32 flow_type;
-    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-	  if (rows[0] != NULL)
-		basic->SetBigInteger(L"uid", atoll(rows[0]));
-	  if (rows[1] != NULL)
-		basic->SetBigInteger(L"flowId", atoll(rows[1]));
-	  if (rows[2] != NULL) {
-		flow_type = atoll(rows[2]);
-		basic->SetInteger(L"flowType", flow_type);
-	  }
-	  if (rows[3] != NULL)
-		basic->SetString(L"flowName", rows[3]);
+  base_logic::DictionaryValue* basic = new base_logic::DictionaryValue();
+  int32 flow_type;
+  while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+    if (rows[0] != NULL)
+    basic->SetBigInteger(L"uid", atoll(rows[0]));
+    if (rows[1] != NULL)
+    basic->SetBigInteger(L"flowId", atoll(rows[1]));
+    if (rows[2] != NULL) {
+    flow_type = atoll(rows[2]);
+    basic->SetInteger(L"flowType", flow_type);
+    }
+    if (rows[3] != NULL)
+    basic->SetString(L"flowName", rows[3]);
       if (rows[4] != NULL)
-		dict->SetBigInteger("inOut", atoll(rows[4]));
+    dict->SetBigInteger("inOut", atoll(rows[4]));
       if (rows[5] != NULL)
-		dict->SetReal("amount", atoll(rows[5]));
+    dict->SetReal("amount", atoll(rows[5]));
       if (rows[6] != NULL)
-		dict->SetReal("balance", atoll(rows[6]));
+    dict->SetReal("balance", atoll(rows[6]));
       if (rows[7] != NULL)
-		dict->SetReal("flowTime", atoll(rows[7]));
+    dict->SetReal("flowTime", atoll(rows[7]));
       if (rows[8] != NULL)
-		dict->SetString("comment", rows[8]);
-	  
-	  switch (flow_type) {
-	  case DEPOSIT:
+    dict->SetString("comment", rows[8]);
+    
+    switch (flow_type) {
+    case DEPOSIT:
         if (rows[9] != NULL)
-		  dict->SetString("depositType", rows[9]);
+      dict->SetString("depositType", rows[9]);
         if (rows[10] != NULL)
-		  dict->SetString("depositName", rows[10]);
-		break;
-	  case WITHDRAW:
+      dict->SetString("depositName", rows[10]);
+    break;
+    case WITHDRAW:
         if (rows[9] != NULL)
-		  dict->SetString("bank", rows[9]);
+      dict->SetString("bank", rows[9]);
         if (rows[10] != NULL)
-		  dict->SetString("bank", rows[10]);
+      dict->SetString("bank", rows[10]);
         if (rows[11] != NULL)
-		  dict->SetString("name", rows[11]);
+      dict->SetString("name", rows[11]);
         if (rows[12] != NULL)
-		  dict->SetCharInteger("status", atoi(rows[12]));
+      dict->SetCharInteger("status", atoi(rows[12]));
         if (rows[13] != NULL)
-		  dict->SetReal("withdrawAmount", atof(rows[13]));
+      dict->SetReal("withdrawAmount", atof(rows[13]));
         if (rows[14] != NULL)
-		  dict->SetReal("withdrawCharge", atof(rows[14]));
-		break;
-	  case OPEN_POSITION:
-	  case CLOSE_POSITION: 
+      dict->SetReal("withdrawCharge", atof(rows[14]));
+    break;
+    case OPEN_POSITION:
+    case CLOSE_POSITION: 
         if (rows[9] != NULL)
-		  dict->SetString("goodsName", rows[9]);
+      dict->SetString("goodsName", rows[9]);
         if (rows[10] != NULL)
-		  dict->SetCharInteger("buySell", atoi(rows[10]));
+      dict->SetCharInteger("buySell", atoi(rows[10]));
         if (rows[11] != NULL)
-		  dict->SetInteger("positionAmount", atoi(rows[11]));
+      dict->SetInteger("positionAmount", atoi(rows[11]));
         if (rows[12] != NULL)
-		  dict->SetReal("openPrice", atof(rows[12]));
+      dict->SetReal("openPrice", atof(rows[12]));
         if (rows[13] != NULL)
-		  dict->SetBigInteger("positionTime", atoll(rows[13]));
+      dict->SetBigInteger("positionTime", atoll(rows[13]));
         if (rows[14] != NULL)
-		  dict->SetReal("openCost", atof(rows[14]));
+      dict->SetReal("openCost", atof(rows[14]));
         if (rows[15] != NULL)
-		  dict->SetReal("openCharge", atof(rows[15]));
+      dict->SetReal("openCharge", atof(rows[15]));
         if (rows[16] != NULL)
-		  dict->SetReal("closePrice", atof(rows[16]));
+      dict->SetReal("closePrice", atof(rows[16]));
         if (rows[17] != NULL)
-		  dict->SetBigInteger("closeTime", atoll(rows[17]));
+      dict->SetBigInteger("closeTime", atoll(rows[17]));
         if (rows[18] != NULL)
-		  dict->SetReal("closeIncome", atof(rows[18]));
+      dict->SetReal("closeIncome", atof(rows[18]));
         if (rows[19] != NULL)
-		  dict->SetReal("closeCharge", atof(rows[19]));
+      dict->SetReal("closeCharge", atof(rows[19]));
         if (rows[20] != NULL)
-		  dict->SetCharInteger("closeType", atoi(rows[20]));
+      dict->SetCharInteger("closeType", atoi(rows[20]));
         if (rows[21] != NULL)
-		  dict->SetString("closeName", rows[21]);
-		break;
-	  }
-	}
+      dict->SetString("closeName", rows[21]);
+        break;
+    }
+  }
   } else {
     LOG(WARNING)<<"CallOrderDetailSelect count < 0";
   }
+  dict->Remove(L"sql", &value);
 }
 
-void UserMysql::CallBankcardListSelect(void* param, Value* value) {
+void UserMysql::CallBankcardListSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* info = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* info = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-    ListValue* list = new ListValue();
+    base_logic::ListValue* list = new base_logic::ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-      DicValue* dict = new DicValue();
+      base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
       if (rows[0] != NULL)
-		dict->SetBigInteger(L"bid", atoll(rows[0]));
+    dict->SetBigInteger(L"bid", atoll(rows[0]));
       if (rows[1] != NULL)
-		dict->SetBigInteger(L"uid", atoll(rows[1]));
+    dict->SetBigInteger(L"uid", atoll(rows[1]));
       if (rows[2] != NULL)
         dict->SetString(L"bank", rows[2]);
       if (rows[3] != NULL)
-		dict->SetString("branchBank", rows[3]);
+    dict->SetString("branchBank", rows[3]);
       if (rows[4] != NULL)
-		dict->SetString("cardNo", rows[4]);
+    dict->SetString("cardNo", rows[4]);
       if (rows[5] != NULL)
-		dict->SetString("name", rows[5]);
-	  list->Append(dict); 
+    dict->SetString("name", rows[5]);
+    list->Append(dict); 
     }
-	info->Set("cardlist", list);
+  info->Set("cardlist", list);
   } else {
     LOG(WARNING)<<"CallBankcardListSelect count < 0";
   }
+  info->Remove(L"sql", &value);
 }
 
-void UserMysql::CallBindBankcardInsertAndSelect(void* param, Value* value) {
+void UserMysql::CallBindBankcardInsertAndSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
-		dict->SetBigInteger(L"bid", atoll(rows[0]));
+    dict->SetBigInteger(L"bid", atoll(rows[0]));
       if (rows[1] != NULL)
-		dict->SetBigInteger(L"uid", atoll(rows[1]));
+    dict->SetBigInteger(L"uid", atoll(rows[1]));
       if (rows[2] != NULL)
         dict->SetString(L"bank", rows[2]);
       if (rows[3] != NULL)
-		dict->SetString("branchBank", rows[3]);
+    dict->SetString("branchBank", rows[3]);
       if (rows[4] != NULL)
-		dict->SetString("cardNo", rows[4]);
+    dict->SetString("cardNo", rows[4]);
       if (rows[5] != NULL)
-		dict->SetString("name", rows[5]);
+    dict->SetString("name", rows[5]);
     }
   } else {
-    LOG(WARNING)<<"CallUserWithdrawInsertAndSelect count < 0";
+    LOG(WARNING)<<"CallBindBankcardInsertAndSelect count < 0";
   }
+    dict->Remove(L"sql", &value);
 }
-	
-void UserMysql::CallBankAccountInfoSelect(void* param, Value* value) {
+  
+void UserMysql::CallBankAccountInfoSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
-  	(base_storage::DBStorageEngine*) (param);
+    (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-  	while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-	  int result = atoi(rows[0]);
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+    int result = atoi(rows[0]);
       if (rows[0] != NULL)
         dict->SetInteger(L"result", result);
-	  if (result == 0) {
+    if (result == 0) {
         if (rows[1] != NULL)
           dict->SetBigInteger(L"bankId", atoll(rows[1]));
         if (rows[2] != NULL)
           dict->SetString(L"bankName", rows[2]);
-	  }
-  	}
+    }
+    }
   } else {
-  	LOG(WARNING)<<"CallBankAccountInfoSelect count < 0";
+    LOG(WARNING)<<"CallBankAccountInfoSelect count < 0";
   }
+    dict->Remove(L"sql", &value);
 }
-	
-void UserMysql::CallCreditListSelect(void* param, Value* value) {
+  
+void UserMysql::CallCreditListSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* info = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* info = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-    ListValue* list = new ListValue();
+    base_logic::ListValue* list = new base_logic::ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-      DicValue* dict = new DicValue();
+      base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
       if (rows[0] != NULL)
-		dict->SetBigInteger(L"rid", atoll(rows[0]));
+    dict->SetBigInteger(L"rid", atoll(rows[0]));
       if (rows[1] != NULL)
-		dict->SetBigInteger(L"uid", atoll(rows[1]));
+    dict->SetBigInteger(L"uid", atoll(rows[1]));
       if (rows[2] != NULL)
-		dict->SetReal(L"amount", atof(rows[2]));
+    dict->SetReal(L"amount", atof(rows[2]));
       if (rows[3] != NULL)
-		dict->SetString("depositTime", rows[3]);
+    dict->SetString("depositTime", rows[3]);
       if (rows[4] != NULL)
-		dict->SetCharInteger("depositType", atoi(rows[4]));
+    dict->SetCharInteger("depositType", atoi(rows[4]));
       //if (rows[5] != NULL)
-	  //dict->SetString("depositName", rows[5]);
+    //dict->SetString("depositName", rows[5]);
       if (rows[5] != NULL) {
-		int32 status = atoi(rows[5]);
+    int32 status = atoi(rows[5]);
         const char* ret_status;
-		switch (status) {
-		  case DB_CREDIT_INPROCESS:
-		  case DB_CREDIT_CLIENT_SUCCESS:
-			ret_status = CREDIT_INPROCESS;
-			break;
-		  case DB_CREDIT_CLIENT_FAIL:
-		  case DB_CREDIT_SERVER_FAIL:
-			ret_status = CREDIT_FAIL;
-			break;
-		  case DB_CREDIT_SERVER_SUCCESS:
-			ret_status = CREDIT_SUCCESS;
-			break;
-	    }
-		dict->SetCharInteger("status", atoi(rows[5]));
+    switch (status) {
+      case DB_CREDIT_INPROCESS:
+      case DB_CREDIT_CLIENT_SUCCESS:
+      ret_status = CREDIT_INPROCESS;
+      break;
+      case DB_CREDIT_CLIENT_FAIL:
+      case DB_CREDIT_SERVER_FAIL:
+      ret_status = CREDIT_FAIL;
+      break;
+      case DB_CREDIT_SERVER_SUCCESS:
+      ret_status = CREDIT_SUCCESS;
+      break;
       }
-	  list->Append(dict); 
+    dict->SetCharInteger("status", atoi(rows[5]));
+      }
+    list->Append(dict); 
     }
     info->Set("depositsinfo", list);
   } else {
     LOG(WARNING)<<"CallCreditListSelect count < 0";
   }
+    info->Remove(L"sql", &value);
 }
 
-void UserMysql::CallCreditDetailSelect(void* param, Value* value) {
+void UserMysql::CallCreditDetailSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-	DicValue* basic = new DicValue();
-	int32 flow_type;
+  base_logic::DictionaryValue* basic = new base_logic::DictionaryValue();
+  int32 flow_type;
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-	  if (rows[0] != NULL)
-		basic->SetBigInteger(L"rid", atoll(rows[0]));
-	  if (rows[1] != NULL)
-		basic->SetBigInteger(L"uid", atoll(rows[1]));
-	  if (rows[2] != NULL)
-		basic->SetReal(L"amount", atoll(rows[2]));
-	  if (rows[3] != NULL)
-		basic->SetBigInteger(L"depositTime", atoll(rows[3]));
+    if (rows[0] != NULL)
+    basic->SetBigInteger(L"rid", atoll(rows[0]));
+    if (rows[1] != NULL)
+    basic->SetBigInteger(L"uid", atoll(rows[1]));
+    if (rows[2] != NULL)
+    basic->SetReal(L"amount", atoll(rows[2]));
+    if (rows[3] != NULL)
+    basic->SetBigInteger(L"depositTime", atoll(rows[3]));
       if (rows[4] != NULL)
-		dict->SetCharInteger(L"depositType", atoi(rows[4]));
+    dict->SetCharInteger(L"depositType", atoi(rows[4]));
       if (rows[5] != NULL)
-		dict->SetString(L"depositName", rows[5]);
+    dict->SetString(L"depositName", rows[5]);
       if (rows[6] != NULL)
-		dict->SetCharInteger(L"status", atoi(rows[6]));
-	}
+    dict->SetCharInteger(L"status", atoi(rows[6]));
+  }
   } else {
     LOG(WARNING)<<"CallCreditDetailSelect count < 0";
   }
+    dict->Remove(L"sql", &value);
 }
 
-void UserMysql::CallUserWithdrawInsertAndSelect(void* param, Value* value) {
+void UserMysql::CallUserWithdrawInsertAndSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-		int result; 
-		if (rows[0] != NULL)
-		  result = atoi(rows[0]);
-		if (result == 0) {
-		  if (rows[1] != NULL)
-		    dict->SetBigInteger(L"wid", atoll(rows[1]));
-		  if (rows[2] != NULL)
-		    dict->SetBigInteger(L"uid", atoll(rows[2]));
-		  if (rows[3] != NULL)
-		    dict->SetReal(L"amount", atof(rows[3]));
-		  if (rows[4] != NULL)
-		    dict->SetReal(L"charge", atof(rows[4]));
-		  if (rows[5] != NULL)
-		    dict->SetString(L"withdrawTime", rows[5]);
-		  if (rows[6] != NULL)
-		    dict->SetString(L"handleTime", rows[6]);
-		  if (rows[7] != NULL)
-		    dict->SetString(L"bank", rows[7]);
-		  if (rows[8] != NULL)
-		    dict->SetString(L"branchBank", rows[8]);
-		  if (rows[9] != NULL)
-		    dict->SetString(L"cardNo", rows[9]);
-		  if (rows[10] != NULL)
-		    dict->SetString(L"name", rows[10]);
-		  if (rows[11] != NULL)
-		    dict->SetString(L"comment", rows[11]);
-		  if (rows[12] != NULL) {
-			dict->SetCharInteger(L"status", atoi(rows[12]));
-		  }
-		} else
-		  dict->SetCharInteger(L"status", result);
+    int result; 
+    if (rows[0] != NULL)
+      result = atoi(rows[0]);
+    if (result == 0) {
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"wid", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"uid", atoll(rows[2]));
+      if (rows[3] != NULL)
+        dict->SetReal(L"amount", atof(rows[3]));
+      if (rows[4] != NULL)
+        dict->SetReal(L"charge", atof(rows[4]));
+      if (rows[5] != NULL)
+        dict->SetString(L"withdrawTime", rows[5]);
+      if (rows[6] != NULL)
+        dict->SetString(L"handleTime", rows[6]);
+      if (rows[7] != NULL)
+        dict->SetString(L"bank", rows[7]);
+      if (rows[8] != NULL)
+        dict->SetString(L"branchBank", rows[8]);
+      if (rows[9] != NULL)
+        dict->SetString(L"cardNo", rows[9]);
+      if (rows[10] != NULL)
+        dict->SetString(L"name", rows[10]);
+      if (rows[11] != NULL)
+        dict->SetString(L"comment", rows[11]);
+      if (rows[12] != NULL) {
+      dict->SetCharInteger(L"status", atoi(rows[12]));
+      }
+    } else
+      dict->SetCharInteger(L"status", result);
     }
   } else {
     LOG(WARNING)<<"CallUserWithdrawInsertAndSelect count < 0";
   }
+    dict->Remove(L"sql", &value);
 }
 
-void UserMysql::CallUserWithdrawListSelect(void* param, Value* value) {
+void UserMysql::CallUserWithdrawListSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* info = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* info = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-    ListValue* list = new ListValue();
+    base_logic::ListValue* list = new base_logic::ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-      DicValue* dict = new DicValue();
-	  if (rows[0] != NULL)
-	    dict->SetBigInteger(L"wid", atoll(rows[0]));
-	  if (rows[1] != NULL)
-	    dict->SetBigInteger(L"uid", atoll(rows[1]));
-	  if (rows[2] != NULL)
-	    dict->SetReal(L"amount", atof(rows[2]));
-	  if (rows[3] != NULL)
-	    dict->SetReal(L"charge", atof(rows[3]));
-	  if (rows[4] != NULL)
-	    dict->SetString(L"withdrawTime", rows[4]);
-	  if (rows[5] != NULL)
-	    dict->SetString(L"handleTime", rows[5]);
-	  if (rows[6] != NULL)
-	    dict->SetString(L"bank", rows[6]);
-	  if (rows[7] != NULL)
-	    dict->SetString(L"branchBank", rows[7]);
-	  if (rows[8] != NULL)
-	    dict->SetString(L"cardNo", rows[8]);
-	  if (rows[9] != NULL)
-	    dict->SetString(L"name", rows[9]);
-	  if (rows[10] != NULL)
-	    dict->SetString(L"comment", rows[10]);
-	  if (rows[11] != NULL)
-	    dict->SetCharInteger(L"status", atoi(rows[11]));
+      base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+    if (rows[0] != NULL)
+      dict->SetBigInteger(L"wid", atoll(rows[0]));
+    if (rows[1] != NULL)
+      dict->SetBigInteger(L"uid", atoll(rows[1]));
+    if (rows[2] != NULL)
+      dict->SetReal(L"amount", atof(rows[2]));
+    if (rows[3] != NULL)
+      dict->SetReal(L"charge", atof(rows[3]));
+    if (rows[4] != NULL)
+      dict->SetString(L"withdrawTime", rows[4]);
+    if (rows[5] != NULL)
+      dict->SetString(L"handleTime", rows[5]);
+    if (rows[6] != NULL)
+      dict->SetString(L"bank", rows[6]);
+    if (rows[7] != NULL)
+      dict->SetString(L"branchBank", rows[7]);
+    if (rows[8] != NULL)
+      dict->SetString(L"cardNo", rows[8]);
+    if (rows[9] != NULL)
+      dict->SetString(L"name", rows[9]);
+    if (rows[10] != NULL)
+      dict->SetString(L"comment", rows[10]);
+    if (rows[11] != NULL)
+      dict->SetCharInteger(L"status", atoi(rows[11]));
       list->Append(dict); 
     }
     info->Set("withdrawList", list);
   } else {
     LOG(WARNING)<<"CallUserWithdrawListSelect count < 0";
   }
+    info->Remove(L"sql", &value);
 }
 
-	/*void UserMysql::CallCreditDetailSelect(void* param, Value* value) {
+  /*void UserMysql::CallCreditDetailSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
-	DicValue* basic = new DicValue();
-	int32 flow_type;
+  base_logic::DictionaryValue* basic = new base_logic::DictionaryValue();
+  int32 flow_type;
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
-	  if (rows[0] != NULL)
-		badic->SetBigInteger(L"rid", atoll(rows[0]));
-	  if (rows[1] != NULL)
-		basic->SetBigInteger(L"uid", atoll(rows[1]));
-	  if (rows[2] != NULL)
-		basic->SetReal(L"amount", atoll(rows[2]));
-	  if (rows[3] != NULL)
-		basic->SetBigInteger(L"depositTime", atoll(rows[3]));
+    if (rows[0] != NULL)
+    badic->SetBigInteger(L"rid", atoll(rows[0]));
+    if (rows[1] != NULL)
+    basic->SetBigInteger(L"uid", atoll(rows[1]));
+    if (rows[2] != NULL)
+    basic->SetReal(L"amount", atoll(rows[2]));
+    if (rows[3] != NULL)
+    basic->SetBigInteger(L"depositTime", atoll(rows[3]));
       if (rows[4] != NULL)
-		dict->SetCharInteger(L"depositType", atoi(rows[4]));
+    dict->SetCharInteger(L"depositType", atoi(rows[4]));
       if (rows[5] != NULL)
-		dict->SetString(L"depositName", rows[5]);
+    dict->SetString(L"depositName", rows[5]);
       if (rows[6] != NULL)
-		dict->SetCharInteger(L"status", atoi(rows[6]));
-	}
+    dict->SetCharInteger(L"status", atoi(rows[6]));
+  }
   } else {
     LOG(WARNING)<<"CallCreditDetailSelect count < 0";
   }
   }*/
-	
-void UserMysql::CallRechargeInfoInsertAndSelect(void* param, Value* value) {
+  
+void UserMysql::CallRechargeInfoInsertAndSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
     (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
-      	dict->SetString(L"rid", rows[0]);
+        dict->SetBigInteger(L"rid", atoll(rows[0]));
       }
     }
   } else {
     LOG(WARNING)<<"CallRechargeInfoInsertAndSelect count < 0";
   }
+    dict->Remove(L"sql", &value);
 }
 
-void UserMysql::CallChangeRechargeStatusAndSelect(void* param, Value* value) {
+void UserMysql::CallChangeRechargeStatusAndSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
     (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
-  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  base_logic::DictionaryValue* dict = reinterpret_cast<base_logic::DictionaryValue*>(value);
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
-      	dict->SetBigInteger(L"returnCode", atoll(rows[0]));
+        dict->SetBigInteger(L"returnCode", atoll(rows[0]));
       }
       if (rows[1] != NULL) {
-      	dict->SetReal(L"balance", atof(rows[1]));
+        dict->SetReal(L"balance", atof(rows[1]));
       }
       if (rows[2] != NULL) {
-      	dict->SetBigInteger(L"uid", atoll(rows[2]));
+        dict->SetBigInteger(L"uid", atoll(rows[2]));
       }
     }
   } else {
     LOG(WARNING)<<"CallChangeRechargeStatusAndSelect count < 0";
   }
+    dict->Remove(L"sql", &value);
 }
 
 } // namespace user

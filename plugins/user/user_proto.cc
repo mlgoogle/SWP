@@ -15,6 +15,28 @@
 #include "pub/util/util.h"
 
 namespace user {
+
+namespace net_request {
+
+int32 Heartbeat::set_http_packet(base_logic::DictionaryValue* value) {
+  int32 err = 0;
+  bool r = false;
+  int64 uid;
+  do {
+    if (value != NULL) {
+      r = value->GetBigInteger(L"uid_", &uid);
+      if (r)
+        set_uid(uid);
+      LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "Heartbeat set_http_packet error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  return err;
+}
+
 int32 UserInfo::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
@@ -193,7 +215,7 @@ int32 UnbindBankcard::set_http_packet(base_logic::DictionaryValue* value) {
       if (r)
         set_bankcard_id(bankcard_id);
       LOG_IF(ERROR, !r) << "UnbindBankcard::bankcard_id_ parse error";
-      r = value->GetString(L"vCode", &verify_code);
+      /*r = value->GetString(L"vCode", &verify_code);
       if (r)
         set_verify_code(verify_code);
       LOG_IF(ERROR, !r) << "UnbindBankcard::verify_code_ parse error";
@@ -204,7 +226,7 @@ int32 UnbindBankcard::set_http_packet(base_logic::DictionaryValue* value) {
       r = value->GetString(L"vToken", &verify_token);
       if (r)
         set_verify_token(verify_token);
-      LOG_IF(ERROR, !r) << "UnbindBankcard::verify_token_ parse error";
+        LOG_IF(ERROR, !r) << "UnbindBankcard::verify_token_ parse error";*/
     } else {
       LOG(ERROR)<< "UnbindBankcard set_http_packet error";
       err = JSON_FORMAT_ERR;
@@ -291,7 +313,7 @@ int32 CreditList::set_http_packet(base_logic::DictionaryValue* value) {
   return err;
 }
 	
-int32 CreditDetail::set_http_packet(base_logic::DictionaryValue* value) {
+  /*int32 CreditDetail::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
   int64 uid;
@@ -313,7 +335,7 @@ int32 CreditDetail::set_http_packet(base_logic::DictionaryValue* value) {
     }
   }while (0);
   return err;
-}
+  }*/
 	
 int32 UserWithdraw::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
@@ -441,7 +463,7 @@ int32 ChangeUserInfo::set_http_packet(base_logic::DictionaryValue* value) {
   return err;
 }
 
-int32 WxPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
+int32 WXPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
   int64 uid;
@@ -452,17 +474,17 @@ int32 WxPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
       r = value->GetBigInteger(L"uid", &uid);
       if (r)
         set_uid(uid);
-      LOG_IF(ERROR, !r) << "WxPlaceOrder::uid_ parse error";
+      LOG_IF(ERROR, !r) << "WXPlaceOrder::uid_ parse error";
       r = value->GetString(L"title", &title);
       if (r)
         set_title(title);
-      LOG_IF(ERROR, !r) << "WxPlaceOrder::title_ parse error";
+      LOG_IF(ERROR, !r) << "WXPlaceOrder::title_ parse error";
       r = value->GetReal(L"price", &price);
       if (r)
         set_price(price);
-      LOG_IF(ERROR, !r) << "WxPlaceOrder::price_ parse error";
+      LOG_IF(ERROR, !r) << "WXPlaceOrder::price_ parse error";
     } else {
-      LOG(ERROR)<< "WxPlaceOrder set_http_packet error";
+      LOG(ERROR)<< "WXPlaceOrder set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -491,7 +513,7 @@ int32 WXPayClient::set_http_packet(base_logic::DictionaryValue* value) {
         set_pay_result(pay_result);
       LOG_IF(ERROR, !r) << "WXPayClient::pay_result_ parse error";
     } else {
-      LOG(ERROR)<< "WxPlaceOrder set_http_packet error";
+      LOG(ERROR)<< "WXPlaceOrder set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -502,7 +524,12 @@ int32 WXPayClient::set_http_packet(base_logic::DictionaryValue* value) {
 int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
+  std::string err_str;
   std::string xml_str;
+  std::string appid;
+  std::string mch_id;
+  int64 total_fee;
+  std::string transaction_id; 
   do {
     if (value != NULL) {
       r = value->GetString(L"wxpay_result_", &xml_str);
@@ -513,12 +540,14 @@ int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
             base_logic::ValueSerializer::Create(base_logic::IMPL_XML,
                                                 &xml_str);
         int32 err = 0;
-        DicValue* xml_value = (DicValue*) deserializer->(&err, &err_str);
+        DicValue* xml_value = (DicValue*) deserializer->Deserialize(&err, &err_str);
         if (xml_value != NULL) {
-          xml_value->GetString(L"appid", &appid);
-          xml_value->GetString(L"mch_id", &mch_id);
-          appid_ = util::GetWxpayXmlValue(appid);
-          mch_id_ = util::GetWxpayXmlValue(mch_id);
+          r = xml_value->GetString(L"appid", &appid);
+          if (r)
+            set_appid(util::GetWxpayXmlValue(appid));
+          r = xml_value->GetString(L"mch_id", &mch_id);
+          if (r)
+            set_mch_id(util::GetWxpayXmlValue(mch_id));
           std::string return_code;
           xml_value->GetString(L"return_code", &return_code);
           //通信成功标识
@@ -527,33 +556,39 @@ int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
             xml_value->GetString(L"result_code", &result_code);
 
             //订单总金额
-            xml_value->GetBigInteger(L"total_fee", &total_fee);
+            r = xml_value->GetBigInteger(L"total_fee", &total_fee);
+            if (r)
+              set_total_fee(total_fee);
             //支付总金额
-            xml_value->GetString(L"transaction_id", &transaction_id);
-            transaction_id_ = util::GetWxpayXmlValue(transaction_id);
+            r = xml_value->GetString(L"transaction_id", &transaction_id);
+            if (r)
+              set_transaction_id(util::GetWxpayXmlValue(transaction_id));
             //本平台订单号
             std::string out_trade_no;
-            xml_value->GetString(L"out_trade_no", &out_trade_no);
-            int npos1 = out_trade_no.find("<![CDATA[");
-            int npos2 = out_trade_no.find("]]>");
-            out_trade_no = out_trade_no.substr(npos1 + 9,
+            r = xml_value->GetString(L"out_trade_no", &out_trade_no);
+            if (r) {
+              int npos1 = out_trade_no.find("<![CDATA[");
+              int npos2 = out_trade_no.find("]]>");
+              out_trade_no = out_trade_no.substr(npos1 + 9,
                                                npos2 - npos1 - 9 - 6);
-            recharge_id_ = atol(out_trade_no.c_str());
+              set_recharge_id(atol(out_trade_no.c_str()));
+            }
             //支付成功标识
             if (result_code.find("SUCCESS") != std::string::npos) {
-              pay_result_ = 1;
+              set_pay_result(1);
             } else {
-              pay_result_ = -1;
+              set_pay_result(-1);
             }
           }
         } else {
-          LOG(ERROR)<< "WxPlaceOrder xml  set_http_packet error";
+          LOG(ERROR)<< "WXPlaceOrder xml  set_http_packet error";
         }
         base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
+                                                      deserializer);
       }
 
     } else {
-      LOG(ERROR)<< "WxPlaceOrder json set_http_packet error";
+      LOG(ERROR)<< "WXPlaceOrder json set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -561,9 +596,38 @@ int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
   return err;
 }
 
-int32 SMSCodeLogin::set_http_packet(base_logic::DictionaryValue* value) {
+int32 UnionpayPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
-  /*bool r = false;
+  bool r = false;
+  int64 uid;
+  std::string title;
+  double price;
+  do {
+    if (value != NULL) {
+      r = value->GetBigInteger(L"uid", &uid);
+      if (r)
+        set_uid(uid);
+      LOG_IF(ERROR, !r) << "UnionpayPlaceOrder::uid_ parse error";
+      r = value->GetString(L"title", &title);
+      if (r)
+        set_title(title);
+      LOG_IF(ERROR, !r) << "UnionpayPlaceOrder::title_ parse error";
+      r = value->GetReal(L"price", &price);
+      if (r)
+        set_price(price);
+      LOG_IF(ERROR, !r) << "UnionpayPlaceOrder::price_ parse error";
+    } else {
+      LOG(ERROR)<< "UnionpayPlaceOrder set_http_packet error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  return err;
+}
+
+  /*int32 SMSCodeLogin::set_http_packet(base_logic::DictionaryValue* value) {
+  int32 err = 0;
+  bool r = false;
   int64 timestamp;
   int64 verify_code;
   int64 user_type;
@@ -590,28 +654,9 @@ int32 SMSCodeLogin::set_http_packet(base_logic::DictionaryValue* value) {
       err = JSON_FORMAT_ERR;
       break;
     }
-    }while (0);*/
+    }while (0);
   return err;
-}
-
-int32 Heartbeat::set_http_packet(base_logic::DictionaryValue* value) {
-  int32 err = 0;
-  bool r = false;
-  int64 uid;
-  do {
-    if (value != NULL) {
-      r = value->GetBigInteger(L"uid_", &uid);
-      if (r)
-        set_uid(uid);
-      LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
-    } else {
-      LOG(ERROR)<< "Heartbeat set_http_packet error";
-      err = JSON_FORMAT_ERR;
-      break;
-    }
-  }while (0);
-  return err;
-}
+}*/
 
 int32 DeviceToken::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
@@ -637,7 +682,7 @@ int32 DeviceToken::set_http_packet(base_logic::DictionaryValue* value) {
   return err;
 }
 
-int32 UserCash::set_http_packet(base_logic::DictionaryValue* value) {
+  /*int32 UserCash::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
   int64 uid;
@@ -654,11 +699,11 @@ int32 UserCash::set_http_packet(base_logic::DictionaryValue* value) {
     }
   }while (0);
   return err;
-}
+  }*/
 
-int32 CheckSMSCode::set_http_packet(base_logic::DictionaryValue* value) {
+  /*int32 CheckSMSCode::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
-  /*bool r = false;
+  bool r = false;
   do {
     if (value != NULL) {
       r = value->GetBigInteger(L"timestamp_", &timestamp);
@@ -676,9 +721,10 @@ int32 CheckSMSCode::set_http_packet(base_logic::DictionaryValue* value) {
       err = JSON_FORMAT_ERR;
       break;
     }
-    }while (0);*/
+    }while (0);
   return err;
-}
+  }*/
+} // namespace net_request
 
 }  // namespace user
 

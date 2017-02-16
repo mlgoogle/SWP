@@ -136,6 +136,15 @@ class SomeUtils {
 #define send_message(socket, packet) \
   logic::SendUtils::GetInstance()->SendMessage(socket, packet, __FILE__, __LINE__)\
 
+#define send_error(socket, type, opcode, error_code) \
+  do { \
+    struct PacketControl packet_control; \
+    MAKE_HEAD(packet_control, opcode, type, 0, 0, 0); \
+    DicValue dic; \
+    dic.SetInteger(L"errorCode", error_code); \
+    packet_control.body_ = &dic; \
+    send_message(socket, &packet_control); \
+  } while(0)
 
 #define closelockconnect(socket) \
     shutdown(socket, SHUT_RDWR);

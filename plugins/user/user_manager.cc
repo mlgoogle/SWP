@@ -41,8 +41,8 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
   UserInterface* interface = UserInterface::GetInstance();
   LOG(INFO)<< "AssignPacket opcode" << (int)packet->operate_code;
   switch (packet->operate_code) {
-    case PACKET_HEART_REQ: {
-      interface->OnHeartPacket(socket, packet);
+    case HEARTBEAT_REQ: {
+      interface->OnHeartbeat(socket, packet);
       break;
     }
     case USER_INFO_REQ: {
@@ -124,6 +124,18 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->OnWXPayServerResponse(socket, packet);
       break;
     }
+    case UNIONPAY_PLACE_ORDER_REQ: {
+      interface->OnUnionpayPlaceOrder(socket, packet);
+      break;
+    }
+    case UNIONPAY_CLIENT_REQ: {
+      interface->OnWXPayClientResponse(socket, packet);
+      break;
+    }
+    case UNIONPAY_SERVER_REQ: {
+      interface->OnWXPayServerResponse(socket, packet);
+      break;
+    }
 		/*case CHANGE_USER_INFO_REQ: {
 	  interface->OnChangeUserInfo(socket, packet);
 	  break;
@@ -150,7 +162,7 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 
 int32 UserManager::CheckHeartLoss() {
   UserInterface* interface = UserInterface::GetInstance();
-  //  interface->CheckHeartLoss();
+  interface->CheckHeartLoss();
   return 0;
 }
 

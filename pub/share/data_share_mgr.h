@@ -21,7 +21,7 @@ __attribute__((visibility("default")))
   static DataShareMgr* GetInstance();
   void AddUser(UserInfo* user);
   void DelUser(int64 uid);
-  void UserHeart(int64 uid);
+  void Heartbeat(int64 uid);
   UserInfo* GetUser(int64 uid);
 
   int32 AddDeviceToken(int64 uid, std::string token);  //0-新增 1-更新 -1-未修改
@@ -37,9 +37,9 @@ __attribute__((visibility("default")))
   void SetImgToken(std::string token, int64 time);
   void GetImgToken(std::string*token, int64* time);
   void InitShareType();
-  void InitTourismShare(ListValue* list);
-  void InitSkillShare(ListValue* list);
-  void InitShareType(ListValue* list);
+  void InitTourismShare(base_logic::ListValue* list);
+  void InitSkillShare(base_logic::ListValue* list);
+  void InitShareType(base_logic::ListValue* list);
   void ClearShareTourismMap();
   void ClearShareSkillMap();
   int32 QueryRecommendShare(int64 id, int64 count, int64 type, DicValue* info);
