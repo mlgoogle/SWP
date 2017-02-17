@@ -15,9 +15,7 @@
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
 
-LIB_DIR = ../../../../../library/mylib
-
-PUB_DIR = ../../../pub
+LIB_DIR = ../../../../library/mylib
 
 GTEST_DIR = $(LIB_DIR)/third_party/gtest
 
@@ -28,19 +26,23 @@ THIRD_PATH = $(LIB_DIR)/public
 
 CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 
+PUB_DIR = ../../../pub
+
+PUB_INCLUDE = ../../..
+
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
-CPPFLAGS += -isystem $(GTEST_DIR)/include -D_DEBUG
+CPPFLAGS += -isystem $(GTEST_DIR)/include -D_DEBUG -DFCGI_STD
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g  -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = test_create_xueqiu
+TESTS = test_packetstream
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -49,17 +51,23 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 
 USER_HEADERS =  /usr/include/mysql/*.h \
 				/usr/local/freetds/include/*.h \
+				$(PUB_INCLUDE)/*\
 				$(THIRD_PATH)/*/*.h \
                 $(USER_DIR)/*/*.h \
                 $(CUSTOM_THIRD_PATH)/hiredis/*.h \
                 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(THIRD_PATH)\
+				-I/usr/local/lib\
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
+				-I$(PUB_INCLUDE)\
+				-I$(PUB_DIR)\
+				
+				
 
 
 # House-keeping build targets.
@@ -98,9 +106,18 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-test_create_xueqiu.o : ./test_create_xueqiu.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./test_create_xueqiu.cc $(INCLUDE_PATHS)
+packetstream.o : ./packetstream.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./packetstream.cc $(INCLUDE_PATHS)
 
-test_create_xueqiu : test_create_xueqiu.o gtest_main.a  $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
+fcgimodule.o : $(PUB_DIR)/fcgimodule/fcgimodule.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c  $(PUB_DIR)/fcgimodule/fcgimodule.cc $(INCLUDE_PATHS)
+
+packet_processing.o : $(PUB_DIR)/net/packet_processing.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c  $(PUB_DIR)/net/packet_processing.cc $(INCLUDE_PATHS)
+	
+core_interface.o : $(THIRD_PATH)/comm/core_interface.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c  $(THIRD_PATH)/comm/core_interface.cc $(INCLUDE_PATHS)
+	
+test_packetstream : packetstream.o fcgimodule.o core_interface.o packet_processing.o gtest_main.a  $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient  -lfcgi++ \
 	$^ -o $@
