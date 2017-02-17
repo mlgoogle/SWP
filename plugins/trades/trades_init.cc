@@ -40,9 +40,12 @@ static handler_t OnTradesConnect(struct server *srv, int fd, void *data,
 
 static handler_t OnTradesMessage(struct server *srv, int fd, void *data,
                                  int len) {
-  trades_logic::Tradeslogic::GetInstance()->OnTradesMessage(srv, fd, data,
+  bool r = trades_logic::Tradeslogic::GetInstance()->OnTradesMessage(srv, fd, data,
                                                                   len);
-  return HANDLER_GO_ON;
+  if (r)
+    return HANDLER_GO_ON;
+  else
+    return HANDLER_FINISHED;
 }
 
 static handler_t OnTradesClose(struct server *srv, int fd) {

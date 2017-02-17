@@ -40,9 +40,12 @@ static handler_t OnQuotationsConnect(struct server *srv, int fd, void *data,
 
 static handler_t OnQuotationsMessage(struct server *srv, int fd, void *data,
                                      int len) {
-  quatations_logic::Quotationslogic::GetInstance()->OnQuotationsMessage(srv, fd,
+  bool r = quatations_logic::Quotationslogic::GetInstance()->OnQuotationsMessage(srv, fd,
                                                                     data, len);
-  return HANDLER_GO_ON;
+  if (r)
+    return HANDLER_GO_ON;
+  else
+    return HANDLER_FINISHED;
 }
 
 static handler_t OnQuotationsClose(struct server *srv, int fd) {

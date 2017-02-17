@@ -48,11 +48,15 @@ private:
 
   bool OnOpenPosition(struct server* srv, int socket, struct PacketHead* packet);
 
+  bool OnCurrentPosition(struct server* srv, int socket, struct PacketHead* packet);
+
   bool OnQutations(struct server* srv, int socket,
                                     struct PacketHead *packet);
 
 private:
   bool Init();
+
+  void Test();
 private:
   trades_logic::TradesDB*  trades_db_;
 };

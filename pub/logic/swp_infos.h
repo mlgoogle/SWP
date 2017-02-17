@@ -34,7 +34,18 @@ class Quotations {
     }
   }
 
-  static bool cmp(const Quotations& t_info, const Quotations& r_info);
+
+  static bool before(const Quotations& t_info, const Quotations& r_info){
+    return Data::before(t_info.data_, r_info.data_);
+  }
+
+  static bool after(const Quotations& t_info, const Quotations& r_info){
+    return Data::after(t_info.data_, r_info.data_);
+  }
+
+  static bool cmp(const Quotations& t_info, const Quotations& r_info){
+    return Data::after(t_info.data_, r_info.data_);
+  }
 
   void set_platform_name(const std::string& platform) {
     data_->platform_name_ = platform;
@@ -166,6 +177,14 @@ class Quotations {
     double change_;
     double pchg_;
     int64 current_unix_time_;
+
+    static bool before(const Data* t_info, const Data* r_info){
+      return t_info->current_unix_time_ <= r_info->current_unix_time_;
+    }
+
+    static bool after(const Data* t_info, const Data* r_info){
+      return t_info->current_unix_time_ > r_info->current_unix_time_;
+    }
 
     void AddRef() {
       __sync_fetch_and_add(&refcount_, 1);

@@ -31,9 +31,6 @@ Quotations& Quotations::operator =(const Quotations& quotations) {
   return (*this);
 }
 
-bool Quotations::cmp(const Quotations& t_info, const Quotations& r_info) {
-  return t_info.current_unix_time() > r_info.current_unix_time();
-}
 
 void Quotations::ValueDeserialize(std::string& str) {
   int32 error_code;
