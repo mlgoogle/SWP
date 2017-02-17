@@ -10,15 +10,16 @@
 
 # Where to find user code.
 
-LIB_DIR = ./../../../library
+LIB_DIR = ./../../../mylib
 USER_DIR = ./../../pub
 SO_DIR = ./../../bin/plugins
 
-THIRD_PATH = $(LIB_DIR)/mylib/public
+THIRD_PATH = $(LIB_DIR)/public
 
-CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
+CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 
-LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
+#LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
+LINK_PATHS = -L./ -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
 CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG\
@@ -38,14 +39,14 @@ CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 PLUGIN = $(SO_DIR)/quotations/quotations.so
 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
-				-I$(LIB_DIR)/BasicCore \
+				-I$(LIB_DIR)/basic \
 				-I$(THIRD_PATH)\
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
-				-I$(LIB_DIR)/mylib/base\
+				-I$(LIB_DIR)/base\
 				-I../\
 
 

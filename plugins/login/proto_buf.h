@@ -6,7 +6,6 @@
 #define PUB_NET_PROTO_BUF_H_
 
 #include <stdio.h>
-#include "login/typedef.h"
 
 #pragma pack(push)
 #pragma pack (1)
@@ -26,7 +25,7 @@ struct BufHead {
   int32 reserved;
 };
 
-class PacketHead {
+/*class PacketHead {
  public:
   PacketHead();
   PacketHead(char* packet);
@@ -80,7 +79,7 @@ class PacketErr:public PacketHead {
   inline int32 error() { return error_; }
  private:
   int32 error_;
-};
+  };*/
 
 #pragma pack(pop)
 #endif  // PUB_NET_PROTO_BUF_H_

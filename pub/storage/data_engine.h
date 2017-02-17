@@ -35,10 +35,11 @@ namespace base_logic {
 
 class DataEngine {
  public:
+    DataEngine() {}
+    virtual ~DataEngine() {}
     static DataEngine* Create(int32 type);
     void Init(config::FileConfig* config);
     void Dest();
-    virtual ~DataEngine() {}
  public:
     virtual void Release() = 0;
     virtual void InitParam(std::list<base::ConnAddr>& addrlist) = 0;
