@@ -55,6 +55,8 @@ private:
 
 private:
   bool Init();
+
+  void Test();
 private:
   trades_logic::TradesDB*  trades_db_;
 };

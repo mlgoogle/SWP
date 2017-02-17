@@ -48,6 +48,8 @@ private:
 
   bool OnTimeLine(struct server* srv, int socket, struct PacketHead *packet);
 
+  bool OnKChartTimeLine(struct server* srv, int socket, struct PacketHead *packet);
+
   void Test();
 
 private:

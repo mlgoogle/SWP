@@ -20,8 +20,8 @@ typedef std::map<int64, GOODS_TRADES_MAP> PLAT_TRADES_MAP;
 typedef std::map<int64, TRADES_MAP> USER_TRADES_MAP;
 
 //当前报价
-typedef std::map<std::string, swp_logic::Quotations> QUOTATIONS_MAP;
-typedef std::map<int64, QUOTATIONS_MAP> QUOTATIONS_ALL_MAP;
+typedef std::map<std::string, swp_logic::Quotations> QUOTATIONS_MAP; /*key fx_sjpycnh*/
+typedef std::map<int64, QUOTATIONS_MAP> QUOTATIONS_ALL_MAP;/*类别 外汇，股票，期货*/
 
 //定时渠道
 typedef std::map<int64, trades_logic::TimeTask> TASKINFO_MAP;
@@ -53,13 +53,16 @@ class TradesManager {
 
   void InitGoodsData();
 
-  void SendGoods(const int socket, const int32 pid);
+  void SendGoods(const int socket, const int64 session, const int32 pid,
+                 const int32 start, const int32 count);
 
-  void SendCurrentPosition(const int socket, const int64 uid);
+  void SendCurrentPosition(const int socket, const int64 session,
+                           const int64 uid,const int32 pos, const int32 count = 10);
 
-  void OnTimePosition(const int socket, trades_logic::TradesPosition& trades_position);
+  void OnTimePosition(const int socket, const int64 session,
+                      trades_logic::TradesPosition& trades_position);
 
-  void OpenPosition(trades_logic::TradesPosition& trades_position);
+  int32 OpenPosition(trades_logic::TradesPosition& trades_position);
 
   void SetTimePosition(trades_logic::TradesPosition& trades_position);
 
@@ -69,6 +72,8 @@ class TradesManager {
 
   void GetQuotationsNoLock(const std::string& key,
                            swp_logic::Quotations& quotation);
+
+  void GetAllQuotatiosnNoLock(const int64 type ,QUOTATIONS_MAP& quotations);
 
   bool DistributionTask();
  private:

@@ -4,6 +4,7 @@
 #include "trades/schduler_engine.h"
 #include "trades/trades_proto_buf.h"
 #include "trades/operator_code.h"
+#include "trades/errno.h"
 #include "net/comm_head.h"
 #include "net/packet_processing.h"
 #include "logic/logic_unit.h"
@@ -61,9 +62,14 @@ void TradesManager::SetGoodsUnit(trades_logic::GoodsInfo& goods_info) {
 }
 
 void TradesManager::OnTimePosition(
-    const int socket, trades_logic::TradesPosition& trades_position) {
+    const int socket, const int64 session,
+    trades_logic::TradesPosition& trades_position) {
   net_reply::TradesPosition r_trades_position;
-  OpenPosition(trades_position);
+  int32 result  = OpenPosition(trades_position);
+  if (result != 0){
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_CHARGE);
+    return;
+  }
   r_trades_position.set_position_id(trades_position.position_id());
   r_trades_position.set_id(trades_position.uid());
   r_trades_position.set_code_id(trades_position.code_id());
@@ -87,12 +93,12 @@ void TradesManager::OnTimePosition(
       trades_position.close_position_time()
           - trades_position.open_position_time());
   struct PacketControl packet_control;
-  MAKE_HEAD(packet_control, S_TRADES_OPEN_POSITION, TRADES_TYPE, 0, 0, 0);
+  MAKE_HEAD(packet_control, S_TRADES_OPEN_POSITION, TRADES_TYPE, 0, session, 0);
   packet_control.body_ = r_trades_position.get();
   send_message(socket, &packet_control);
 }
 
-void TradesManager::OpenPosition(
+int32 TradesManager::OpenPosition(
     trades_logic::TradesPosition& trades_position) {
   bool r = false;
   trades_logic::GoodsInfo good_info;
@@ -105,41 +111,50 @@ void TradesManager::OpenPosition(
         base::MapGet<PLAT_GOODS_MAP, PLAT_GOODS_MAP::iterator, int32, GOODS_MAP>(
             trades_cache_->trades_map_, 1002, goods_map);
     if (!r)
-      return;
+      return NO_HAVE_PLATFORM;
 
     r = base::MapGet<GOODS_MAP, GOODS_MAP::iterator, int32,
         trades_logic::GoodsInfo>(goods_map, trades_position.code_id(),
                                  good_info);
     if (!r)
-      return;
+      return NO_HAVE_TRADES_GOODS;
   }
   swp_logic::Quotations quotation;
   trades_position.set_open_position_time(time(NULL));
   trades_position.set_close_position_time(
-      trades_position.open_position_time() + ONE_MINUTE);
+      trades_position.open_position_time() + good_info.interval());
   //获取当前行情
   std::string key = good_info.platform_name() + ":" + good_info.exchange_name()
       + ":" + good_info.symbol();
 
   quotation.set_type(FORXE_TYPE);
   GetQuotations(key, quotation);
+  if(quotation.current_unix_time()==0)
+    return NO_HAVE_QUOTATIONS_DATA;
+  trades_position.set_goods_key(key);
   trades_position.set_symbol(good_info.symbol());
   trades_position.set_name(good_info.name());
   trades_position.set_open_price(quotation.current_price());
   trades_position.set_open_charge(good_info.open());
   trades_position.set_close_type(TIMER_TYPE);
   //建仓总成本
-  double open_all_cost = good_info.deposit() * trades_position.amount();
+  double open_all_cost = good_info.deposit() * trades_position.amount()
+      * quotation.current_price(); /**/
   //建仓成本
   double open_const = open_all_cost * (1 - trades_position.open_charge());
 
   //写入数据库 扣除用户费用及记录收入总金额
   trades_position.set_open_cost(open_const);
+  trades_position.set_open_all_cost(open_all_cost);
 
   r = trades_db_->OnOpenPosition(trades_position);
   //放入定时队列中
-  if (r)
+  if (r){
     SetTimePosition(trades_position);
+    return 0;
+  }else{
+    return NO_HAVE_CHARGE;
+  }
 }
 
 bool TradesManager::DistributionTask() {
@@ -147,24 +162,36 @@ bool TradesManager::DistributionTask() {
   time_t current_time = time(NULL);
   trades_cache_->task_temp_list_.sort(trades_logic::TimeTask::cmp);
   std::list<trades_logic::TradesPosition> result_list;
+  QUOTATIONS_MAP quotations;
+  GetAllQuotatiosnNoLock(FORXE_TYPE, quotations);
+  if (quotations.size() <= 0)
+    return false;
+
+  LOG_DEBUG2("===============>task_temp_list_ %d",trades_cache_->task_temp_list_.size());
   //获取当前行情
   while (trades_cache_->task_temp_list_.size() > 0) {
     trades_logic::TimeTask time_task = trades_cache_->task_temp_list_.front();
-    trades_cache_->task_temp_list_.pop_front();
     if (current_time >= time_task.end_time()) {
+      trades_cache_->task_temp_list_.pop_front();
       //时间到平仓
       TRADES_MAP::iterator trades_map_it = trades_cache_->all_trades_map_.find(
           time_task.id());
       trades_logic::TradesPosition trades_position = trades_map_it->second;
-      double close_price = 7.123;
+      QUOTATIONS_MAP::iterator quotations_map_it = quotations.find(
+          trades_position.goods_key());
+      swp_logic::Quotations& quotation = quotations_map_it->second;
+      double close_price = quotation.current_price();
       trades_position.check_buy_sell(close_price);
+      trades_position.c_gross_profit();
+
       //写入结果数据库中,批量写入
       result_list.push_back(trades_position);
     } else {
       break;
     }
   }
-  //批量写入数据库，做金额操作
+  if (result_list.size() > 0)
+    trades_db_->OnClosePosition(&result_list);
   return true;
 }
 
@@ -182,6 +209,12 @@ void TradesManager::SetTimePosition(
   trades_cache_->all_trades_map_[trades_position.position_id()] =
       trades_position;
 
+  trades_logic::TimeTask time_task;
+  time_task.set_end_time(trades_position.close_position_time());
+  time_task.set_id(trades_position.position_id());
+  time_task.set_start_time(trades_position.open_position_time());
+  trades_cache_->task_temp_list_.push_back(time_task);
+
   USER_TRADES_MAP::iterator user_trades_it = trades_cache_->user_trades_map_
       .find(trades_position.uid());
   if (user_trades_it != trades_cache_->user_trades_map_.end())
@@ -189,6 +222,13 @@ void TradesManager::SetTimePosition(
 
   user_trades_map[trades_position.position_id()] = trades_position;
   trades_cache_->user_trades_map_[trades_position.uid()] = user_trades_map;
+}
+
+void TradesManager::GetAllQuotatiosnNoLock(const int64 type,
+                                           QUOTATIONS_MAP& quotations) {
+  QUOTATIONS_ALL_MAP::iterator quotations_all_it = trades_cache_
+      ->quotations_map_.find(type);
+  quotations = quotations_all_it->second;
 }
 
 void TradesManager::GetQuotationsNoLock(const std::string& key,
@@ -220,20 +260,36 @@ void TradesManager::SetQuotations(swp_logic::Quotations& quotation) {
   trades_cache_->quotations_map_[quotation.type()] = quotations;
 }
 
-void TradesManager::SendCurrentPosition(const int socket, const int64 uid) {
+void TradesManager::SendCurrentPosition(const int socket, const int64 session,
+                                        const int64 uid,const int32 pos, const int32 count) {
   base_logic::RLockGd lk(lock_);
   TRADES_MAP trades_map;
   int32 base_num = 5;
+  base_num = base_num < count ? base_num : count;
+  int32 t_start = 0;
+  int32 t_count = 0;
+
   bool r = base::MapGet<USER_TRADES_MAP, USER_TRADES_MAP::iterator, int64,
       TRADES_MAP>(trades_cache_->user_trades_map_, uid, trades_map);
   if (!r)
     return;
 
   net_reply::AllTradesPosition net_trades_positions;
-  //遍历发送
+  std::list <trades_logic::TradesPosition> trades_list;
+
   for (TRADES_MAP::iterator it = trades_map.begin(); it != trades_map.end();
-      it++) {
+      it++){
     trades_logic::TradesPosition trades_position = it->second;
+    trades_list.push_back(trades_position);
+  }
+  //trades_list.sort(trades_logic::TradesPosition:)
+  //遍历发送
+  while (trades_list.size() > 0 && t_count < count)  {
+    trades_logic::TradesPosition trades_position = trades_list.front();
+    trades_list.pop_front();
+    t_start++;
+    if (t_start < pos)
+      continue;
     net_reply::TradesPosition* net_trades_position =
         new net_reply::TradesPosition;
     net_trades_position->set_amount(trades_position.amount());
@@ -260,11 +316,12 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 uid) {
     net_trades_position->set_stop(trades_position.stop());
     net_trades_position->set_symbol(trades_position.symbol());
     net_trades_positions.set_unit(net_trades_position->get());
+    t_count++;
     if (net_trades_positions.Size() % base_num == 0
         && net_trades_positions.Size() != 0) {
       struct PacketControl packet_control;
-      MAKE_HEAD(packet_control, S_TRADES_CURRENT_POSITION, TRADES_TYPE, 0, 0,
-                0);
+      MAKE_HEAD(packet_control, S_TRADES_CURRENT_POSITION, TRADES_TYPE, 0,
+                session, 0);
       packet_control.body_ = net_trades_positions.get();
       send_message(socket, &packet_control);
       net_trades_positions.Reset();
@@ -273,26 +330,53 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 uid) {
 
   if (net_trades_positions.Size() > 0) {
     struct PacketControl packet_control;
-    MAKE_HEAD(packet_control, S_TRADES_CURRENT_POSITION, TRADES_TYPE, 0, 0, 0);
+    MAKE_HEAD(packet_control, S_TRADES_CURRENT_POSITION, TRADES_TYPE, 0,
+              session, 0);
     packet_control.body_ = net_trades_positions.get();
     send_message(socket, &packet_control);
   }
 }
 
-void TradesManager::SendGoods(const int socket, const int32 pid) {
+void TradesManager::SendGoods(const int socket, const int64 session,
+                              const int32 pid, const int32 start,
+                              const int32 count) {
   base_logic::WLockGd lk(lock_);
   GOODS_MAP goods_map;
   int32 base_num = 5;
+  base_num = base_num < count ? base_num : count;
+  int32 t_start = 0;
+  int32 t_count = 0;
+
   bool r = base::MapGet<PLAT_GOODS_MAP, PLAT_GOODS_MAP::iterator, int32,
       GOODS_MAP>(trades_cache_->trades_map_, pid, goods_map);
-  if (!r)
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_GOODS_DATA);
     return;
+  }
 
-  net_reply::Goods net_reply_goods;
-  //遍历发送
+  //排序
+  std::list<trades_logic::GoodsInfo> goods_list;
   for (GOODS_MAP::iterator it = goods_map.begin(); it != goods_map.end();
       it++) {
     trades_logic::GoodsInfo goods = it->second;
+    goods_list.push_back(goods);
+  }
+
+  if (goods_list.size()<=0){
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_GOODS_DATA);
+    return;
+  }
+
+  goods_list.sort(trades_logic::GoodsInfo::before);
+
+  net_reply::Goods net_reply_goods;
+  //遍历发送
+  while (goods_list.size() > 0 && t_count < count) {
+    trades_logic::GoodsInfo goods = goods_list.front();
+    goods_list.pop_front();
+    t_start++;
+    if (t_start < start)
+      continue;
     net_reply::GoodsUnit* goods_unit = new net_reply::GoodsUnit;
     goods_unit->set_exchange_name(goods.exchange_name());
     goods_unit->set_amount(goods.amount());
@@ -314,9 +398,11 @@ void TradesManager::SendGoods(const int socket, const int32 pid) {
     goods_unit->set_show_symbol(goods.show_symbol());
     goods_unit->set_id(goods.id());
     net_reply_goods.set_unit(goods_unit->get());
+    t_count++;
     if (net_reply_goods.Size() % base_num == 0 && net_reply_goods.Size() != 0) {
       struct PacketControl packet_control;
-      MAKE_HEAD(packet_control, S_TRADES_GOODS_DATA, TRADES_TYPE, 0, 0, 0);
+      MAKE_HEAD(packet_control, S_TRADES_GOODS_DATA, TRADES_TYPE, 0, session,
+                0);
       packet_control.body_ = net_reply_goods.get();
       send_message(socket, &packet_control);
       net_reply_goods.Reset();
@@ -325,7 +411,7 @@ void TradesManager::SendGoods(const int socket, const int32 pid) {
 
   if (net_reply_goods.Size() > 0) {
     struct PacketControl packet_control;
-    MAKE_HEAD(packet_control, S_TRADES_GOODS_DATA, TRADES_TYPE, 0, 0, 0);
+    MAKE_HEAD(packet_control, S_TRADES_GOODS_DATA, TRADES_TYPE, 0, session, 0);
     packet_control.body_ = net_reply_goods.get();
     send_message(socket, &packet_control);
   }

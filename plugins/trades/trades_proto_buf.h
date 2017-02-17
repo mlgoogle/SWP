@@ -226,7 +226,9 @@ class CurrentPosition {
  public:
   CurrentPosition()
       : id_(NULL),
-        token_(NULL) {
+        token_(NULL),
+        start_(NULL),
+        count_(NULL){
   }
 
   ~CurrentPosition() {
@@ -238,9 +240,18 @@ class CurrentPosition {
       delete token_;
       token_ = NULL;
     }
+    if (start_){
+      delete start_;
+      start_ = NULL;
+    }
+
+    if (count_){
+      delete count_;
+      count_ = NULL;
+    }
   }
 
-  void set_http_packet(base_logic::DictionaryValue* value);
+  bool set_http_packet(base_logic::DictionaryValue* value);
 
   void set_id(const int64 id) {
     id_ = new base_logic::FundamentalValue(id);
@@ -248,6 +259,14 @@ class CurrentPosition {
 
   void set_token(const std::string& token) {
     token_ = new base_logic::StringValue(token);
+  }
+
+  void set_start(const int32 start){
+    start_ = new base_logic::FundamentalValue(start);
+  }
+
+  void set_count(const int32 count){
+    count_ = new base_logic::FundamentalValue(count);
   }
 
   const int64 id() const {
@@ -262,9 +281,23 @@ class CurrentPosition {
     return token;
   }
 
+  const int32 start() const {
+    int32 start = 0;
+    start_->GetAsInteger(&start);
+    return start;
+  }
+
+  const int32 count() const {
+    int32 count = 0;
+    count_->GetAsInteger(&count);
+    return count;
+  }
+
  public:
   base_logic::FundamentalValue* id_;
   base_logic::StringValue* token_;
+  base_logic::FundamentalValue* start_;
+  base_logic::FundamentalValue* count_;
 };
 
 class OpenPosition {
@@ -320,7 +353,7 @@ class OpenPosition {
     }
   }
 
-  void set_http_packet(base_logic::DictionaryValue* value);
+  bool set_http_packet(base_logic::DictionaryValue* value);
 
   void set_id(const int64 id) {
     id_ = new base_logic::FundamentalValue(id);
@@ -428,7 +461,9 @@ class Goods {
   Goods()
       : id_(NULL),
         token_(NULL),
-        pid_(NULL) {
+        pid_(NULL),
+        start_(NULL),
+        count_(NULL){
 
   }
 
@@ -445,9 +480,17 @@ class Goods {
       delete pid_;
       pid_ = NULL;
     }
+    if (start_) {
+      delete start_;
+      start_ = NULL;
+    }
+    if (count_) {
+      delete count_;
+      count_ = NULL;
+    }
   }
 
-  void set_http_packet(base_logic::DictionaryValue* value);
+  bool set_http_packet(base_logic::DictionaryValue* value);
 
   void set_id(const int64 id) {
     id_ = new base_logic::FundamentalValue(id);
@@ -459,6 +502,14 @@ class Goods {
 
   void set_pid(const int32 pid) {
     pid_ = new base_logic::FundamentalValue(pid);
+  }
+
+  void set_start(const int32 start) {
+    start_ = new base_logic::FundamentalValue(start);
+  }
+
+  void set_count(const int32 count) {
+    count_ = new base_logic::FundamentalValue(count);
   }
 
   const int64 id() const {
@@ -479,10 +530,24 @@ class Goods {
     return pid;
   }
 
+  const int32 start() const {
+    int32 start = 0;
+    start_->GetAsInteger(&start);
+    return start;
+  }
+
+  const int32 count() const {
+    int32 count = 0;
+    count_->GetAsInteger(&count);
+    return count;
+  }
+
  public:
   base_logic::FundamentalValue* id_;
   base_logic::StringValue* token_;
   base_logic::FundamentalValue* pid_;
+  base_logic::FundamentalValue* start_;
+  base_logic::FundamentalValue* count_;
 };
 
 }

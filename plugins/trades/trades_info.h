@@ -49,7 +49,8 @@ class TimeTask {
 
   static bool cmp(const trades_logic::TimeTask& t_time_task,
                   const trades_logic::TimeTask& r_time_task) {
-    return t_time_task.end_time() <= t_time_task.end_time();
+    //return t_time_task.end_time() <= t_time_task.end_time();
+    return Data::cmp(t_time_task.data_, r_time_task.data_);
   }
 
   void set_id(const int64 id) {
@@ -95,6 +96,12 @@ class TimeTask {
     int64 id_;
     int64 start_time_;
     int64 end_time_;
+
+    static bool cmp(const Data* t_data,
+                      const Data* r_data) {
+      return t_data->end_time_ < r_data->end_time_;
+    }
+
     void AddRef() {
       __sync_fetch_and_add(&refcount_, 1);
     }
@@ -110,6 +117,7 @@ class TimeTask {
   Data* data_;
 };
 
+
 class TradesPosition {
  public:
   TradesPosition();
@@ -123,8 +131,11 @@ class TradesPosition {
     }
   }
 
+  void ValueSerialization(base_logic::DictionaryValue* dict);
+
   bool check_buy_sell(double close_price) {
     int32 buy_sell = 0;
+    data_->close_price_ = close_price;
     double difference = close_price - data_->open_price_;
     if (difference > 0)
       buy_sell = BUY_TYPE;
@@ -135,6 +146,12 @@ class TradesPosition {
     else
       data_->result_ = (buy_sell == data_->buy_sell_) ? true : false;
     return data_->result_;
+  }
+
+
+  void c_gross_profit() {
+    if (data_->close_type_)
+      data_->gross_profit_ = data_->open_cost_;
   }
 
   void create_position_id() {
@@ -221,6 +238,17 @@ class TradesPosition {
     data_->name_ = name;
   }
 
+  void set_result(const bool result) {
+    data_->result_ = result;
+  }
+
+  void set_gross_profit(const double gross_profit) {
+    data_->gross_profit_ = gross_profit;
+  }
+
+  void set_goods_key(const std::string& goods_key) {
+    data_->goods_key_ = goods_key;
+  }
   const int64 uid() const {
     return data_->uid_;
   }
@@ -285,8 +313,16 @@ class TradesPosition {
     return data_->stop_;
   }
 
+  const double gross_profit() const {
+    return data_->gross_profit_;
+  }
+
   const double deferred() const {
     return data_->deferred_;
+  }
+
+  const bool result() const {
+    return data_->result_;
   }
 
   const std::string& code() const {
@@ -299,6 +335,10 @@ class TradesPosition {
 
   const std::string& name() const {
     return data_->name_;
+  }
+
+  const std::string& goods_key() const {
+    return data_->goods_key_;
   }
 
  private:
@@ -316,6 +356,7 @@ class TradesPosition {
           amount_(0),
           open_position_time_(0),
           close_position_time_(0),
+          gross_profit_(0.0),
           open_price_(0.0),
           open_cost_(0.0),
           open_all_cost_(0.0),
@@ -329,7 +370,7 @@ class TradesPosition {
    public:
     int64 uid_;
     int64 position_id_;
-    int32 code_id_; //属于哪个商品
+    int32 code_id_;  //属于哪个商品
     int32 buy_sell_;  // 1,买 2,卖
     int32 close_type_;
     bool is_deferred_;
@@ -337,6 +378,7 @@ class TradesPosition {
     int64 amount_;
     int64 open_position_time_;
     int64 close_position_time_;
+    double gross_profit_;
     double open_price_;
     double open_cost_;
     double open_all_cost_;
@@ -348,6 +390,7 @@ class TradesPosition {
     std::string code_;
     std::string symbol_;
     std::string name_;
+    std::string goods_key_;
 
     void AddRef() {
       __sync_fetch_and_add(&refcount_, 1);
@@ -363,6 +406,7 @@ class TradesPosition {
   Data* data_;
 };
 
+
 class GoodsInfo {
  public:
   GoodsInfo();
@@ -375,6 +419,10 @@ class GoodsInfo {
     if (data_ != NULL) {
       data_->Release();
     }
+  }
+
+  static bool before(const GoodsInfo& t_goodsinfo, const GoodsInfo& r_goodsinfo){
+    return Data::before(t_goodsinfo.data_, r_goodsinfo.data_);
   }
 
   const int32 id() const {
@@ -457,6 +505,10 @@ class GoodsInfo {
     return data_->sort_;
   }
 
+  const int64 interval() const {
+    return data_->interval_;
+  }
+
   void set_id(const int32 id) {
     data_->id_ = id;
   }
@@ -534,7 +586,11 @@ class GoodsInfo {
   }
 
   void set_status(const int8 status) {
-    data_->status_;
+    data_->status_ = status;
+  }
+
+  void set_interval(const int64 interval) {
+    data_->interval_ = interval;
   }
 
   void ValueSerialization(base_logic::DictionaryValue* dict);
@@ -545,6 +601,7 @@ class GoodsInfo {
         : refcount_(1),
           id_(0),
           plaform_id_(0),
+          interval_(0),
           amount_(0.0),
           profit_(0.0),
           deposit_(0.0),
@@ -577,10 +634,16 @@ class GoodsInfo {
     double deferred_;
     int64 max_;
     int64 min_;
+    int64 interval_;
     std::string exchange_name_;
     std::string platform_name_;
     std::string show_symbol_;
     std::string show_name_;
+
+    static bool before(const Data* t_data,
+                      const Data* r_data) {
+      return t_data->id_ < r_data->id_;
+    }
 
     void AddRef() {
       __sync_fetch_and_add(&refcount_, 1);

@@ -108,6 +108,14 @@ void GoodsInfo::ValueSerialization(base_logic::DictionaryValue* dict) {
 
   dict->GetString(L"show_name",&data_->show_name_);
   dict->GetString(L"show_symbol", &data_->show_symbol_);
+  if(data_->unit_ == "1MIN")
+    data_->interval_ = ONE_MINUTE;
+  else if (data_->unit_ == "5MIN")
+    data_->interval_ = FIVE_MINUTE;
+  else if (data_->unit_ == "30MIN")
+    data_->interval_ = HALF_HOUR;
+  else if (data_->unit_ == "60MIN")
+    data_->interval_ = ONE_HOUR;
 
 }
 

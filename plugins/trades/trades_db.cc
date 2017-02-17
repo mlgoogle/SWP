@@ -46,8 +46,9 @@ bool TradesDB::OnOpenPosition(trades_logic::TradesPosition& trades) {
       + "," + base::BasicUtil::StringUtil::DoubleToString(trades.limit()) + ","
       + base::BasicUtil::StringUtil::DoubleToString(trades.stop()) + ","
       + base::BasicUtil::StringUtil::DoubleToString(trades.deferred()) + ",\'"
-      + trades.code() + "\',\'" + trades.symbol() + "\',\'" + trades.name() + "\');";
+      + trades.symbol() + "\',\'" + trades.name() + "\');";
 
+  LOG_DEBUG2("%s",sql.c_str());
   dict->SetString(L"sql", sql);
   r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict),
                               CallOnOpenPosition);
@@ -61,6 +62,34 @@ bool TradesDB::OnOpenPosition(trades_logic::TradesPosition& trades) {
     delete dict;
     dict = NULL;
   }
+  return r;
+}
+
+bool TradesDB::OnClosePosition(std::list<trades_logic::TradesPosition>* list) {
+  bool r = false;
+  //call actuals.proc_ClosePosition(3773378865228031997,7.33,12.1,-1)
+  base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+  std::string sql;
+  base_logic::DictionaryValue *info_value = NULL;
+  int32 result = 0;
+  while ((*list).size() > 0) {
+    trades_logic::TradesPosition trades_position = (*list).front();
+    (*list).pop_front();
+    int32 int_result = 0;
+    int_result = trades_position.result() ? 1 : -1;
+    sql += "call proc_ClosePosition("
+        + base::BasicUtil::StringUtil::Int64ToString(trades_position.uid()) + ","
+        + base::BasicUtil::StringUtil::Int64ToString(trades_position.position_id()) + ","
+        + base::BasicUtil::StringUtil::DoubleToString(trades_position.open_cost())+","
+        + base::BasicUtil::StringUtil::DoubleToString(trades_position.close_price())+","
+        + base::BasicUtil::StringUtil::DoubleToString(trades_position.gross_profit())+","
+        + base::BasicUtil::StringUtil::Int64ToString(int_result) + ");";
+  }
+
+  dict->SetString(L"sql", sql);
+  r = mysql_engine_->WriteData(0, (base_logic::Value *) (dict));
+  if (!r)
+    return false;
   return r;
 }
 
