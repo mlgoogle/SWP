@@ -5,6 +5,7 @@
 #include "trades/schduler_engine.h"
 #include "trades/trades_proto_buf.h"
 #include "trades/trades_info.h"
+#include "trades/errno.h"
 #include "basic/native_library.h"
 #include "trades/operator_code.h"
 #include "config/config.h"
@@ -16,6 +17,8 @@
 
 #define DEFAULT_CONFIG_PATH "./plugins/trades/trades_config.xml"
 
+#define TIME_DISTRIBUTION_TASK 10000
+
 namespace trades_logic {
 
 Tradeslogic *Tradeslogic::instance_ = NULL;
@@ -26,9 +29,72 @@ Tradeslogic::Tradeslogic() {
 }
 
 Tradeslogic::~Tradeslogic() {
-  if (trades_db_){delete trades_db_; trades_db_ = NULL;}
+  if (trades_db_) {
+    delete trades_db_;
+    trades_db_ = NULL;
+  }
   trades_logic::TradesEngine::FreeSchdulerManager();
   trades_logic::TradesEngine::FreeTradesEngine();
+}
+
+void Tradeslogic::Test() {
+  std::list<trades_logic::TimeTask> list;
+  trades_logic::TimeTask time_task1;
+  time_task1.set_id(1);
+  time_task1.set_start_time(time(NULL));
+  time_task1.set_end_time(1486995277);
+  list.push_back(time_task1);
+
+  trades_logic::TimeTask time_task2;
+  time_task2.set_id(2);
+  time_task2.set_start_time(time(NULL));
+  time_task2.set_end_time(1486995177);
+  list.push_back(time_task2);
+
+  trades_logic::TimeTask time_task3;
+  time_task3.set_id(3);
+  time_task3.set_start_time(time(NULL));
+  time_task3.set_end_time(1486998140);
+  list.push_back(time_task3);
+
+  trades_logic::TimeTask time_task4;
+  time_task4.set_id(4);
+  time_task4.set_start_time(time(NULL));
+  time_task4.set_end_time(1486997938);
+  list.push_back(time_task4);
+
+  trades_logic::TimeTask time_task5;
+  time_task5.set_id(5);
+  time_task5.set_start_time(time(NULL));
+  time_task5.set_end_time(1486998253);
+  list.push_back(time_task5);
+
+  trades_logic::TimeTask time_task6;
+  time_task6.set_id(6);
+  time_task6.set_start_time(time(NULL));
+  time_task6.set_end_time(1486998344);
+  list.push_back(time_task6);
+
+  trades_logic::TimeTask time_task7;
+  time_task7.set_id(7);
+  time_task7.set_start_time(time(NULL));
+  time_task7.set_end_time(1486998014);
+  list.push_back(time_task7);
+
+  trades_logic::TimeTask time_task8;
+  time_task8.set_id(8);
+  time_task8.set_start_time(time(NULL));
+  time_task8.set_end_time(1486998321);
+  list.push_back(time_task8);
+  list.sort(trades_logic::TimeTask::cmp);
+
+  while (list.size() > 0) {
+    trades_logic::TimeTask time_task = list.front();
+    list.pop_front();
+    LOG_DEBUG2("id %lld, end_time %lld",time_task.id(),time_task.end_time());
+  }
+
+  LOG_DEBUG("id , end_time ");
 }
 
 bool Tradeslogic::Init() {
@@ -62,7 +128,7 @@ bool Tradeslogic::OnTradesConnect(struct server *srv, const int socket) {
 }
 
 bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
-                                        const void *msg, const int len) {
+                                  const void *msg, const int len) {
   bool r = false;
   struct PacketHead *packet = NULL;
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
@@ -73,14 +139,22 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
     return false;
   }
 
-
   switch (packet->operate_code) {
-    case R_TRADES_GOODS_DATA:{
+    case R_TRADES_GOODS_DATA: {
       OnPlatformsGoods(srv, socket, packet);
       break;
     }
-  default:
-    break;
+    case R_TRADES_OPEN_POSITION: {
+      OnOpenPosition(srv, socket, packet);
+      break;
+    }
+
+    case R_TRADES_CURRENT_POSITION: {
+      OnCurrentPosition(srv, socket, packet);
+      break;
+    }
+    default:
+      break;
   }
   return true;
 }
@@ -118,7 +192,7 @@ bool Tradeslogic::OnBroadcastMessage(struct server *srv, const int socket,
 }
 
 bool Tradeslogic::OnQutations(struct server* srv, int socket,
-                                  struct PacketHead *packet) {
+                              struct PacketHead *packet) {
   trades_logic::net_other::RealTime real_time;
   swp_logic::Quotations quotations;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
@@ -135,8 +209,7 @@ bool Tradeslogic::OnQutations(struct server* srv, int socket,
   quotations.set_platform_name(real_time.platform_name());
   quotations.set_symbol(real_time.symbol());
   quotations.set_type(real_time.type());
-  trades_logic::TradesEngine::GetSchdulerManager()->SetQuotations(
-      quotations);
+  trades_logic::TradesEngine::GetSchdulerManager()->SetQuotations(quotations);
   return true;
 }
 
@@ -146,6 +219,7 @@ bool Tradeslogic::OnBroadcastClose(struct server *srv, const int socket) {
 
 bool Tradeslogic::OnIniTimer(struct server *srv) {
   if (srv->add_time_task != NULL) {
+    srv->add_time_task(srv, "trades", TIME_DISTRIBUTION_TASK, 3, -1);
   }
   return true;
 }
@@ -153,26 +227,40 @@ bool Tradeslogic::OnIniTimer(struct server *srv) {
 bool Tradeslogic::OnTimeout(struct server *srv, char *id, int opcode,
                             int time) {
   switch (opcode) {
-  default:
-    break;
+    case TIME_DISTRIBUTION_TASK: {
+      trades_logic::TradesEngine::GetSchdulerManager()->DistributionTask();
+      break;
+    }
+    default:
+      break;
   }
   return true;
 }
 
 bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
-                                  struct PacketHead *packet) {
+                                   struct PacketHead *packet) {
   trades_logic::net_request::Goods goods;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  goods.set_http_packet(packet_control->body_);
-  trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(socket, goods.pid());
+  bool r = goods.set_http_packet(packet_control->body_);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
+  trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(
+      socket, packet->session_id, goods.pid(), goods.start(), goods.count());
   return true;
 
 }
 
-bool Tradeslogic::OnOpenPosition(struct server* srv, int socket, struct PacketHead* packet) {
+bool Tradeslogic::OnOpenPosition(struct server* srv, int socket,
+                                 struct PacketHead* packet) {
   trades_logic::net_request::OpenPosition open_position;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  open_position.set_http_packet(packet_control->body_);
+  bool r = open_position.set_http_packet(packet_control->body_);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
   trades_logic::TradesPosition trades_position;
   trades_position.create_position_id();
   trades_position.set_uid(open_position.id());
@@ -180,8 +268,24 @@ bool Tradeslogic::OnOpenPosition(struct server* srv, int socket, struct PacketHe
   trades_position.set_close_type(trades_logic::TIMER_TYPE);
   trades_position.set_amount(open_position.amount());
   trades_position.set_code_id(open_position.code_id());
+  trades_logic::TradesEngine::GetSchdulerManager()->OnTimePosition(
+      socket, packet->session_id, trades_position);
   return true;
 }
 
+bool Tradeslogic::OnCurrentPosition(struct server* srv, int socket,
+                                    struct PacketHead* packet) {
+  trades_logic::net_request::CurrentPosition current_position;
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  bool r = current_position.set_http_packet(packet_control->body_);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
+  trades_logic::TradesEngine::GetSchdulerManager()->SendCurrentPosition(
+      socket, packet->session_id, current_position.id(),
+      current_position.start(), current_position.count());
+  return true;
+}
 
-} // namespace trades_logic
+}  // namespace trades_logic

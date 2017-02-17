@@ -8,7 +8,7 @@ namespace quotations_logic {
 
 namespace net_other {
 
-void RealTime::set_http_packet(base_logic::DictionaryValue* value) {
+bool RealTime::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   double change = 0.0;
   double pchg = 0.0;
@@ -22,6 +22,9 @@ void RealTime::set_http_packet(base_logic::DictionaryValue* value) {
   std::string exchange_name;
   std::string platform_name;
   std::string symbol;
+
+  if (value == NULL)
+    return false;
 
   r = value->GetReal(L"change", &change);
   if (r)
@@ -70,13 +73,15 @@ void RealTime::set_http_packet(base_logic::DictionaryValue* value) {
   r = value->GetString(L"symbol", &symbol);
   if (r)
     set_symbol(symbol);
+
+  return true;
 }
 
 }
 
 namespace net_request {
 
-void TimeLine::set_htt_packet(base_logic::DictionaryValue* value) {
+bool TimeLine::set_htt_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   int64 id = 0;
   std::string token;
@@ -85,74 +90,183 @@ void TimeLine::set_htt_packet(base_logic::DictionaryValue* value) {
   std::string symbol;
   int64 temp_atype;
   int32 atype;
+  int64 big_count;
+  int32 count;
+  int64 start_time;
+
+  if (value == NULL)
+    return false;
 
   r = value->GetBigInteger(L"id", &id);
   if (r)
     set_id(id);
+  else
+    return false;
 
   r = value->GetString(L"token", &token);
   if (r)
     set_token(token);
+  else
+    return false;
 
   r = value->GetString(L"exchangeName", &exchange_name);
   if (r)
     set_exchange_name(exchange_name);
+  else
+    return false;
 
   r = value->GetString(L"platformName", &platform_name);
   if (r)
     set_platform_name(platform_name);
+  else
+    return false;
 
   r = value->GetString(L"symbol", &symbol);
   if (r)
     set_symbol(symbol);
-
-  r = value->GetBigInteger(L"aType", &temp_atype);
-   if (r) {
-     atype = temp_atype;
-     set_atype(atype);
-   }
-}
-
-void RealTimeUnit::set_htt_packet(base_logic::DictionaryValue* value) {
-  bool r = false;
-  std::string exchange_name;
-  std::string platform_name;
-  std::string symbol;
-  int64 temp_atype;
-  int32 atype;
-  r = value->GetString(L"exchangeName", &exchange_name);
-  if (r)
-    set_exchange_name(exchange_name);
-
-  r = value->GetString(L"platformName", &platform_name);
-  if (r)
-    set_platform_name(platform_name);
-
-  r = value->GetString(L"symbol", &symbol);
-  if (r)
-    set_symbol(symbol);
+  else
+    return false;
 
   r = value->GetBigInteger(L"aType", &temp_atype);
   if (r) {
     atype = temp_atype;
     set_atype(atype);
-  }
+  } else
+    return false;
+
+  r = value->GetBigInteger(L"startTime", &start_time);
+  if (!r)
+    start_time = time(NULL);
+  set_start_time(start_time);
+
+  r = value->GetBigInteger(L"count", &big_count);
+  if (r)
+    count = big_count;
+  else
+    count = 50;
+  set_count(count);
+
+  return true;
 }
 
-void RealTime::set_htt_packet(base_logic::DictionaryValue* value) {
+bool RealTimeUnit::set_htt_packet(base_logic::DictionaryValue* value) {
+  bool r = false;
+  std::string exchange_name;
+  std::string platform_name;
+  std::string symbol;
+  int64 temp_atype;
+  int32 atype;
+
+  if (value == NULL)
+    return false;
+
+  r = value->GetString(L"exchangeName", &exchange_name);
+  if (r)
+    set_exchange_name(exchange_name);
+  else
+    return false;
+
+  r = value->GetString(L"platformName", &platform_name);
+  if (r)
+    set_platform_name(platform_name);
+  else
+    return false;
+
+  r = value->GetString(L"symbol", &symbol);
+  if (r)
+    set_symbol(symbol);
+  else
+    return false;
+
+  r = value->GetBigInteger(L"aType", &temp_atype);
+  if (r) {
+    atype = temp_atype;
+    set_atype(atype);
+  } else
+    return false;
+
+  return true;
+}
+
+bool KChartTimeLine::set_http_packet(base_logic::DictionaryValue* value) {
+  bool r = false;
+  std::string exchange_name;
+  std::string platform_name;
+  std::string symbol;
+  int64 temp_atype;
+  int32 atype;
+  int64 big_count;
+  int32 count;
+  int64 start_time;
+
+  if (value == NULL)
+    return false;
+
+  r = value->GetString(L"exchangeName", &exchange_name);
+  if (r)
+    set_exchange_name(exchange_name);
+  else
+    return false;
+
+  r = value->GetString(L"platformName", &platform_name);
+  if (r)
+    set_platform_name(platform_name);
+  else
+    return false;
+
+  r = value->GetString(L"symbol", &symbol);
+  if (r)
+    set_symbol(symbol);
+  else
+    return false;
+
+  r = value->GetBigInteger(L"chartType", &temp_atype);
+  if (r) {
+    atype = temp_atype;
+    set_chart_type(atype);
+  } else
+    return false;
+
+  r = value->GetBigInteger(L"startTime", &start_time);
+  if (!r)
+    start_time = time(NULL);
+  set_start_time(start_time);
+
+  r = value->GetBigInteger(L"count", &big_count);
+  if (r)
+    count = big_count;
+  else
+    count = 50;
+  set_count(count);
+
+  return true;
+}
+
+bool RealTime::set_htt_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   int64 id = 0;
   std::string token;
 
+  if (value == NULL)
+    return false;
+
   r = value->GetBigInteger(L"id", &id);
   if (r)
     set_id(id);
+  else
+    return false;
 
   r = value->GetString(L"token", &token);
   if (r)
     set_token(token);
+  else
+    return false;
 
   r = value->GetList(L"symbolInfos", &symbol_infos_);
+  if (!r)
+    return false;
+
+  return true;
 }
 
 }

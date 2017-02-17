@@ -107,6 +107,16 @@ class PacketProsess {
   static void DeletePacket(const void *packet_stream, int32 len,
                            struct PacketHead *packet_head);
 
+  static bool StrPacket(const int16 t_operate_code,
+                        const int8 t_is_zip_encrypt, const int8 t_type,
+                        int64 t_session_id, const int32 t_reserved,
+                        const std::string& body_stream, void **packet_stream,
+                        int32 *packet_stream_length);
+
+  static std::string StrUnpacket(const void *packet_stream, int32 len);
+
+  //列表发送清除内存
+
  private:
   static uint64 CompressionStream(const uint8 *unzip_data, uint64 unzip_len,
                                   uint8 **zip_data);  //  压缩

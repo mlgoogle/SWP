@@ -17,6 +17,7 @@ enum PACKET_TYPE {
   LOGIN_TYPE = 3,
   QUOTATIONS_TYPE = 4,
   TRADES_TYPE = 5,
+  HISTORY_TYPE = 6,
 };
 
 enum PRS {

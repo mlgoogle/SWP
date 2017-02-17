@@ -17,6 +17,8 @@
 
 LIB_DIR = ../../../../../library/mylib
 
+PUB_DIR = ../../../pub
+
 GTEST_DIR = $(LIB_DIR)/third_party/gtest
 
 # Where to find user code.

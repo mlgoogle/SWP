@@ -73,15 +73,53 @@ void RealTime::set_http_packet(base_logic::DictionaryValue* value) {
 
 }
 
-
 namespace net_request {
 
-void OpenPosition::set_http_packet(base_logic::DictionaryValue* value) {
+bool CurrentPosition::set_http_packet(base_logic::DictionaryValue* value) {
+  bool r = false;
+  int64 id = 0;
+  std::string token;
+  int64 big_start = 0;
+  int32 start = 0;
+  int64 big_count = 0;
+  int32 count = 0;
+  if (value == NULL)
+    return false;
+  r = value->GetBigInteger(L"id", &id);
+  if (r)
+    set_id(id);
+  else
+    return false;
+
+  r = value->GetString(L"token", &token);
+  if (r)
+    set_token(token);
+  else
+    return false;
+
+  r = value->GetBigInteger(L"start", &big_start);
+  if (r)
+    start = big_start;
+  else
+    start = 0;
+  set_start(start);
+
+  r = value->GetBigInteger(L"count", &big_count);
+  if (r)
+    count = big_count;
+  else
+    count = 10000;
+  set_count(count);
+
+  return true;
+}
+
+bool OpenPosition::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   int64 id = 0;
   int64 big_buy_sell = 0;
   int32 buy_sell = 0;
-  double amount = 0.0;
+  int64 amount = 0;
   double price = 0.0;
   double limit = 0.0;
   double stop = 0.0;
@@ -90,29 +128,41 @@ void OpenPosition::set_http_packet(base_logic::DictionaryValue* value) {
   std::string token;
   int32 code_id = 0;
   int64 big_code_id = 0;
+
+  if (value == NULL)
+    return false;
+
   r = value->GetBigInteger(L"id", &id);
   if (r)
     set_id(id);
+  else
+    return false;
 
   r = value->GetString(L"token", &token);
   if (r)
     set_token(token);
+  else
+    return false;
 
   r = value->GetBigInteger(L"codeId", &big_code_id);
-  if (r){
+  if (r) {
     code_id = big_code_id;
     set_code_id(code_id);
-  }
+  } else
+    return false;
 
   r = value->GetBigInteger(L"buySell", &big_buy_sell);
   if (r) {
     buy_sell = big_buy_sell;
     set_buy_sell(buy_sell);
-  }
+  } else
+    return false;
 
-  r = value->GetReal(L"amount", &amount);
+  r = value->GetBigInteger(L"amount", &amount);
   if (r)
     set_amount(amount);
+  else
+    return false;
 
   r = value->GetReal(L"price", &price);
   if (r)
@@ -131,28 +181,60 @@ void OpenPosition::set_http_packet(base_logic::DictionaryValue* value) {
     deferred = big_deferred;
     set_deferred(deferred);
   }
+
+  return true;
 }
 
-void Goods::set_http_packet(base_logic::DictionaryValue* value) {
+bool Goods::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   int64 id = 0;
+  int64 big_start = 0;
+  int32 start = 0;
+  int64 big_count = 0;
+  int32 count = 0;
   std::string token;
   int64 pid = 0;
+
+  if (value == NULL)
+    return false;
+
   r = value->GetBigInteger(L"id", &id);
-  if (r) {
+  if (r)
     set_id(id);
-  }
+  else
+    return false;
 
   r = value->GetString(L"token", &token);
   if (r)
     set_token(token);
+  else
+    return false;
 
   r = value->GetBigInteger(L"pid", &pid);
   if (r) {
     int32 temp = 0;
     temp = pid;
     set_pid(temp);
+  } else
+    return false;
+
+  r = value->GetBigInteger(L"start", &big_start);
+  if (r) {
+    start = big_start;
+  } else {
+    start = 0;
   }
+  set_start(start);
+
+  r = value->GetBigInteger(L"count", &big_count);
+  if (r) {
+    count = big_count;
+  } else {
+    count = 100000;
+  }
+  set_count(count);
+
+  return true;
 }
 
 }

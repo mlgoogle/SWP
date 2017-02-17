@@ -140,7 +140,7 @@ class SomeUtils {
   do { \
     struct PacketControl packet_control; \
     MAKE_HEAD(packet_control, opcode, type, 0, 0, 0); \
-    DicValue dic; \
+    base_logic::DictionaryValue dic; \
     dic.SetInteger(L"errorCode", error_code); \
     packet_control.body_ = &dic; \
     send_message(socket, &packet_control); \

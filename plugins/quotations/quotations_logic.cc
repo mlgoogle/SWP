@@ -4,6 +4,7 @@
 #include "quotations/quotations_logic.h"
 #include "quotations/quotations_proto_buf.h"
 #include "quotations/operator_code.h"
+#include "quotations/errno.h"
 #include "quotations/schduler_engine.h"
 #include "logic/swp_infos.h"
 #include "config/config.h"
@@ -40,7 +41,7 @@ bool Quotationslogic::Init() {
   quotations_redis_ = new quotations_logic::QuotationsRedis(config);
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitRedis(
       quotations_redis_);
-  quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
+  //quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitFoxreData();
   return true;
 }
@@ -74,6 +75,7 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
 
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
     LOG_ERROR2("UnpackStream Error socket %d", socket);
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
     return false;
   }
 
@@ -84,6 +86,10 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
     }
     case R_QUOTATIONS_TIME_LINE_DATA: {
       OnTimeLine(srv, socket, packet);
+      break;
+    }
+    case R_KCHART_TIME_LINE_DATA: {
+      OnKChartTimeLine(srv, socket, packet);
       break;
     }
     default:
@@ -146,14 +152,29 @@ bool Quotationslogic::OnTimeout(struct server *srv, char *id, int opcode,
   return true;
 }
 
+bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket, struct PacketHead *packet) {
+  quotations_logic::net_request::KChartTimeLine kchar_time;
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  kchar_time.set_http_packet(packet_control->body_);
+  quotations_logic::QuotationsEngine::GetSchdulerManager()->SendKChartLine(
+      socket, packet->session_id, kchar_time.chart_type(), kchar_time.exchange_name(),
+      kchar_time.platform_name(), kchar_time.symbol(), kchar_time.start_time(),
+      kchar_time.count());
+  return true;
+}
+
 bool Quotationslogic::OnRealTime(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::RealTime real_time;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  real_time.set_htt_packet(packet_control->body_);
+  bool r = real_time.set_htt_packet(packet_control->body_);
+  if (!r){
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    return false;
+  }
   if (real_time.symbol_infos_ != NULL)
     quotations_logic::QuotationsEngine::GetSchdulerManager()->SendRealTime(
-        socket, real_time.symbol_infos_);
+        socket, packet->session_id, real_time.symbol_infos_);
   return true;
 }
 
@@ -162,11 +183,16 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
   quotations_logic::net_request::TimeLine time_line;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
 
-  time_line.set_htt_packet(packet_control->body_);
+  bool r = time_line.set_htt_packet(packet_control->body_);
+  if (!r){
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    return false;
+  }
 
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendTimeLine(
-      socket, time_line.atype(), time_line.exchange_name(),
-      time_line.platform_name(), time_line.symbol());
+      socket, packet->session_id, time_line.atype(), time_line.exchange_name(),
+      time_line.platform_name(), time_line.symbol(),time_line.start_time(),
+      time_line.count());
   return true;
 }
 
@@ -175,7 +201,11 @@ bool Quotationslogic::OnQutations(struct server* srv, int socket,
   quotations_logic::net_other::RealTime real_time;
   swp_logic::Quotations quotations;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  real_time.set_http_packet(packet_control->body_);
+  bool r = real_time.set_http_packet(packet_control->body_);
+  if (!r){
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    return false;
+  }
   quotations.set_change(real_time.change());
   quotations.set_closed_yesterday_price(real_time.closed_yesterday_price());
   quotations.set_current_price(real_time.current_price());
@@ -212,7 +242,7 @@ void Quotationslogic::Test() {
   engine->Serialize((*goodsinfos), &body_stream);
 
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendRealTime(
-      13, goodsinfos);
+      13,0, goodsinfos);
   if (goodsinfos) {
     delete goodsinfos;
     goodsinfos = NULL;

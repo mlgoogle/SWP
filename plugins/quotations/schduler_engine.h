@@ -16,12 +16,34 @@ typedef std::map<int64, QUOTATIONS_MAP> QUOTATIONS_ALL_MAP; /*股票,现货,期�
 typedef std::map<std::string, swp_logic::Quotations> LAST_QUOTATIONS_MAP;  //最近一次报价
 typedef std::map<int64, LAST_QUOTATIONS_MAP> LAST_QUOTATIONS_ALL_MAP;
 
+//正在计算的K线
+typedef std::map<std::string, swp_logic::Quotations> K_QUOTATIONS_MAP; /*KEY SYMBOL 外汇标识*/
+typedef std::map<int32, K_QUOTATIONS_MAP> K_ALL_QUOTATIONS_MAP; /*KEY 时间标识*/
+
+//K线存储
+typedef std::map<std::string,QUOTATIONS_LIST> K_HIS_QUOTATIONS_MAP; /*外汇标识*/
+typedef std::map<int32, K_HIS_QUOTATIONS_MAP> K_ALL_HIS_QUOTATIONS_MAP; /*时间标识*/
+
+
+
+
 namespace quotations_logic {
+
+enum TIMETYPE {
+  ONE_MINUTE = 60,
+  FIVE_MINUTE = 300,
+  QUARTER_MINUTE = 900,
+  HALF_HOUR = 1800,
+  ONE_HOUR = 3600
+};
+
 
 class QuotationsCache {
  public:
   QUOTATIONS_ALL_MAP quotations_map_;
   LAST_QUOTATIONS_ALL_MAP last_quotations_map_;
+  K_ALL_QUOTATIONS_MAP    current_k_all_map_;
+  K_ALL_HIS_QUOTATIONS_MAP k_history_all_map_;
 };
 
 class QuotationsManager {
@@ -33,13 +55,24 @@ class QuotationsManager {
 
   void LoginQuotationsCenter(const int socket);
 
-  void SendRealTime(const int socket, base_logic::ListValue* value);
+  void SendRealTime(const int socket, const int64 session,
+                    base_logic::ListValue* value);
 
-  void SendTimeLine(const int socket,
+  void SendKChartLine(const int socket, const int64 session,
+                      const int32 kchar_type,
+                      const std::string& exchange_name,
+                      const std::string& platform_name,
+                      const std::string& symbol,
+                      const int64 start_time,
+                      const int32 count);
+
+  void SendTimeLine(const int socket, const int64 session,
                     const int32 atype,
                     const std::string& exchange_name,
                     const std::string& platform_name,
-                    const std::string& symbol);
+                    const std::string& symbol,
+                    const int64 start_time,
+                    const int32 count);
 
   void TimeEvent(int opcode, int time);
 
@@ -51,13 +84,23 @@ class QuotationsManager {
 
   void InitRedisData(const std::string& hash_name, int32 atype);
  private:
+
+  void SetKQuotations(const std::string& key, const int32 time_symbol,
+                      swp_logic::Quotations& quotation);
+
   void SetQuotationsUnit(swp_logic::Quotations& quotation);
 
+  void SetKQuotations(swp_logic::Quotations& quotation);
+  void SetKQuotationsUnit(const int32 time_symbol, swp_logic::Quotations& quotation);
+
   void GetRealTime(const int32 atype, const std::string& symbol,
-                        swp_logic::Quotations* quotations);
+                   swp_logic::Quotations* quotations);
 
   void GetTimeLine(const int32 atype, const std::string& symbol,
-                        std::list<swp_logic::Quotations>& list);
+                   std::list<swp_logic::Quotations>& list);
+
+  void GetKChartLine(const int32 chart_type, const std::string& key,
+                     std::list<swp_logic::Quotations>& list);
 
  private:
   void Init();
