@@ -51,7 +51,9 @@
   int32 timestamp = in.Read32();                                               \
   int64 session_id = in.Read64();                                              \
   int32 reserved = in.Read32();                                                \
-  std::string body_stream = in.ReadData(data_length, temp);
+  std::string body_stream;                                                     \
+  if (data_length > 0)                                                         \
+    body_stream  = in.ReadData(data_length, temp);
 
 #define FILLPACKET()                                                          \
   (packet_control)->packet_length = packet_length;                               \
