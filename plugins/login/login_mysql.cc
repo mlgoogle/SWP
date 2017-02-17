@@ -133,7 +133,7 @@ void LoginMysql::CallRegisterInsertAndSelect(void* param, base_logic::Value* val
           break;
       }
       if (rows[1] != NULL)
-        dict->SetBigInteger(L"uid", atoll(rows[1]));
+        dict->SetBigInteger(L"id", atoll(rows[1]));
     }
   } else {
     LOG(WARNING)<< "CallRegisterInsertAndSelect count < 0";
@@ -151,7 +151,7 @@ void LoginMysql::CallUserLoginSelect(void* param, base_logic::Value* value) {
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
-        userinfo->SetBigInteger(L"uid", atoll(rows[0]));
+        userinfo->SetBigInteger(L"id", atoll(rows[0]));
       if (rows[1] != NULL)
         userinfo->SetString(L"screenName", rows[1]);
       if (rows[2] != NULL)

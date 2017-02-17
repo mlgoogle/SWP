@@ -16,6 +16,24 @@ namespace login {
 
 namespace net_request {
 
+int32 Heartbeat::set_http_packet(base_logic::DictionaryValue* value) {
+  int32 err = 0;
+  bool r = false;
+  int64 uid;
+  do {
+    if (value != NULL) {
+      r = value->GetBigInteger(L"id", &uid); if (r)
+        set_uid(uid);
+      LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "Heartbeat set_http_packet error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  return err;
+}
+
 int32 RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
@@ -54,6 +72,45 @@ int32 RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
   }while (0);
   return err;
 }
+
+  /*int32 RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
+  int32 err = 0;
+  bool r = false;
+  std::string verify_code;
+  int64 timestamp;
+  std::string verify_token;
+  std::string phone_num;
+  std::string passwd;
+  do {
+    if (value != NULL) {
+      r = value->GetString(L"vCode", &verify_code);
+      if (r)
+        set_verify_code(verify_code);
+      LOG_IF(ERROR, !r) << "RegisterAccount::verify_code_ parse error";
+      r = value->GetBigInteger(L"timestamp", &timestamp);
+      if (r)
+        set_timestamp(timestamp);
+      LOG_IF(ERROR, !r) << "RegisterAccount::timestamp_ parse error";
+      r = value->GetString(L"vToken", &verify_token);
+      if (r)
+        set_verify_token(verify_token);
+      LOG_IF(ERROR, !r) << "RegisterAccount::verify_token_ parse error";
+      r = value->GetString(L"phone", &phone_num);
+      if (r)
+        set_phone_num(phone_num);
+      LOG_IF(ERROR, !r) << "RegisterAccount::phone parse error";
+      r = value->GetString(L"pwd", &passwd);
+      if (r)
+        set_passwd(passwd);
+      LOG_IF(ERROR, !r) << "RegisterAccount::pwd parse error";
+    } else {
+      LOG(ERROR)<< "RegisterAccount Deserialize error";
+      err = JSON_FORMAT_ERR;
+      break;
+    }
+  }while (0);
+  return err;
+  }*/
 
 int32 UserLogin::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
@@ -143,7 +200,7 @@ int32 SMSCodeLogin::set_http_packet(base_logic::DictionaryValue* value) {
   int64 uid;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid_", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
@@ -229,7 +286,7 @@ int32 ObtainVerifyCode::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid_", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "ImproveData::uid_ parse error";
@@ -277,7 +334,7 @@ int32 ObtainVerifyCode::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid_", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       LOG_IF(ERROR, !r) << "VerifyPasswd::uid_ parse error";
       r = value->GetBigInteger(L"passwd_type_", &passwd_type);
       LOG_IF(ERROR, !r) << "VerifyPasswd::passwd_type_ parse error";
@@ -309,7 +366,7 @@ int32 ChangePayPasswd::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid_", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       LOG_IF(ERROR, !r) << "ChangePayPasswd::uid_ parse error";
       r = value->GetBigInteger(L"change_type_", &change_type);
       LOG_IF(ERROR, !r) << "ChangePayPasswd::change_type_ parse error";

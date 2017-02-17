@@ -62,7 +62,7 @@ int32 AccountInfo::set_http_packet(base_logic::DictionaryValue* value) {
   int64 uid;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "AccountInfo::uid_ parse error";
@@ -84,7 +84,7 @@ int32 OrderList::set_http_packet(base_logic::DictionaryValue* value) {
   int32 count;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "OrderList::uid_ parse error";
@@ -117,7 +117,7 @@ int32 OrderDetail::set_http_packet(base_logic::DictionaryValue* value) {
   int32 flow_type;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "OrderDetail::uid_ parse error";
@@ -144,7 +144,7 @@ int32 BankcardList::set_http_packet(base_logic::DictionaryValue* value) {
   int64 uid;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "BankcardList::uid_ parse error";
@@ -168,7 +168,7 @@ int32 BindBankcard::set_http_packet(base_logic::DictionaryValue* value) {
   
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "BindBankcard::uid_ parse error";
@@ -243,7 +243,7 @@ int32 ChangeDefaultBankcard::set_http_packet(base_logic::DictionaryValue* value)
   int64 bankcard_id;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "ChangeDefaultBankcard::uid_ parse error";
@@ -288,7 +288,7 @@ int32 CreditList::set_http_packet(base_logic::DictionaryValue* value) {
   int64 count;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "CreditList::uid_ parse error";
@@ -320,7 +320,7 @@ int32 CreditList::set_http_packet(base_logic::DictionaryValue* value) {
   int64 recharge_id;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "CreditDetail::uid_ parse error";
@@ -346,7 +346,7 @@ int32 UserWithdraw::set_http_packet(base_logic::DictionaryValue* value) {
   std::string passwd;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "UserWithdraw::uid_ parse error";
@@ -380,7 +380,7 @@ int32 UserWithdrawList::set_http_packet(base_logic::DictionaryValue* value) {
   int64 count;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "UserWithdrawList::uid_ parse error";
@@ -438,7 +438,7 @@ int32 ChangeUserInfo::set_http_packet(base_logic::DictionaryValue* value) {
   std::string head_url;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "ChangeUserInfo::uid_ parse error";
@@ -471,7 +471,7 @@ int32 WXPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
   double price;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "WXPlaceOrder::uid_ parse error";
@@ -500,7 +500,7 @@ int32 WXPayClient::set_http_packet(base_logic::DictionaryValue* value) {
   int64 pay_result;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "WXPayClient::uid_ parse error";
@@ -604,7 +604,7 @@ int32 UnionpayPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
   double price;
   do {
     if (value != NULL) {
-      r = value->GetBigInteger(L"uid", &uid);
+      r = value->GetBigInteger(L"id", &uid);
       if (r)
         set_uid(uid);
       LOG_IF(ERROR, !r) << "UnionpayPlaceOrder::uid_ parse error";

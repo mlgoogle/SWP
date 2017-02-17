@@ -57,26 +57,6 @@ void UserInterface::InitShareDataMgr(share::DataShareMgr* data) {
   data_share_mgr_ = data;
 }
 
-int32 UserInterface::CheckHeartLoss() {
-  int32 err = 0;
-  do {
-    data_share_mgr_->CheckHeartLoss();
-  } while (0);
-
-  return err;
-}
-  
-int32 UserInterface::OnHeartbeat(const int32 socket, PacketHead* packet) {
-  int32 err = 0;
-  do {
-    net_request::Heartbeat heartbeat;
-    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
-    heartbeat.set_http_packet(packet_recv->body_);
-    data_share_mgr_->Heartbeat(heartbeat.uid());
-  } while (0);
-  return err;
-}
-
 int32 UserInterface::OnUserInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {

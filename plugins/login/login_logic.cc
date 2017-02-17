@@ -94,12 +94,11 @@ bool Loginlogic::Init() {
     return false;
   }
   login_mysql_ = new LoginMysql(config);
-  //  InitShareData();
-  data_share_mgr_ = share::DataShareMgr::GetInstance();
+  InitShareData();
   return true;
 }
 
-	/*bool Loginlogic::InitShareData() {
+bool Loginlogic::InitShareData() {
   basic::libhandle  handle = NULL;
   handle = basic::load_native_library("./data.so");
   if (handle==NULL){
@@ -112,10 +111,9 @@ bool Loginlogic::Init() {
     LOG(ERROR) << "Can't find GetDataShareMgr\n";
     return false;
   }
-  share::DataShareMgr* data_engine_ = (*pengine)();
-  UserInterface::GetInstance()->InitShareDataMgr(data_engine_);
+  data_share_mgr_ = (*pengine)();
   return false;
-  }*/
+}
 
 Loginlogic* Loginlogic::GetInstance() {
   if (instance_ == NULL)
@@ -143,9 +141,14 @@ bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
     //    LOG_ERROR2("UnpackStream Error socket:%d", socket);
     return false;
   }
-
-  if (packet->type == LOGIN_TYPE) {
-	switch (packet->operate_code) {
+  
+  if (packet->type == LOGIN_TYPE
+      && logic::SomeUtils::VerifyToken(packet)) {
+    switch (packet->operate_code) {
+    case HEARTBEAT_REQ: {
+      OnHeartbeat(socket, packet);
+      break;
+    }
       case REGISTER_ACCOUNT_REQ: {
         OnRegisterAccount(socket, packet);
         break;
@@ -164,6 +167,17 @@ bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
   return false;
 }
 	
+int32 Loginlogic::OnHeartbeat(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    net_request::Heartbeat heartbeat;
+    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
+    heartbeat.set_http_packet(packet_recv->body_);
+    data_share_mgr_->Heartbeat(heartbeat.uid());
+  } while (0);
+  return err;
+}
+
 int32 Loginlogic::OnRegisterAccount(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
@@ -377,7 +391,7 @@ int32 Loginlogic::OnUserLoginReply(const int32 socket, PacketHead* packet) {
     packet_control.body_ = &dic;
     send_message(packet->reserved, &packet_control);
     //SendMsg(packet->reserved, packet, &dic, USER_LOGIN_RLY, err);
-    AddUser(socket, &dic, user_login.token());
+    AddUser(packet->reserved, &dic, user_login.token());
     } else {
       LOG(INFO)<< "token err here";
       send_message(packet->reserved, packet);
@@ -396,11 +410,14 @@ void Loginlogic::AddUser(int32 fd, DicValue* v, std::string token) {
     UserInfo* user = NULL;
     //游客
     user = new UserInfo();
-    user->Serialization(v);
+    base_logic::DictionaryValue* dic;
+    v->GetDictionary(L"userinfo", &dic);
+    user->Serialization(dic);
+    //    delete dic;
     user->set_is_login(true);
     user->set_socket_fd(fd);
     user->set_token(token);
-    LOG(INFO) << "adduser login :" << user->uid();
+    LOG(INFO) << "add user id:" << user->uid() << " fd:" << fd;
     data_share_mgr_->AddUser(user);
   }
 
@@ -416,11 +433,18 @@ bool Loginlogic::OnBroadcastClose(struct server *srv, const int socket) {
 }
 
 bool Loginlogic::OnInitTimer(struct server *srv) {
+  srv->add_time_task(srv, "login", CONNECT_CKECK, 15, -1);
   return true;
 }
 
 bool Loginlogic::OnTimeout(struct server *srv, char *id, int opcode,
                              int time) {
+  switch (opcode) {
+    case CONNECT_CKECK: {
+      data_share_mgr_->CheckHeartLoss();
+      break;
+    }
+  }
   return true;
 }
 

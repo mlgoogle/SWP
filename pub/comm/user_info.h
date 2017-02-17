@@ -54,7 +54,7 @@ class UserInfo {
   inline int32 heart_loss() const { return data_->heart_loss_; }
   inline int64 gender() const { return data_->gender_; }
 
-  inline void set_uid(int64 id) { data_->uid_ = id; }
+  //inline void set_uid(int64 id) { data_->uid_ = id; }
   inline void set_phone_num(std::string mob) { data_->phone_num_ = mob; }
   inline void set_nickname(std::string nm) { data_->nickname_ = nm; }
   //inline void set_passwd(std::string pwd) { data_->passwd_ = pwd; }

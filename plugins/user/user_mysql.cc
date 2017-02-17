@@ -374,7 +374,7 @@ void UserMysql::CallUserInfoSelect(void* param, base_logic::Value* value) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
       if (rows[0] != NULL)
-        dict->SetBigInteger(L"uid", atoll(rows[0]));
+        dict->SetBigInteger(L"id", atoll(rows[0]));
       if (rows[1] != NULL)
         dict->SetString(L"phone", rows[1]);
       if (rows[2] != NULL)
@@ -456,7 +456,7 @@ void UserMysql::CallOrderDetailSelect(void* param, base_logic::Value* value) {
   int32 flow_type;
   while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
     if (rows[0] != NULL)
-    basic->SetBigInteger(L"uid", atoll(rows[0]));
+    basic->SetBigInteger(L"id", atoll(rows[0]));
     if (rows[1] != NULL)
     basic->SetBigInteger(L"flowId", atoll(rows[1]));
     if (rows[2] != NULL) {
@@ -547,7 +547,7 @@ void UserMysql::CallBankcardListSelect(void* param, base_logic::Value* value) {
       if (rows[0] != NULL)
     dict->SetBigInteger(L"bid", atoll(rows[0]));
       if (rows[1] != NULL)
-    dict->SetBigInteger(L"uid", atoll(rows[1]));
+    dict->SetBigInteger(L"id", atoll(rows[1]));
       if (rows[2] != NULL)
         dict->SetString(L"bank", rows[2]);
       if (rows[3] != NULL)
@@ -576,7 +576,7 @@ void UserMysql::CallBindBankcardInsertAndSelect(void* param, base_logic::Value* 
       if (rows[0] != NULL)
     dict->SetBigInteger(L"bid", atoll(rows[0]));
       if (rows[1] != NULL)
-    dict->SetBigInteger(L"uid", atoll(rows[1]));
+    dict->SetBigInteger(L"id", atoll(rows[1]));
       if (rows[2] != NULL)
         dict->SetString(L"bank", rows[2]);
       if (rows[3] != NULL)
@@ -629,7 +629,7 @@ void UserMysql::CallCreditListSelect(void* param, base_logic::Value* value) {
       if (rows[0] != NULL)
     dict->SetBigInteger(L"rid", atoll(rows[0]));
       if (rows[1] != NULL)
-    dict->SetBigInteger(L"uid", atoll(rows[1]));
+    dict->SetBigInteger(L"id", atoll(rows[1]));
       if (rows[2] != NULL)
     dict->SetReal(L"amount", atof(rows[2]));
       if (rows[3] != NULL)
@@ -678,7 +678,7 @@ void UserMysql::CallCreditDetailSelect(void* param, base_logic::Value* value) {
     if (rows[0] != NULL)
     basic->SetBigInteger(L"rid", atoll(rows[0]));
     if (rows[1] != NULL)
-    basic->SetBigInteger(L"uid", atoll(rows[1]));
+    basic->SetBigInteger(L"id", atoll(rows[1]));
     if (rows[2] != NULL)
     basic->SetReal(L"amount", atoll(rows[2]));
     if (rows[3] != NULL)
@@ -711,7 +711,7 @@ void UserMysql::CallUserWithdrawInsertAndSelect(void* param, base_logic::Value* 
       if (rows[1] != NULL)
         dict->SetBigInteger(L"wid", atoll(rows[1]));
       if (rows[2] != NULL)
-        dict->SetBigInteger(L"uid", atoll(rows[2]));
+        dict->SetBigInteger(L"id", atoll(rows[2]));
       if (rows[3] != NULL)
         dict->SetReal(L"amount", atof(rows[3]));
       if (rows[4] != NULL)
@@ -755,7 +755,7 @@ void UserMysql::CallUserWithdrawListSelect(void* param, base_logic::Value* value
     if (rows[0] != NULL)
       dict->SetBigInteger(L"wid", atoll(rows[0]));
     if (rows[1] != NULL)
-      dict->SetBigInteger(L"uid", atoll(rows[1]));
+      dict->SetBigInteger(L"id", atoll(rows[1]));
     if (rows[2] != NULL)
       dict->SetReal(L"amount", atof(rows[2]));
     if (rows[3] != NULL)
@@ -798,7 +798,7 @@ void UserMysql::CallUserWithdrawListSelect(void* param, base_logic::Value* value
     if (rows[0] != NULL)
     badic->SetBigInteger(L"rid", atoll(rows[0]));
     if (rows[1] != NULL)
-    basic->SetBigInteger(L"uid", atoll(rows[1]));
+    basic->SetBigInteger(L"id", atoll(rows[1]));
     if (rows[2] != NULL)
     basic->SetReal(L"amount", atoll(rows[2]));
     if (rows[3] != NULL)
@@ -848,7 +848,7 @@ void UserMysql::CallChangeRechargeStatusAndSelect(void* param, base_logic::Value
         dict->SetReal(L"balance", atof(rows[1]));
       }
       if (rows[2] != NULL) {
-        dict->SetBigInteger(L"uid", atoll(rows[2]));
+        dict->SetBigInteger(L"id", atoll(rows[2]));
       }
     }
   } else {

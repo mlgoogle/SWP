@@ -69,7 +69,7 @@ UserInfo* DataShareMgr::GetUser(int64 uid) {
   }
 
 void DataShareMgr::AddUser(UserInfo* user) {
-  AddNick(user->uid(), user->nickname());
+  //  AddNick(user->uid(), user->nickname());
   DLOG(ERROR)<< "DataShareMgr AddUser lock";
   base_logic::WLockGd lk(lock_);
   DLOG(ERROR)<< "DataShareMgr AddUser locked";
@@ -141,9 +141,9 @@ void DataShareMgr::UserOffline(int fd) {
 }
 
 void DataShareMgr::CheckHeartLoss() {
-  DLOG(ERROR)<< "DataShareMgr CheckHeartLoss lock";
+  //DLOG(ERROR)<< "DataShareMgr CheckHeartLoss lock";
   base_logic::WLockGd lk(lock_);
-  DLOG(ERROR) << "DataShareMgr CheckHeartLoss locked";
+  //DLOG(ERROR) << "DataShareMgr CheckHeartLoss locked";
   UserMap::iterator it1 = user_map_.begin();
   for (; it1 != user_map_.end(); ) {
     UserInfo* p = it1->second;
@@ -176,13 +176,13 @@ void DataShareMgr::CheckHeartLoss() {
 		}*/
 //      int err = close(p->socket_fd());
       int err = shutdown(p->socket_fd(), 2);
-      LOG(WARNING) << "user lost connect :" << p->socket_fd() << "close socket code ["
+      LOG(WARNING) << "user lost connect :" << p->socket_fd() << " close socket code ["
           << err << "]";
       delete p;
       p = NULL;
     }
   }
-  DLOG(ERROR) << "DataShareMgr CheckHeartLoss unlock";
+  //DLOG(ERROR) << "DataShareMgr CheckHeartLoss unlock";
   }
 
 void DataShareMgr::Heartbeat(int64 uid) {

@@ -1,4 +1,3 @@
-
 // Copyright (c) 2016 The user Authors. All rights reserved.
 // user_logic.cc
 // Created on: 2016年8月8日
@@ -23,7 +22,7 @@
 #include "user/user_opcode.h"
 #include "net/comm_head.h"
 #include "net/packet_processing.h"
-
+#include "logic/logic_unit.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/user/user_config.xml"
 static char *host ="http://sdk.open.api.getui.net/apiex.htm";
@@ -144,7 +143,8 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
     return false;
   }
 
-  if (packet->type == USER_TYPE) {
+  if (packet->type == USER_TYPE
+      && logic::SomeUtils::VerifyToken(packet)) {
     user_manager_->AssignPacket(socket, packet);
     return true;
   }
@@ -204,7 +204,7 @@ void* Userlogic::AutoReconnectToServer(void* arg) {
 }
 	
 bool Userlogic::OnInitTimer(struct server *srv) {
-  srv->add_time_task(srv, "user", CONNECT_CKECK, 1, -1);
+  //srv->add_time_task(srv, "user", CONNECT_CKECK, 15, -1);
   srv->add_time_task(srv, "user", SHARE_DATA_INIT, 3, 1);
   srv->add_time_task(srv, "user", SHARE_DATA_INIT_TEN, 10*60, -1);
   srv->add_time_task(srv, "user", ORDER_STATUS_CHECK, 2*60, -1);

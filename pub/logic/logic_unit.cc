@@ -10,6 +10,9 @@
 #include "basic/md5sum.h"
 #include "basic/radom_in.h"
 #include "glog/logging.h" ///////////////////
+#include "pub/comm/user_info.h"
+#include "login/login_logic.h"
+#include "login/login_opcode.h"
 
 namespace logic {
 
@@ -41,9 +44,48 @@ void SomeUtils::CreateToken(const int64 uid, const std::string& password,
   (*token) = md5.GetHash();
 }
 
-bool SomeUtils::VerifyToken(const int64 uid, const std::string& password,
-                            const std::string& token) {
-  return true;
+bool SomeUtils::VerifyToken(PacketHead* packet) {
+  base_logic::DictionaryValue* dic =
+    ((struct PacketControl*)packet)->body_;
+  int16 operate_code = packet->operate_code; 
+  if (dic) {
+    bool r;
+    int64 uid = 0;
+    r = dic->GetBigInteger(L"id", &uid);
+    if (r) {
+      std::string token;
+      r = dic->GetString(L"token", &token);
+      if (r) {
+        UserInfo* user_info = login::Loginlogic::GetInstance()->GetUser(uid);
+        if (user_info) {
+          if (user_info->token() == token) 
+            return true;
+          else {
+            LOG(ERROR) << "verify token not match id:" << uid
+                  << " opcode:" << operate_code;
+            return false;
+          }
+        } else {
+          LOG(ERROR) << "verify token not found UserInfo id:" << uid;
+          return false;
+        }
+      } else {
+        LOG(ERROR) << "verify token parse token error";
+        return false;
+      }
+    } else {
+      if (operate_code == REGISTER_ACCOUNT_REQ
+          || operate_code == USER_LOGIN_REQ)
+        return true;
+      else {
+        LOG(ERROR) << "verify token no user id found";
+        return false;
+      }
+    }
+  } else {
+    LOG(ERROR) << "verify token body NULL, opcode:" << operate_code;
+    return false;
+  }
 }
 
 base_logic::Value* BaseValue::Deserialize(std::string* str) {
