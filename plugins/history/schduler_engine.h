@@ -26,7 +26,7 @@ class HistoryManager {
   virtual ~HistoryManager();
   void InitDB(history_logic::HistoryDB* history_db);
   void InitHistoryTradesData();
-  void SendHistoryTrades(const int socket, const int64 uid,
+  void SendHistoryTrades(const int socket,const int64 session, const int64 uid,
                          const int64 pos, const int64 count = 10);
  private:
   void Init();

@@ -42,10 +42,11 @@ void TradesPosition::ValueSerialization(base_logic::DictionaryValue* dict) {
   dict->GetBigInteger(L"amount", &data_->amount_);
   dict->GetBigInteger(L"open_position_time", &data_->open_position_time_);
   dict->GetBigInteger(L"close_position_time", &data_->close_position_time_);
+  dict->GetReal(L"gross_profit", &data_->gross_profit_);
   dict->GetReal(L"open_price", &data_->open_price_);
   dict->GetReal(L"open_cost", &data_->open_cost_);
+  dict->GetReal(L"open_charge", &data_->open_charge_);
   dict->GetReal(L"close_price", &data_->close_price_);
-  dict->GetReal(L"gross_profit", &data_->gross_profit_);
   dict->GetReal(L"pos_limit", &data_->limit_);
   dict->GetReal(L"stop", &data_->stop_);
   dict->GetReal(L"deferred", &data_->deferred_);

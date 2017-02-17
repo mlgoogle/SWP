@@ -17,7 +17,9 @@ class HistoryPosition {
  public:
   HistoryPosition()
       : id_(NULL),
-        token_(NULL) {
+        token_(NULL),
+        start_(NULL),
+        count_(NULL){
   }
 
   ~HistoryPosition() {
@@ -29,9 +31,19 @@ class HistoryPosition {
       delete token_;
       token_ = NULL;
     }
+
+    if (start_){
+      delete start_;
+      start_ = NULL;
+    }
+
+    if (count_){
+      delete count_;
+      count_ = NULL;
+    }
   }
 
-  void set_http_packet(base_logic::DictionaryValue* value);
+  bool set_http_packet(base_logic::DictionaryValue* value);
 
   void set_id(const int64 id) {
     id_ = new base_logic::FundamentalValue(id);
@@ -39,6 +51,14 @@ class HistoryPosition {
 
   void set_token(const std::string& token) {
     token_ = new base_logic::StringValue(token);
+  }
+
+  void set_start(const int32 start){
+    start_ = new base_logic::FundamentalValue(start);
+  }
+
+  void set_count(const int32 count) {
+    count_ = new base_logic::FundamentalValue(count);
   }
 
   const int64 id() const {
@@ -53,9 +73,23 @@ class HistoryPosition {
     return token;
   }
 
+  const int32 start() const {
+    int32 start = 0;
+    start_->GetAsInteger(&start);
+    return start;
+  }
+
+  const int32 count() const {
+    int32 count = 0;
+    count_->GetAsInteger(&count);
+    return count;
+  }
+
  public:
   base_logic::FundamentalValue* id_;
   base_logic::StringValue* token_;
+  base_logic::FundamentalValue* start_;
+  base_logic::FundamentalValue* count_;
 };
 
 }

@@ -40,9 +40,12 @@ static handler_t OnHistoryConnect(struct server *srv, int fd, void *data,
 
 static handler_t OnHistoryMessage(struct server *srv, int fd, void *data,
                                      int len) {
-  history_logic::Historylogic::GetInstance()->OnHistoryMessage(srv, fd,
+  bool r = history_logic::Historylogic::GetInstance()->OnHistoryMessage(srv, fd,
                                                                     data, len);
-  return HANDLER_GO_ON;
+  if (r)
+    return HANDLER_GO_ON;
+  else
+    return HANDLER_FINISHED;
 }
 
 static handler_t OnHistoryClose(struct server *srv, int fd) {

@@ -64,6 +64,11 @@ class TradesPosition {
     return data_->result_;
   }
 
+  void c_gross_profit() {
+     if (data_->close_type_)
+       data_->gross_profit_ = data_->open_cost_;
+   }
+
   void create_position_id() {
     data_->position_id_ = base::SysRadom::GetInstance()->GetRandomID();
   }

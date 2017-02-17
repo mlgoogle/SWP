@@ -4,6 +4,7 @@
 #include "history/history_logic.h"
 #include "history/history_proto_buf.h"
 #include "history/operator_code.h"
+#include "history/errno.h"
 #include "history/schduler_engine.h"
 #include "logic/swp_infos.h"
 #include "config/config.h"
@@ -74,6 +75,7 @@ bool Historylogic::OnHistoryMessage(struct server *srv, const int socket,
 
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
     LOG_ERROR2("UnpackStream Error socket %d", socket);
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
     return false;
   }
 
@@ -126,9 +128,14 @@ bool Historylogic::OnHistoryTrades(struct server* srv, int socket,
                                    struct PacketHead *packet) {
   history_logic::net_request::HistoryPosition history_position;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  history_position.set_http_packet(packet_control->body_);
+  bool r = history_position.set_http_packet(packet_control->body_);
+  if (!r){
+    LOG_DEBUG2("packet_length %d",packet->packet_length);
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    return false;
+  }
   history_logic::HistoryEngine::GetSchdulerManager()->SendHistoryTrades(
-      socket, history_position.id(), 0, 0);
+      socket, packet->session_id,history_position.id(), history_position.start(), history_position.count());
   return true;
 }
 
