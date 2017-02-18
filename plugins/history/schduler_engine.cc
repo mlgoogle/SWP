@@ -57,7 +57,7 @@ void HistoryManager::SendHistoryTrades(const int socket, const int64 session,
     send_error(socket,ERROR_TYPE,ERROR_TYPE,NO_HAVE_HISTROY_DATA);
     return;
   }
-  int32 base_num = 5;
+  int32 base_num = 10;
   base_num = base_num < count ? base_num : count;
   int32 t_start = 0;
   int32 t_count = 0;
