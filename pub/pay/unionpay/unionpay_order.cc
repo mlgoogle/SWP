@@ -41,9 +41,9 @@ void UnionpayOrder::PlaceOrderSign() {
      << "&out_trade_no=" << out_trade_no << "&spbill_create_ip="
      << spbill_create_ip << "&total_fee=" << total_fee << "&trade_type="
      << trade_type << "&key=" << key;
-  LOG(INFO)<< "WX_ORDER_SIGN before:" << ss.str();
+  //LOG(INFO)<< "WX_ORDER_SIGN before:" << ss.str();
   base::MD5Sum md5sum(ss.str());
-  LOG(INFO)<< "WX_ORDER_SIGN_MD5 after:" << md5sum.GetHash();
+  //LOG(INFO)<< "WX_ORDER_SIGN_MD5 after:" << md5sum.GetHash();
   sign = md5sum.GetHash();
 }
 
@@ -58,9 +58,9 @@ void UnionpayOrder::PreSign() {
   ss << "appid=" << appid << "&noncestr=" << nonce_str
      << "&package=Sign=WXPay" << "&partnerid=" << mch_id << "&prepayid="
      << prepayid << "&timestamp=" << timestamp << "&key=" << key;
-  LOG(INFO)<< "WX_PRE_SIGN before:" << ss.str();
+  //LOG(INFO)<< "WX_PRE_SIGN before:" << ss.str();
   base::MD5Sum md5sum(ss.str());
-  LOG(INFO)<< "WX_PRE_SIGN_MD5 after:" << md5sum.GetHash();
+  //LOG(INFO)<< "WX_PRE_SIGN_MD5 after:" << md5sum.GetHash();
   prepaysign = md5sum.GetHash();
 }
 
@@ -94,7 +94,7 @@ std::string UnionpayOrder::PlaceOrder() {
   hmp.Post(PostFiled().c_str());
   std::string result;
   hmp.GetContent(result);
-  LOG(INFO)<< "http post result:" << result;
+  //LOG(INFO)<< "http post result:" << result;
   return result;
   }*/
 
@@ -106,20 +106,20 @@ std::string UnionpayOrder::PlaceOrder() {
   char time_buf[128];
   snprintf(time_buf, 128, "%04d%02d%02d%02d%02d%02d", now->tm_year + 1900, now->tm_mon + 1, now->tm_mday,
            now->tm_hour, now->tm_min, now->tm_sec);
-  LOG(INFO) << "time now:" << time_buf;
+  //LOG(INFO) << "time now:" << time_buf;
   std::string orderId = time_buf;
   std::string time_send = orderId;
   req_url << ACP_SERVER_URL << "?merId=" << mer_id_
           << "&txnTime=" << time_send << "&orderId="
           << orderId << "&txnAmt=" << price_;
-  LOG(INFO) << "req url:" << req_url.str();
+  //LOG(INFO) << "req url:" << req_url.str();
   http::HttpMethodGet hmp(req_url.str());
   //std::string headers = "Content-Type: text/xml";
   //hmp.SetHeaders(headers);
   hmp.Get();
   std::string result;
   hmp.GetContent(result);
-  LOG(INFO)<< "http get result:" << result;
+  //LOG(INFO)<< "http get result:" << result;
   return result;
 }
 

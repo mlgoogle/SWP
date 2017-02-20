@@ -29,7 +29,7 @@ int32 Heartbeat::set_http_packet(base_logic::DictionaryValue* value) {
         set_uid(uid);
       LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
     } else {
-      LOG(ERROR)<< "Heartbeat set_http_packet error";
+      //LOG(ERROR)<< "Heartbeat set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -48,7 +48,7 @@ int32 UserInfo::set_http_packet(base_logic::DictionaryValue* value) {
         set_uid_str(uid_str);
       LOG_IF(ERROR, !r) << "UserInfo::uid_str_ parse error";
     } else {
-      LOG(ERROR)<< "UserInfo set_http_packet error";
+      //LOG(ERROR)<< "UserInfo set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -67,7 +67,7 @@ int32 AccountInfo::set_http_packet(base_logic::DictionaryValue* value) {
         set_uid(uid);
       LOG_IF(ERROR, !r) << "AccountInfo::uid_ parse error";
     } else {
-      LOG(ERROR)<< "AccountInfo set_http_packet error";
+      //LOG(ERROR)<< "AccountInfo set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -101,7 +101,7 @@ int32 OrderList::set_http_packet(base_logic::DictionaryValue* value) {
         set_count(count);
       LOG_IF(ERROR, !r) << "OrderDetail::count_ parse error";
     } else {
-      LOG(ERROR)<< "OrderDetail set_http_packet error";
+      //LOG(ERROR)<< "OrderDetail set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -130,7 +130,7 @@ int32 OrderDetail::set_http_packet(base_logic::DictionaryValue* value) {
         set_flow_type(flow_type);
       LOG_IF(ERROR, !r) << "OrderDetail::flow_type_ parse error";
     } else {
-      LOG(ERROR)<< "OrderDetail set_http_packet error";
+      //LOG(ERROR)<< "OrderDetail set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -149,7 +149,7 @@ int32 BankcardList::set_http_packet(base_logic::DictionaryValue* value) {
         set_uid(uid);
       LOG_IF(ERROR, !r) << "BankcardList::uid_ parse error";
     } else {
-      LOG(ERROR)<< "BankcardList set_http_packet error";
+      //LOG(ERROR)<< "BankcardList set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -189,7 +189,7 @@ int32 BindBankcard::set_http_packet(base_logic::DictionaryValue* value) {
         set_bank_username(bank_username);
       LOG_IF(ERROR, !r) << "BindBankcard::bank_username_ parse error";
     } else {
-      LOG(ERROR)<< "BindBankcard set_http_packet error";
+      //LOG(ERROR)<< "BindBankcard set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -228,7 +228,7 @@ int32 UnbindBankcard::set_http_packet(base_logic::DictionaryValue* value) {
         set_verify_token(verify_token);
         LOG_IF(ERROR, !r) << "UnbindBankcard::verify_token_ parse error";*/
     } else {
-      LOG(ERROR)<< "UnbindBankcard set_http_packet error";
+      //LOG(ERROR)<< "UnbindBankcard set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -252,7 +252,7 @@ int32 ChangeDefaultBankcard::set_http_packet(base_logic::DictionaryValue* value)
         set_bankcard_id(bankcard_id);
       LOG_IF(ERROR, !r) << "ChangeDefaultBankcard::bankcard_id_ parse error";
     } else {
-      LOG(ERROR)<< "ChangeDefaultBankcard set_http_packet error";
+      //LOG(ERROR)<< "ChangeDefaultBankcard set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -271,7 +271,7 @@ int32 BankAccountInfo::set_http_packet(base_logic::DictionaryValue* value) {
         set_bankcard_num(bankcard_num);
   		LOG_IF(ERROR, !r) << "BankAccountInfo::bankcard_num_ parse error";
   	} else {
-  		LOG(ERROR)<< "BankAccountInfo set_http_packet error";
+  		//LOG(ERROR)<< "BankAccountInfo set_http_packet error";
   		err = JSON_FORMAT_ERR;
   		break;
   	}
@@ -305,7 +305,7 @@ int32 CreditList::set_http_packet(base_logic::DictionaryValue* value) {
         set_count(count);
       LOG_IF(ERROR, !r) << "CreditList::count_ parse error";
     } else {
-      LOG(ERROR)<< "CreditList set_http_packet error";
+      //LOG(ERROR)<< "CreditList set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -329,7 +329,7 @@ int32 CreditList::set_http_packet(base_logic::DictionaryValue* value) {
         set_recharge_id(recharge_id);
       LOG_IF(ERROR, !r) << "CreditDetail::recharge_id_ parse error";
     } else {
-      LOG(ERROR)<< "CreditDetail set_http_packet error";
+      //LOG(ERROR)<< "CreditDetail set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -363,7 +363,7 @@ int32 UserWithdraw::set_http_packet(base_logic::DictionaryValue* value) {
         set_passwd(passwd);
       LOG_IF(ERROR, !r) << "UserWithdraw::passwd_ parse error";
     } else {
-      LOG(ERROR)<< "UserWithdraw set_http_packet error";
+      //LOG(ERROR)<< "UserWithdraw set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -397,7 +397,7 @@ int32 UserWithdrawList::set_http_packet(base_logic::DictionaryValue* value) {
         set_count(count);
       LOG_IF(ERROR, !r) << "UserWithdrawList::count_ parse error";
     } else {
-      LOG(ERROR)<< "UserWithdrawList set_http_packet error";
+      //LOG(ERROR)<< "UserWithdrawList set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -421,7 +421,7 @@ int32 ObtainVerifyCode::set_http_packet(base_logic::DictionaryValue* value) {
         set_phone_num(phone_num);
       LOG_IF(ERROR, !r) << "ObtainVerifyCode::phone_num_ parse error";
     } else {
-      LOG(ERROR)<< "ObtainVerifyCode set_http_packet error";
+      //LOG(ERROR)<< "ObtainVerifyCode set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -455,7 +455,7 @@ int32 ChangeUserInfo::set_http_packet(base_logic::DictionaryValue* value) {
         set_head_url(head_url);
       LOG_IF(ERROR, !r) << "ChangeUserInfo::head_url_ parse error";
     } else {
-      LOG(ERROR)<< "ChangeUserInfo set_http_packet error";
+      //LOG(ERROR)<< "ChangeUserInfo set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -484,7 +484,7 @@ int32 WXPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
         set_price(price);
       LOG_IF(ERROR, !r) << "WXPlaceOrder::price_ parse error";
     } else {
-      LOG(ERROR)<< "WXPlaceOrder set_http_packet error";
+      //LOG(ERROR)<< "WXPlaceOrder set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -513,7 +513,7 @@ int32 WXPayClient::set_http_packet(base_logic::DictionaryValue* value) {
         set_pay_result(pay_result);
       LOG_IF(ERROR, !r) << "WXPayClient::pay_result_ parse error";
     } else {
-      LOG(ERROR)<< "WXPlaceOrder set_http_packet error";
+      //LOG(ERROR)<< "WXPlaceOrder set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -534,7 +534,7 @@ int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
     if (value != NULL) {
       r = value->GetString(L"result", &xml_str);
       LOG_IF(ERROR, !r) << "WXPayServer::xml_str parse error";
-      LOG(INFO)<< "WXPAY SERVER RESULT***" << xml_str << "***";
+      //LOG(INFO)<< "WXPAY SERVER RESULT***" << xml_str << "***";
       if (r && xml_str.length() > 5) {
         base_logic::ValueSerializer* deserializer =
             base_logic::ValueSerializer::Create(base_logic::IMPL_XML,
@@ -581,13 +581,13 @@ int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
             }
           }
         } else {
-          LOG(ERROR)<< "WXPlaceOrder xml  set_http_packet error";
+          //LOG(ERROR)<< "WXPlaceOrder xml  set_http_packet error";
         }
         base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
                                                       deserializer);
       }
     } else {
-      LOG(ERROR)<< "WXPlaceOrder json set_http_packet error";
+      //LOG(ERROR)<< "WXPlaceOrder json set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -616,7 +616,7 @@ int32 UnionpayPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
         set_price(price);
       LOG_IF(ERROR, !r) << "UnionpayPlaceOrder::price_ parse error";
     } else {
-      LOG(ERROR)<< "UnionpayPlaceOrder set_http_packet error";
+      //LOG(ERROR)<< "UnionpayPlaceOrder set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -649,7 +649,7 @@ int32 UnionpayPlaceOrder::set_http_packet(base_logic::DictionaryValue* value) {
       r = value->GetString(L"token_", &token);
       LOG_IF(ERROR, !r) << "SMSCodeLogin::token_ parse error";
     } else {
-      LOG(ERROR)<< "SMSCodeLogin set_http_packet error";
+      //LOG(ERROR)<< "SMSCodeLogin set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -673,7 +673,7 @@ int32 DeviceToken::set_http_packet(base_logic::DictionaryValue* value) {
         set_device_token(device_token);
       LOG_IF(ERROR, !r) << "DeviceToken::device_token_ parse error";
     } else {
-      LOG(ERROR)<< "DeviceToken set_http_packet error";
+      //LOG(ERROR)<< "DeviceToken set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -692,7 +692,7 @@ int32 DeviceToken::set_http_packet(base_logic::DictionaryValue* value) {
         set_uid(uid);
       LOG_IF(ERROR, !r) << "UserCash::uid_ parse error";
     } else {
-      LOG(ERROR)<< "UserCash set_http_packet error";
+      //LOG(ERROR)<< "UserCash set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -716,7 +716,7 @@ int32 DeviceToken::set_http_packet(base_logic::DictionaryValue* value) {
       r = value->GetString(L"token_", &token);
       LOG_IF(ERROR, !r) << "CheckSMSCode::token_ parse error";
     } else {
-      LOG(ERROR)<< "CheckSMSCode set_http_packet error";
+      //LOG(ERROR)<< "CheckSMSCode set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }

@@ -46,18 +46,18 @@ bool Userlogic::Init() {
   bool r = false;
   Result res = pushInit(host, appKey, masterSecret, "编码");
    if(res!=SUCCESS){
-     LOG(ERROR) << "DataShareMgr pushInit err";
+     //LOG(ERROR) << "DataShareMgr pushInit err";
    }
   user_manager_ = UserManager::GetInstance();
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;
   if (config == NULL) {
-    LOG(ERROR) << "Userlogic config init error";
+    //LOG(ERROR) << "Userlogic config init error";
     return false;
   }
   r = config->LoadConfig(path);
   if (!r) {
-    LOG(ERROR) << "user config load error";
+    //LOG(ERROR) << "user config load error";
     return false;
   }
   UserInterface::GetInstance()->InitConfig(config);
@@ -95,20 +95,20 @@ void Userlogic::InitLog() {
   //捕捉 core dumped
   google::InstallFailureSignalHandler();
 
-  LOG(INFO)<< "glog has init finished";
+  //LOG(INFO)<< "glog has init finished";
 }
 
 bool Userlogic::InitShareData() {
   basic::libhandle  handle = NULL;
   handle = basic::load_native_library("./data.so");
   if (handle==NULL){
-    LOG(ERROR) << "Can't load path data.so\n";
+    //LOG(ERROR) << "Can't load path data.so\n";
   }
-  LOG(INFO) << "load data.so success";
+  //LOG(INFO) << "load data.so success";
   share::DataShareMgr* (*pengine) (void);
   pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
   if(pengine==NULL){
-    LOG(ERROR) << "Can't find GetDataShareMgr\n";
+    //LOG(ERROR) << "Can't find GetDataShareMgr\n";
     return false;
   }
   share::DataShareMgr* data_engine_ = (*pengine)();
@@ -128,7 +128,7 @@ void Userlogic::FreeInstance() {
 }
 
 bool Userlogic::OnUserConnect(struct server *srv, const int socket) {
-  LOG(INFO) << "socket has be connected:" << socket;
+  //LOG(INFO) << "socket has be connected:" << socket;
   return true;
 }
 
@@ -152,9 +152,9 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
 }
 
 bool Userlogic::OnUserClose(struct server *srv, const int socket) {
-  LOG(INFO) << "socket has be closed:" << socket;
+  //LOG(INFO) << "socket has be closed:" << socket;
   user_manager_->OnSockClose(socket);
-  LOG(INFO) << "OnSockClose:" << socket;
+  //LOG(INFO) << "OnSockClose:" << socket;
   return true;
 }
 
@@ -172,7 +172,7 @@ bool Userlogic::OnBroadcastMessage(struct server *srv, const int socket,
   char* msg_c = new char[len + 1];
   memcpy(msg_c, msg, len);
   msg_c[len] = '\0';
-  LOG(INFO) << "OnBroadcastMessage:len-" << len;
+  //LOG(INFO) << "OnBroadcastMessage:len-" << len;
   PacketHead packet_head(msg_c);
   delete[] msg_c;
   msg_c = NULL;
@@ -187,7 +187,7 @@ bool Userlogic::OnBroadcastClose(struct server *srv, const int socket) {
   if (pthread_create(&tid, 0, Userlogic::AutoReconnectToServer, (void*)srv) == 0)
 	pthread_detach(tid);
   else
-	LOG(ERROR) << "can not create thread AutoReconnectToserver";
+	//LOG(ERROR) << "can not create thread AutoReconnectToserver";
   
   return true;
 }
@@ -200,7 +200,7 @@ void* Userlogic::AutoReconnectToServer(void* arg) {
 	ret = srv->create_reconnects(srv);
 	sleep(1);
   } while (ret < 0);
-  LOG(INFO) << "try reconnect remote server:" << ret;
+  //LOG(INFO) << "try reconnect remote server:" << ret;
 }
 	
 bool Userlogic::OnInitTimer(struct server *srv) {

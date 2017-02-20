@@ -67,8 +67,7 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
       return false;
     }
 
-    LOG(INFO) << "packet processing";
-    LOG_DEBUG2("%s",body_stream.c_str());
+    //LOG_DEBUG2("%s",body_stream.c_str());
 
     base_logic::DictionaryValue *value =
       (base_logic::DictionaryValue*)engine->Deserialize(&body_stream, &error_code, &error_str);

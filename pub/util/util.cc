@@ -56,9 +56,9 @@ int SendFull(int socket, const char *buffer, size_t nbytes) {
     total += amt;
   } while (nbytes > 0);
   return static_cast<int32>(amt == -1 ? amt : total);
-  /*LOG(ERROR) << "SendFull :: lock";
+  /*//LOG(ERROR) << "SendFull :: lock";
    pthread_mutex_lock(&sock_send_mutex_lock);
-   LOG(ERROR) << "SendFull :: locked";
+   //LOG(ERROR) << "SendFull :: locked";
    ssize_t amt = 0;
    ssize_t total = 0;
    const char *buf = buffer;
@@ -70,7 +70,7 @@ int SendFull(int socket, const char *buffer, size_t nbytes) {
    total += amt;
    } while (amt != -1 && nbytes > 0);
    pthread_mutex_unlock(&sock_send_mutex_lock);
-   LOG(ERROR) << "SendFull :: unlock";
+   //LOG(ERROR) << "SendFull :: unlock";
    return amt == -1 ? amt : total;*/
 }
 
@@ -177,11 +177,11 @@ int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
   IPushResult result = { 0 };
 
   result = pushAPNMessageToSingle((char*) APPKEY, &templ, APPID, dt);
-  LOG(INFO)<< "print result:-------------";
+  //LOG(INFO)<< "print result:-------------";
   for (int i = 0; i < result.size; i++) {
-    LOG(INFO)<< result.entry[i].key << ": " << result.entry[i].value;
+    //LOG(INFO)<< result.entry[i].key << ": " << result.entry[i].value;
   }
-  LOG(INFO)<< "print end:----------------";
+  //LOG(INFO)<< "print end:----------------";
   //打印结果
 //  printResult(result);
   return 0;

@@ -26,7 +26,7 @@ int32 Heartbeat::set_http_packet(base_logic::DictionaryValue* value) {
         set_uid(uid);
       LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
     } else {
-      LOG(ERROR)<< "Heartbeat set_http_packet error";
+      //LOG(ERROR)<< "Heartbeat set_http_packet error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -65,7 +65,7 @@ int32 RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
         set_passwd(passwd);
       LOG_IF(ERROR, !r) << "RegisterAccount::pwd parse error";
     } else {
-      LOG(ERROR)<< "RegisterAccount Deserialize error";
+      //LOG(ERROR)<< "RegisterAccount Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -104,7 +104,7 @@ int32 RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
         set_passwd(passwd);
       LOG_IF(ERROR, !r) << "RegisterAccount::pwd parse error";
     } else {
-      LOG(ERROR)<< "RegisterAccount Deserialize error";
+      //LOG(ERROR)<< "RegisterAccount Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -123,10 +123,10 @@ int32 UserLogin::set_http_packet(base_logic::DictionaryValue* value) {
   do {
     /*if (v != NULL) {
       if (typeid(*v) == typeid(ListValue)) {
-        LOG(INFO)<< "listvalue:";
+        //LOG(INFO)<< "listvalue:";
         ((ListValue*)v)->GetDictionary(0, &value);
       } else if (typeid(*v) == typeid(DicValue)) {
-        LOG(INFO) << "valuevalue:";
+        //LOG(INFO) << "valuevalue:";
         value = (DicValue*) v;
       } else {
         err = JSON_FORMAT_ERR;
@@ -145,7 +145,7 @@ int32 UserLogin::set_http_packet(base_logic::DictionaryValue* value) {
         set_phone_num(phone_num);
       LOG_IF(ERROR, !r) << "Login::phone_num_ parse error";
       if (phone_num.length() < 11) {
-        LOG(ERROR) << "phone is wrong";
+        //LOG(ERROR) << "phone is wrong";
         err = PHONE_NUM_ERR;
         break;
       }
@@ -154,7 +154,7 @@ int32 UserLogin::set_http_packet(base_logic::DictionaryValue* value) {
         set_token(token);
       LOG_IF(ERROR, !r) << "Login::token_ parse error";
       /*} else {
-      LOG(ERROR) << "Login Deserialize error";
+      //LOG(ERROR) << "Login Deserialize error";
       err = JSON_FORMAT_ERR;
       }*/
   }while (0);
@@ -185,7 +185,7 @@ int32 SMSCodeLogin::set_http_packet(base_logic::DictionaryValue* value) {
       r = value->GetString(L"token_", &token);
       LOG_IF(ERROR, !r) << "SMSCodeLogin::token_ parse error";
     } else {
-      LOG(ERROR)<< "SMSCodeLogin Deserialize error";
+      //LOG(ERROR)<< "SMSCodeLogin Deserialize error";
       err = SMS_CODE_LOGIN_JSON_ERR;
       break;
     }
@@ -205,7 +205,7 @@ int32 SMSCodeLogin::set_http_packet(base_logic::DictionaryValue* value) {
         set_uid(uid);
       LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
     } else {
-      LOG(ERROR)<< "Heartbeat Deserialize error";
+      //LOG(ERROR)<< "Heartbeat Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -249,7 +249,7 @@ int32 ChangePasswd::set_http_packet(base_logic::DictionaryValue* value) {
         set_passwd(passwd);
       LOG_IF(ERROR, !r) << "ChangePasswd::pwd parse error";
     } else {
-      LOG(ERROR)<< "ChangePasswd Deserialize error";
+      //LOG(ERROR)<< "ChangePasswd Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -273,7 +273,7 @@ int32 ObtainVerifyCode::set_http_packet(base_logic::DictionaryValue* value) {
         set_phone_num(phone_num);
       LOG_IF(ERROR, !r) << "ObtainVerifyCode::phone_num_ parse error";
     } else {
-      LOG(ERROR)<< "ObtainVerifyCode Deserialize error";
+      //LOG(ERROR)<< "ObtainVerifyCode Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -303,7 +303,7 @@ int32 ObtainVerifyCode::set_http_packet(base_logic::DictionaryValue* value) {
       r = value->GetReal(L"latitude_", &latitude);
       LOG_IF(ERROR, !r) << "ImproveData::latitude_ parse error";
     } else {
-      LOG(ERROR)<< "ImproveData Deserialize error";
+      //LOG(ERROR)<< "ImproveData Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -320,7 +320,7 @@ int32 ObtainVerifyCode::set_http_packet(base_logic::DictionaryValue* value) {
       LOG_IF(ERROR, !r) << "UserDetail::uid_str_ parse error";
 
     } else {
-      LOG(ERROR)<< "UserDetail Deserialize error";
+      //LOG(ERROR)<< "UserDetail Deserialize error";
       err = JSON_FORMAT_ERR;
       break;
     }
@@ -345,7 +345,7 @@ int32 ObtainVerifyCode::set_http_packet(base_logic::DictionaryValue* value) {
       }
       LOG_IF(ERROR, !r) << "VerifyPasswd::passwd_ parse error";
     } else {
-      LOG(ERROR)<< "VerifyPasswd Deserialize error";
+      //LOG(ERROR)<< "VerifyPasswd Deserialize error";
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -385,7 +385,7 @@ int32 ChangePayPasswd::set_http_packet(base_logic::DictionaryValue* value) {
       }
       LOG_IF(ERROR, !r) << "ChangePayPasswd::old_passwd_ parse error";
     } else {
-      LOG(ERROR)<< "ChangePayPasswd Deserialize error";
+      //LOG(ERROR)<< "ChangePayPasswd Deserialize error";
       err = REQUEST_JSON_ERR;
       break;
     }

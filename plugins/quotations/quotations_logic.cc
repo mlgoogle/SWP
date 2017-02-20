@@ -14,6 +14,7 @@
 #include "net/errno.h"
 #include "net/comm_head.h"
 #include <string>
+#include "glog/logging.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/quotations/quotations_config.xml"
 
@@ -63,6 +64,7 @@ bool Quotationslogic::OnQuotationsConnect(struct server *srv,
   int port;
   logic::SomeUtils::GetIPAddress(socket, ip, port);
   LOG_MSG2("ip {%s} prot {%d}", ip.c_str(), port);
+  //LOG(INFO) << "on quotations connect";
   return true;
 }
 
@@ -79,6 +81,7 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
     return false;
   }
 
+  ////LOG(INFO) << "packet processing";
   if (packet->type == QUOTATIONS_TYPE
       && logic::SomeUtils::VerifyToken(packet)) {
     switch (packet->operate_code) {

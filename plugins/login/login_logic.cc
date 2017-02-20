@@ -74,7 +74,7 @@ void Loginlogic::InitLog() {
   //捕捉 core dumped
   google::InstallFailureSignalHandler();
 
-  LOG(INFO)<< "glog has init finished";
+  //LOG(INFO)<< "glog has init finished";
 }
 
 Loginlogic::~Loginlogic() {
@@ -85,12 +85,12 @@ bool Loginlogic::Init() {
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;
   if (config == NULL) {
-    LOG(ERROR) << "Loginlogic config init error";
+    //LOG(ERROR) << "Loginlogic config init error";
     return false;
   }
   r = config->LoadConfig(path);
   if (!r) {
-    LOG(ERROR) << "login config load error";
+    //LOG(ERROR) << "login config load error";
     return false;
   }
   login_mysql_ = new LoginMysql(config);
@@ -102,13 +102,13 @@ bool Loginlogic::InitShareData() {
   basic::libhandle  handle = NULL;
   handle = basic::load_native_library("./data.so");
   if (handle==NULL){
-    LOG(ERROR) << "Can't load path data.so\n";
+    //LOG(ERROR) << "Can't load path data.so\n";
   }
-  LOG(INFO) << "load data.so success";
+  //LOG(INFO) << "load data.so success";
   share::DataShareMgr* (*pengine) (void);
   pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
   if(pengine==NULL){
-    LOG(ERROR) << "Can't find GetDataShareMgr\n";
+    //LOG(ERROR) << "Can't find GetDataShareMgr\n";
     return false;
   }
   data_share_mgr_ = (*pengine)();
@@ -127,7 +127,7 @@ void Loginlogic::FreeInstance() {
 }
 
 bool Loginlogic::OnLoginConnect(struct server *srv, const int socket) {
-  LOG(INFO)<< "OnLoginConnect";
+  //LOG(INFO)<< "OnLoginConnect";
   return true;
 }
 
@@ -143,7 +143,7 @@ bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
     return false;
   }
   
-  LOG(INFO) << "-----------type:" << packet->type << "---opecode:" << packet->operate_code; 
+  //LOG(INFO) << "-----------type:" << packet->type << "---opecode:" << packet->operate_code; 
   if (packet->type == LOGIN_TYPE
       && logic::SomeUtils::VerifyToken(packet)) {
     switch (packet->operate_code) {
@@ -205,7 +205,7 @@ int32 Loginlogic::OnRegisterAccount(const int32 socket, PacketHead* packet) {
     //dic.SetString("phone", register_account.phone_num());
     //dic.SetString("pwd", register_account.passwd());
     packet->reserved = socket;
-    LOG(INFO) << "recv socket:" << packet->reserved;
+    //LOG(INFO) << "recv socket:" << packet->reserved;
     send_message(server_fd_, packet);
   } while (0);
   if (err < 0) {
@@ -229,7 +229,7 @@ int32 Loginlogic::OnUserLogin(const int32 socket, PacketHead* packet) {
   if (err < 0) {
     send_error(socket, LOGIN_TYPE, USER_LOGIN_RLY, err);
   }
-  LOG(INFO) << "UserLogin finish err:" << err;
+  //LOG(INFO) << "UserLogin finish err:" << err;
   return err;
 }
 
@@ -255,7 +255,7 @@ int32 Loginlogic::OnChangePasswd(const int32 socket, PacketHead* packet) {
       err = USER_NOT_IN_CACHE;
       break;
 	  }
-    LOG(INFO) << "pwd:" << p->passwd();
+    //LOG(INFO) << "pwd:" << p->passwd();
     if (p->passwd() != change_passwd.old_passwd()) {
       err = CHANGE_OLD_PWD_ERR;
       break;
@@ -294,7 +294,7 @@ bool Loginlogic::OnBroadcastConnect(struct server *srv, const int socket,
                                       const void *msg, const int len) {
   server_fd_ = socket;
   
-  LOG(INFO)<< "OnBroadcastConnect";
+  //LOG(INFO)<< "OnBroadcastConnect";
   return true;
 }
 
@@ -385,7 +385,7 @@ int32 Loginlogic::OnUserLoginReply(const int32 socket, PacketHead* packet) {
     err = login_mysql_->UserLoginSelect(user_login.phone_num(), client_ip, &dic);
     if (err < 0)
       break;
-    LOG(INFO) << "packet->reserved:" << packet->reserved;
+    //LOG(INFO) << "packet->reserved:" << packet->reserved;
 	  if (user_login.token() != "")
 	    dic.SetString("token", user_login.token());
     struct PacketControl packet_control;
@@ -395,7 +395,7 @@ int32 Loginlogic::OnUserLoginReply(const int32 socket, PacketHead* packet) {
     //SendMsg(packet->reserved, packet, &dic, USER_LOGIN_RLY, err);
     AddUser(packet->reserved, &dic, user_login.token());
     } else {
-      LOG(INFO)<< "token err here";
+      //LOG(INFO)<< "token err here";
       send_message(packet->reserved, packet);
       return -1;
     }
@@ -404,7 +404,7 @@ int32 Loginlogic::OnUserLoginReply(const int32 socket, PacketHead* packet) {
   if (err < 0) {
     send_error(packet->reserved, LOGIN_TYPE, USER_LOGIN_RLY, err);
   }
-  LOG(INFO)<< "UserLoginReply finish err:" << err;
+  //LOG(INFO)<< "UserLoginReply finish err:" << err;
   return err;
 }
   
@@ -419,7 +419,7 @@ void Loginlogic::AddUser(int32 fd, DicValue* v, std::string token) {
     user->set_is_login(true);
     user->set_socket_fd(fd);
     user->set_token(token);
-    LOG(INFO) << "add user id:" << user->uid() << " fd:" << fd;
+    //LOG(INFO) << "add user id:" << user->uid() << " fd:" << fd;
     data_share_mgr_->AddUser(user);
   }
 
@@ -428,7 +428,7 @@ bool Loginlogic::OnBroadcastClose(struct server *srv, const int socket) {
   
   pthread_t tid;
   if (pthread_create(&tid, 0, Loginlogic::AutoReconnectToServer, (void*)srv) != 0)
-	LOG(ERROR) << "can not create thread AutoReconnectToserver";
+	//LOG(ERROR) << "can not create thread AutoReconnectToserver";
   pthread_detach(tid);
   
   return true;
@@ -458,7 +458,7 @@ void* Loginlogic::AutoReconnectToServer(void* arg) {
 	ret = srv->create_reconnects(srv);
 	sleep(1);
   } while (ret < 0);
-  LOG(INFO) << "try reconnect remote server:" << ret;
+  //LOG(INFO) << "try reconnect remote server:" << ret;
 }
 
 int Loginlogic::SendFull(int socket, const char *buffer, size_t nbytes) {
@@ -474,17 +474,17 @@ int Loginlogic::SendFull(int socket, const char *buffer, size_t nbytes) {
     total += amt;
   } while (amt != -1 && nbytes > 0);
 
-  LOG(INFO) << "SendFull:" << total;
+  //LOG(INFO) << "SendFull:" << total;
   return (int) (amt == -1 ? amt : total);
 }
 
 void Loginlogic::SendPacket(const int socket, PacketHead* packet) {
 
   int packet_length = packet->packet_length;
-  LOG(INFO) << "SendPacket packet_length:" << packet_length << ", head:" << HEAD_LENGTH;
-  LOG(INFO) << (char*)(packet + HEAD_LENGTH + 5);
+  //LOG(INFO) << "SendPacket packet_length:" << packet_length << ", head:" << HEAD_LENGTH;
+  //LOG(INFO) << (char*)(packet + HEAD_LENGTH + 5);
   char* s = new char[packet_length + 1];
-  //LOG(INFO)<< "packet body:" << packet->body_str();
+  ////LOG(INFO)<< "packet body:" << packet->body_str();
   //memset(s, 0, packet->packet_length);
   memcpy(s, &packet, packet_length);
   s[packet_length] = '\0';
@@ -515,7 +515,7 @@ void Loginlogic::SendPacket(const int socket, PacketHead* packet) {
 void Loginlogic::SendPacket(const int socket, PacketHead* packet) {
 
   char* s = new char[packet->packet_length()];
-  LOG(INFO)<< "packet body:" << packet->body_str();
+  //LOG(INFO)<< "packet body:" << packet->body_str();
   memset(s, 0, packet->packet_length());
   memcpy(s, &packet->head(), HEAD_LENGTH);
   memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),

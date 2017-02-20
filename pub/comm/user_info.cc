@@ -16,7 +16,7 @@ UserInfo::UserInfo(const UserInfo& user) : data_(user.data_) {
 }
 
 UserInfo::~UserInfo() {
-  LOG(INFO) << "delete ~UserInfo()";
+  //LOG(INFO) << "delete ~UserInfo()";
   if (data_ != NULL) {
     data_->DelRef();
   }

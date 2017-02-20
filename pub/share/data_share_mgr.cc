@@ -108,7 +108,7 @@ void DataShareMgr::UserOffline(int fd) {
   for (; it1 != user_map_.end(); ) {
     UserInfo* p = it1->second;
     if (p == NULL) {
-      LOG(ERROR) << "UserOffline user NULL";
+      //LOG(ERROR) << "UserOffline user NULL";
       user_map_.erase(it1++);
       continue;
     }
@@ -149,7 +149,7 @@ void DataShareMgr::CheckHeartLoss() {
     UserInfo* p = it1->second;
     if (p == NULL) {
       ++it1;
-      LOG(ERROR) << "CheckHeartLoss UserInfo NULL";
+      //LOG(ERROR) << "CheckHeartLoss UserInfo NULL";
       continue;
     }
     p->set_heart_loss(p->heart_loss() + 1);
@@ -157,7 +157,7 @@ void DataShareMgr::CheckHeartLoss() {
       ++it1;
       continue;
     } else {
-      LOG(WARNING) << "user lost connect uid:" << p->uid();
+      //LOG(WARNING) << "user lost connect uid:" << p->uid();
       user_map_.erase(it1++);
       /*GuideMap::iterator itg = guide_map_.find(p->uid());
       if (itg != guide_map_.end()) {
@@ -176,8 +176,8 @@ void DataShareMgr::CheckHeartLoss() {
 		}*/
 //      int err = close(p->socket_fd());
       int err = shutdown(p->socket_fd(), 2);
-      LOG(WARNING) << "user lost connect :" << p->socket_fd() << " close socket code ["
-          << err << "]";
+      //LOG(WARNING) << "user lost connect :" << p->socket_fd() << " close socket code ["
+      //<< err << "]";
       delete p;
       p = NULL;
     }
@@ -266,7 +266,7 @@ void DataShareMgr::DelGuide(int64 uid) {
   base_logic::RLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr GetDeviceToken locked";
   DeviceTokenMap::iterator it = dt_map_.find(uid);
-  LOG(ERROR) << "DataShareMgr GetDeviceToken find";
+  //LOG(ERROR) << "DataShareMgr GetDeviceToken find";
   if (it != dt_map_.end()) {
     DLOG(ERROR) << "DataShareMgr GetDeviceToken unlock";
     return it->second;

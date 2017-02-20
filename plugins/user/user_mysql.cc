@@ -33,7 +33,7 @@ int32 UserMysql::UserInfoSelect(std::string uids, base_logic::DictionaryValue* d
     std::stringstream ss;
     ss << "call proc_UserInfoSelect('" << uids << "')";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -54,7 +54,7 @@ int32 UserMysql::AccountInfoSelect(int64 uid, base_logic::DictionaryValue* dic) 
     std::stringstream ss;
     ss << "call proc_AccountInfoSelect(" << uid << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallAccountInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -73,7 +73,7 @@ int32 UserMysql::OrderListSelect(int64 uid, std::string flow_type, int32 start_p
     ss << "call proc_OrderListSelect(" << uid << ",'" << flow_type << "',"
             << start_pos << "," << count << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallOrderListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -92,7 +92,7 @@ int32 UserMysql::OrderDetailSelect(int64 uid, int64 flow_id, int32 flow_type,
     ss << "call proc_OrderDetailSelect(" << uid << "," << flow_id << ","
                   << flow_type << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallOrderDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -109,7 +109,7 @@ int32 UserMysql::BankcardListSelect(int64 uid, base_logic::DictionaryValue* dic)
     std::stringstream ss;
     ss << "call proc_BankcardListSelect(" << uid << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallBankcardListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -128,7 +128,7 @@ int32 UserMysql::BindBankcardInsertAndSelect(int64 uid, int32 bank_id, std::stri
     ss << "call proc_BindBankcardInsertAndSelect(" << uid << "," << bank_id << ",'" << branch_bank
      << "','" << bankcard_num << "','" << bank_username << "')";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallBindBankcardInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -146,7 +146,7 @@ int32 UserMysql::UnbindBankcardDelete(std::string phone_num, int32 bank_id) {
     ss << "call proc_UnbindBankcardDelete(" << phone_num << "," << bank_id << ")";
     base_logic::DictionaryValue dic;
     dic.SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -164,7 +164,7 @@ int32 UserMysql::ChangeDefaultBankcard(int64 uid, int32 bank_id) {
     ss << "call proc_ChangeDefaultbankcardUpdate(" << uid << "," << bank_id << ")";
     base_logic::DictionaryValue* dic;
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -181,7 +181,7 @@ int32 UserMysql::BankAccountInfoSelect(std::string account, base_logic::Dictiona
     std::stringstream ss;
     ss << "call proc_BankAccountInfoSelect('" << account << "')";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallBankAccountInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -199,7 +199,7 @@ int32 UserMysql::CreditListSelect(int64 uid, std::string status, int64 start_pos
     ss << "call proc_CreditListSelect(" << uid << ",'" << status
      << "'," << start_pos << "," << count << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallCreditListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -216,7 +216,7 @@ int32 UserMysql::CreditDetailSelect(int64 uid, int64 recharge_id, base_logic::Di
     std::stringstream ss;
     ss << "call proc_CreditDetailSelect(" << uid << "," << recharge_id << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallCreditDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -235,7 +235,7 @@ int32 UserMysql::UserWithdrawInsertAndSelect(int64 uid, double money,
     ss << "call proc_UserWithdrawInsertAndSelect(" << uid << "," << money
       << "," << bankcard_id << ",'" << passwd << "')";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserWithdrawInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -259,7 +259,7 @@ int32 UserMysql::UserWithdrawListSelect(int64 uid, std::string status,
     ss << "call proc_UserWithdrawListSelect(" << uid << ",'" << status
         << "'," << startPos << "," << count << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserWithdrawListSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -276,7 +276,7 @@ int32 UserMysql::UserWithdrawListSelect(int64 uid, std::string status,
     std::stringstream ss;
     ss << "call proc_UserWithdrawDetailSelect(" << uid << "," << withdraw_id << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallUserWithdrawDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -296,7 +296,7 @@ int32 UserMysql::ChangeUserInfoUpdate(int64 uid, std::string nickname,
        << nickname << "','" << headurl << "'," << gender << ")";
     base_logic::DictionaryValue dic;
     dic.SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -315,7 +315,7 @@ int32 UserMysql::RechargeInfoInsertAndSelect(int64 uid, double price,
     ss << "call proc_RechargeInfoInsertAndSelect(" << uid << "," << price
        << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic), CallRechargeInfoInsertAndSelect);
     if (!r || dic->empty()) {
       err = SQL_EXEC_ERR;
@@ -334,7 +334,7 @@ int32 UserMysql::ChangeRechargeStatusAndSelect(int64 rid, int64 result,
     ss << "call proc_ChangeRechargeStatusAndSelect(" << rid << "," << result
        << ")";
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(0, (base_logic::Value *) (dic),
               CallChangeRechargeStatusAndSelect);
     if (!r || dic->empty()) {
@@ -353,7 +353,7 @@ int32 UserMysql::DeviceTokenUpdate(int64 uid, std::string dt) {
     ss << "call proc_DeviceTokenUpdate(" << uid << ",'" << dt << "')";
     base_logic::DictionaryValue* dic;
     dic->SetString(L"sql", ss.str());
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(0, (base_logic::Value *) (&dic));
     if (!r) {
       err = SQL_EXEC_ERR;
@@ -387,7 +387,7 @@ void UserMysql::CallUserInfoSelect(void* param, base_logic::Value* value) {
     }
     info->Set(L"userinfoList", list);
   } else {
-    LOG(WARNING)<< "CallUserInfoSelect count < 0";
+    //LOG(WARNING)<< "CallUserInfoSelect count < 0";
   }
     info->Remove(L"sql", &value);
 }
@@ -405,7 +405,7 @@ void UserMysql::CallAccountInfoSelect(void* param, base_logic::Value* value) {
     }
   }
   } else {
-    LOG(WARNING)<<"CallAccountInfoSelect count < 0";
+    //LOG(WARNING)<<"CallAccountInfoSelect count < 0";
   }
     dict->Remove(L"sql", &value);
 }
@@ -440,7 +440,7 @@ void UserMysql::CallOrderListSelect(void* param, base_logic::Value* value) {
     }
     info->Set("orders", list);
   } else {
-    LOG(WARNING)<<"CallOrderListSelect count < 0";
+    //LOG(WARNING)<<"CallOrderListSelect count < 0";
   }
     info->Remove(L"sql", &value);
 }
@@ -529,7 +529,7 @@ void UserMysql::CallOrderDetailSelect(void* param, base_logic::Value* value) {
     }
   }
   } else {
-    LOG(WARNING)<<"CallOrderDetailSelect count < 0";
+    //LOG(WARNING)<<"CallOrderDetailSelect count < 0";
   }
   dict->Remove(L"sql", &value);
 }
@@ -560,7 +560,7 @@ void UserMysql::CallBankcardListSelect(void* param, base_logic::Value* value) {
     }
   info->Set("cardlist", list);
   } else {
-    LOG(WARNING)<<"CallBankcardListSelect count < 0";
+    //LOG(WARNING)<<"CallBankcardListSelect count < 0";
   }
   info->Remove(L"sql", &value);
 }
@@ -587,7 +587,7 @@ void UserMysql::CallBindBankcardInsertAndSelect(void* param, base_logic::Value* 
     dict->SetString("name", rows[5]);
     }
   } else {
-    LOG(WARNING)<<"CallBindBankcardInsertAndSelect count < 0";
+    //LOG(WARNING)<<"CallBindBankcardInsertAndSelect count < 0";
   }
     dict->Remove(L"sql", &value);
 }
@@ -611,7 +611,7 @@ void UserMysql::CallBankAccountInfoSelect(void* param, base_logic::Value* value)
     }
     }
   } else {
-    LOG(WARNING)<<"CallBankAccountInfoSelect count < 0";
+    //LOG(WARNING)<<"CallBankAccountInfoSelect count < 0";
   }
     dict->Remove(L"sql", &value);
 }
@@ -660,7 +660,7 @@ void UserMysql::CallCreditListSelect(void* param, base_logic::Value* value) {
     }
     info->Set("depositsinfo", list);
   } else {
-    LOG(WARNING)<<"CallCreditListSelect count < 0";
+    //LOG(WARNING)<<"CallCreditListSelect count < 0";
   }
     info->Remove(L"sql", &value);
 }
@@ -691,7 +691,7 @@ void UserMysql::CallCreditDetailSelect(void* param, base_logic::Value* value) {
     dict->SetCharInteger(L"status", atoi(rows[6]));
   }
   } else {
-    LOG(WARNING)<<"CallCreditDetailSelect count < 0";
+    //LOG(WARNING)<<"CallCreditDetailSelect count < 0";
   }
     dict->Remove(L"sql", &value);
 }
@@ -737,7 +737,7 @@ void UserMysql::CallUserWithdrawInsertAndSelect(void* param, base_logic::Value* 
       dict->SetCharInteger(L"status", result);
     }
   } else {
-    LOG(WARNING)<<"CallUserWithdrawInsertAndSelect count < 0";
+    //LOG(WARNING)<<"CallUserWithdrawInsertAndSelect count < 0";
   }
     dict->Remove(L"sql", &value);
 }
@@ -780,7 +780,7 @@ void UserMysql::CallUserWithdrawListSelect(void* param, base_logic::Value* value
     }
     info->Set("withdrawList", list);
   } else {
-    LOG(WARNING)<<"CallUserWithdrawListSelect count < 0";
+    //LOG(WARNING)<<"CallUserWithdrawListSelect count < 0";
   }
     info->Remove(L"sql", &value);
 }
@@ -811,7 +811,7 @@ void UserMysql::CallUserWithdrawListSelect(void* param, base_logic::Value* value
     dict->SetCharInteger(L"status", atoi(rows[6]));
   }
   } else {
-    LOG(WARNING)<<"CallCreditDetailSelect count < 0";
+    //LOG(WARNING)<<"CallCreditDetailSelect count < 0";
   }
   }*/
   
@@ -828,7 +828,7 @@ void UserMysql::CallRechargeInfoInsertAndSelect(void* param, base_logic::Value* 
       }
     }
   } else {
-    LOG(WARNING)<<"CallRechargeInfoInsertAndSelect count < 0";
+    //LOG(WARNING)<<"CallRechargeInfoInsertAndSelect count < 0";
   }
     dict->Remove(L"sql", &value);
 }
@@ -852,7 +852,7 @@ void UserMysql::CallChangeRechargeStatusAndSelect(void* param, base_logic::Value
       }
     }
   } else {
-    LOG(WARNING)<<"CallChangeRechargeStatusAndSelect count < 0";
+    //LOG(WARNING)<<"CallChangeRechargeStatusAndSelect count < 0";
   }
     dict->Remove(L"sql", &value);
 }

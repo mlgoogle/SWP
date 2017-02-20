@@ -49,13 +49,13 @@ share::DataShareMgr* SomeUtils::GetShareDataMgr() {
   basic::libhandle  handle = NULL;
   handle = basic::load_native_library("./data.so");
   if (handle==NULL){
-    LOG(ERROR) << "Can't load path data.so\n";
+    //LOG(ERROR) << "Can't load path data.so\n";
   }
-  LOG(INFO) << "load data.so success";
+  //LOG(INFO) << "load data.so success";
   share::DataShareMgr* (*pengine) (void);
   pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
   if(pengine==NULL){
-    LOG(ERROR) << "Can't find GetDataShareMgr\n";
+    //LOG(ERROR) << "Can't find GetDataShareMgr\n";
     return false;
   }
   return (*pengine)();
@@ -78,16 +78,16 @@ bool SomeUtils::VerifyToken(PacketHead* packet) {
           if (user_info->token() == token) 
             return true;
           else {
-            LOG(ERROR) << "verify token not match id:" << uid
-                  << " opcode:" << operate_code;
+            //LOG(ERROR) << "verify token not match id:" << uid
+            //<< " opcode:" << operate_code;
             return false;
           }
         } else {
-          LOG(ERROR) << "verify token not found UserInfo id:" << uid;
+          //LOG(ERROR) << "verify token not found UserInfo id:" << uid;
           return false;
         }
       } else {
-        LOG(ERROR) << "verify token parse token error";
+        //LOG(ERROR) << "verify token parse token error";
         return false;
       }
     } else {
@@ -96,13 +96,13 @@ bool SomeUtils::VerifyToken(PacketHead* packet) {
           || operate_code == 1037)
         return true;
       else {
-        LOG(ERROR) << "verify token no user id found";
+        //LOG(ERROR) << "verify token no user id found";
         return false;
       }
     }
   } else {
     std::string result;
-    LOG(ERROR) << "verify token body NULL, opcode:" << operate_code;
+    //LOG(ERROR) << "verify token body NULL, opcode:" << operate_code;
     return false;
   }
 }
