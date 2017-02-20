@@ -53,7 +53,7 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
   return true;
 }
 
-  bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
+bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
                                    struct PacketHead **packet_head) {
 
     int32 temp;
@@ -67,6 +67,7 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
       return false;
     }
 
+    LOG(INFO) << "packet processing";
     LOG_DEBUG2("%s",body_stream.c_str());
 
     base_logic::DictionaryValue *value =

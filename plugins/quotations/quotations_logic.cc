@@ -79,23 +79,27 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
     return false;
   }
 
-  switch (packet->operate_code) {
-    case R_QUOTATIONS_REAL_TIME_DATA: {
-      OnRealTime(srv, socket, packet);
-      break;
+  if (packet->type == QUOTATIONS_TYPE
+      && logic::SomeUtils::VerifyToken(packet)) {
+    switch (packet->operate_code) {
+      case R_QUOTATIONS_REAL_TIME_DATA: {
+        OnRealTime(srv, socket, packet);
+        break;
+      }
+      case R_QUOTATIONS_TIME_LINE_DATA: {
+        OnTimeLine(srv, socket, packet);
+        break;
+      }
+      case R_KCHART_TIME_LINE_DATA: {
+        OnKChartTimeLine(srv, socket, packet);
+        break;
+      }
+      default:
+        break;
     }
-    case R_QUOTATIONS_TIME_LINE_DATA: {
-      OnTimeLine(srv, socket, packet);
-      break;
-    }
-    case R_KCHART_TIME_LINE_DATA: {
-      OnKChartTimeLine(srv, socket, packet);
-      break;
-    }
-    default:
-      break;
+    return true;
   }
-  return true;
+  return false;
 }
 
 bool Quotationslogic::OnQuotationsClose(struct server *srv, const int socket) {

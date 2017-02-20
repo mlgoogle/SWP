@@ -139,24 +139,28 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
     return false;
   }
 
-  switch (packet->operate_code) {
-    case R_TRADES_GOODS_DATA: {
-      OnPlatformsGoods(srv, socket, packet);
-      break;
+  if (packet->type == TRADES_TYPE
+      && logic::SomeUtils::VerifyToken(packet)) {
+    switch (packet->operate_code) {
+      case R_TRADES_GOODS_DATA: {
+        OnPlatformsGoods(srv, socket, packet);
+        break;
+      }
+      case R_TRADES_OPEN_POSITION: {
+        OnOpenPosition(srv, socket, packet);
+        break;
+      }
+  
+      case R_TRADES_CURRENT_POSITION: {
+        OnCurrentPosition(srv, socket, packet);
+        break;
+      }
+      default:
+        break;
     }
-    case R_TRADES_OPEN_POSITION: {
-      OnOpenPosition(srv, socket, packet);
-      break;
-    }
-
-    case R_TRADES_CURRENT_POSITION: {
-      OnCurrentPosition(srv, socket, packet);
-      break;
-    }
-    default:
-      break;
+    return true;
   }
-  return true;
+  return false;
 }
 
 bool Tradeslogic::OnTradesClose(struct server *srv, const int socket) {

@@ -65,6 +65,8 @@
   (packet_control)->timestamp = timestamp;                                       \
   (packet_control)->session_id = session_id;                                     \
   (packet_control)->reserved = reserved;                                         \
+                  if (!value) \
+LOG(INFO) << "aaaaaaaaaaaa value null"; \
   (packet_control)->body_ = value;
 
 #define _MAKE_HEAD(head, _packet_length, _operate_code, _data_length, _type,   \

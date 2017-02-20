@@ -14,6 +14,7 @@
 #include "net/packet_processing.h"
 #include "logic/logic_comm.h"
 #include "basic/basic_util.h"
+#include "pub/share/data_share_mgr.h"
 
 namespace logic {
 
@@ -74,6 +75,7 @@ class SomeUtils {
   static void CreateToken(const int64 uid, const std::string& password,
                           std::string* token);
 
+  static share::DataShareMgr* GetShareDataMgr();
   static bool VerifyToken(PacketHead* packet);
 
   static inline int8 StringToIntChar(const char* str) {

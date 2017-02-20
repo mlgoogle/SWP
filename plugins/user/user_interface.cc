@@ -671,6 +671,12 @@ int32 UserInterface::OnWXPayClientResponse(const int32 socket,
   return err;
 }
 
+#define WX_RESPONSE \
+"<xml>\
+  <return_code><![CDATA[SUCCESS]]></return_code>\
+  <return_msg><![CDATA[OK]]></return_msg>\
+</xml>"
+
 int32 UserInterface::OnWXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
@@ -691,6 +697,7 @@ int32 UserInterface::OnWXPayServerResponse(const int32 socket,
       user_mysql_->ChangeRechargeStatusAndSelect(wx_pay_server.recharge_id(), 4, &dic);
     }
     int64 user_id = 0;
+    send(socket, WX_RESPONSE, sizeof(WX_RESPONSE), 0);
     /*dic.GetBigInteger(L"uid_", &user_id);
   UserInfo* user = data_share_mgr_->GetUser(user_id);
     if (user != NULL && user->is_login()) {

@@ -532,7 +532,7 @@ int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
   std::string transaction_id; 
   do {
     if (value != NULL) {
-      r = value->GetString(L"wxpay_result_", &xml_str);
+      r = value->GetString(L"result", &xml_str);
       LOG_IF(ERROR, !r) << "WXPayServer::xml_str parse error";
       LOG(INFO)<< "WXPAY SERVER RESULT***" << xml_str << "***";
       if (r && xml_str.length() > 5) {
@@ -586,7 +586,6 @@ int32 WXPayServer::set_http_packet(base_logic::DictionaryValue* value) {
         base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
                                                       deserializer);
       }
-
     } else {
       LOG(ERROR)<< "WXPlaceOrder json set_http_packet error";
       err = JSON_FORMAT_ERR;

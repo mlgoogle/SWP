@@ -136,12 +136,14 @@ bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
     return false;
 
+  LOG_ERROR2("====================login look");
   PacketHead *packet = NULL;
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
     //    LOG_ERROR2("UnpackStream Error socket:%d", socket);
     return false;
   }
   
+  LOG(INFO) << "-----------type:" << packet->type << "---opecode:" << packet->operate_code; 
   if (packet->type == LOGIN_TYPE
       && logic::SomeUtils::VerifyToken(packet)) {
     switch (packet->operate_code) {

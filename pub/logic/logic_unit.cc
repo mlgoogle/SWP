@@ -1,6 +1,7 @@
 //  Copyright (c) 2016-2017 The SWP Authors. All rights reserved.
 //  Created on: 2016年12月30日 Author: kerry
 
+#include <cerrno>
 #include <sys/socket.h>
 #include <time.h>
 #include <sstream>
@@ -44,6 +45,22 @@ void SomeUtils::CreateToken(const int64 uid, const std::string& password,
   (*token) = md5.GetHash();
 }
 
+share::DataShareMgr* SomeUtils::GetShareDataMgr() {
+  basic::libhandle  handle = NULL;
+  handle = basic::load_native_library("./data.so");
+  if (handle==NULL){
+    LOG(ERROR) << "Can't load path data.so\n";
+  }
+  LOG(INFO) << "load data.so success";
+  share::DataShareMgr* (*pengine) (void);
+  pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
+  if(pengine==NULL){
+    LOG(ERROR) << "Can't find GetDataShareMgr\n";
+    return false;
+  }
+  return (*pengine)();
+}
+
 bool SomeUtils::VerifyToken(PacketHead* packet) {
   base_logic::DictionaryValue* dic =
     ((struct PacketControl*)packet)->body_;
@@ -56,7 +73,7 @@ bool SomeUtils::VerifyToken(PacketHead* packet) {
       std::string token;
       r = dic->GetString(L"token", &token);
       if (r) {
-        UserInfo* user_info = login::Loginlogic::GetInstance()->GetUser(uid);
+        UserInfo* user_info = GetShareDataMgr()->GetUser(uid); //////NULL!
         if (user_info) {
           if (user_info->token() == token) 
             return true;
@@ -75,7 +92,8 @@ bool SomeUtils::VerifyToken(PacketHead* packet) {
       }
     } else {
       if (operate_code == REGISTER_ACCOUNT_REQ
-          || operate_code == USER_LOGIN_REQ)
+          || operate_code == USER_LOGIN_REQ
+          || operate_code == 1037)
         return true;
       else {
         LOG(ERROR) << "verify token no user id found";
@@ -83,6 +101,7 @@ bool SomeUtils::VerifyToken(PacketHead* packet) {
       }
     }
   } else {
+    std::string result;
     LOG(ERROR) << "verify token body NULL, opcode:" << operate_code;
     return false;
   }
@@ -264,11 +283,11 @@ int32 SendUtils::SendFull(int socket, const char *buffer, size_t nbytes) {
     amt = nbytes;
     amt = send(socket, buf, amt, 0);
     if (-1 == amt) {
-      if (11 == errno)
+      /*//////////////////////if (11 == errno)
         continue;
       else {
         break;
-      }
+        }*/
     }
     buf = buf + amt;
     nbytes -= amt;

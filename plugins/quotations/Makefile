@@ -11,6 +11,7 @@
 # Where to find user code.
 
 LIB_DIR = ./../../../mylib
+SRC_DIR = ../..
 USER_DIR = ./../../pub
 SO_DIR = ./../../bin/plugins
 
@@ -39,8 +40,11 @@ CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 PLUGIN = $(SO_DIR)/quotations/quotations.so
 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
+				-I$(LIB_DIR) \
+				-I${SRC_DIR} \
 				-I$(LIB_DIR)/basic \
 				-I$(THIRD_PATH)\
+				-I$(CUSTOM_THIRD_PATH)/glog/include \
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
@@ -130,6 +134,6 @@ redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool
 
 $(PLUGIN) : quotations_init.o  quotations_logic.o schduler_engine.o quotations_proto_buf.o quotations_redis.o\
 	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o mysql_pool.o redis_pool.o\
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
 	$^ -o $@
