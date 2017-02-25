@@ -8,6 +8,7 @@
 #include <list>
 #include "history/history_info.h"
 #include "storage/data_engine.h"
+#include "logic/swp_infos.h"
 #include "config/config.h"
 #include "basic/basictypes.h"
 #include "logic/base_values.h"
@@ -21,7 +22,7 @@ class HistoryDB {
   ~HistoryDB();
 
  public:
-  bool OnHistroyTradesRecord(std::list<history_logic::TradesPosition>* list);
+  bool OnHistroyTradesRecord(std::list<swp_logic::TradesPosition>* list);
 
  public:
   static void CallHistroyTradesTradesRecord(void* param, base_logic::Value* value);

@@ -32,7 +32,7 @@ TimeTask& TimeTask::operator =(const TimeTask& time_task) {
   return (*this);
 }
 
-
+/*
 TradesPosition::TradesPosition() {
   data_ = new Data();
 }
@@ -55,7 +55,7 @@ TradesPosition& TradesPosition::operator =(const TradesPosition& trades_position
 
   data_ = trades_positions.data_;
   return (*this);
-}
+}*/
 
 
 GoodsInfo::GoodsInfo() {
