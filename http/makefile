@@ -126,9 +126,10 @@ $(TRADES_OBJECT_PATH)/$(TRADESNAME)goods.o:
 clean:
 	-rm -f *.o
 	-rm -f $(OUTPUT_FILE)./*.fcgi
+	-rm -f obj/*.o
 
 delete-temp-file:
-	-rm -f *.o
+	-rm -f obj/*.o
 
 ############public###############################
 

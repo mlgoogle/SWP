@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,12 +24,9 @@
 
 int main(int agrc, char* argv[]) {
   fcgi_module::FcgiModule fcgi_client;
-  std::string core_sock_file = "/var/www/tmp/swpcorefile";
-  fcgi_client.Init("61.147.114.87",16001,QUOTATIONS_TYPE,
-                   R_QUOTATIONS_REAL_TIME_DATA,1);
-
-  //fcgi_client.Init(core_sock_file,HISTORY_TYPE,
-                  // R_HISTORY_TRADES,1);
+  fcgi_client.Init(BIND_HOST, BIND_PORT, QUOTATIONS_TYPE,
+  R_QUOTATIONS_REAL_TIME_DATA,
+                   1);
   fcgi_client.Run();
   fcgi_client.Close();
   return 0;
