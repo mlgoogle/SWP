@@ -7,7 +7,6 @@
 #include "protocol/data_packet.h"
 #include <list>
 #include <string>
-#include "glog/logging.h" ///////////////////
 
 #define DUMPPACKBUF 4096 * 10
 
@@ -31,17 +30,13 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
   struct PacketControl *packet_control = (struct PacketControl *)(packet_head);
   base_logic::DictionaryValue *value = packet_control != NULL ? packet_control->body_ : NULL;
 
-  if (value) {
-    base_logic::ValueSerializer *engine =
-      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+  base_logic::ValueSerializer *engine = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON);
     if (engine == NULL) {
       LOG_ERROR("engine create null");
       return false;
     }
     r = engine->Serialize((*value), &body_stream);
-    delete engine;
-    engine = NULL;
-  }
 
   BUILDPAKCET(body_stream.length());
 
@@ -49,7 +44,10 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 
   *packet_stream = reinterpret_cast<void *>(const_cast<char *>(out.GetData()));
   *packet_stream_length = PACKET_HEAD_LENGTH + body_stream.length();
-  
+  if (engine) {
+    delete engine;
+    engine = NULL;
+  }
   return true;
 }
 

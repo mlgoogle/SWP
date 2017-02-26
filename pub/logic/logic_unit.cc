@@ -9,7 +9,6 @@
 #include "logic/logic_comm.h"
 #include "basic/md5sum.h"
 #include "basic/radom_in.h"
-#include "glog/logging.h" ///////////////////
 
 namespace logic {
 
@@ -255,7 +254,7 @@ bool SendUtils::SendMessage(int socket, struct PacketHead* packet,
   int32_t packet_stream_length = 0;
   int ret = 0;
   bool r1 = false;
-  if (socket <= 0)// || packet == NULL)
+  if (socket <= 0 || packet == NULL)
     return false;
 
   if (net::PacketProsess::PacketStream(packet, &packet_stream,
