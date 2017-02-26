@@ -7,6 +7,7 @@
 #include <string>
 #include <list>
 #include "trades/trades_info.h"
+#include "logic/swp_infos.h"
 #include "storage/data_engine.h"
 #include "config/config.h"
 #include "basic/basictypes.h"
@@ -22,8 +23,8 @@ class TradesDB {
 
  public:
   bool OnFetchPlatformGoods(std::list<trades_logic::GoodsInfo>* list);
-  bool OnOpenPosition(trades_logic::TradesPosition& trades);
-  bool OnClosePosition(std::list<trades_logic::TradesPosition>* list);
+  bool OnOpenPosition(swp_logic::TradesPosition& trades);
+  bool OnClosePosition(std::list<swp_logic::TradesPosition>* list);
  public:
   static void CallFecthPlatformGoods(void* param, base_logic::Value* value);
   static void CallOnOpenPosition(void* param, base_logic::Value* value);

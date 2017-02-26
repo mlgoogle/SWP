@@ -63,7 +63,7 @@ void TradesManager::SetGoodsUnit(trades_logic::GoodsInfo& goods_info) {
 
 void TradesManager::OnTimePosition(
     const int socket, const int64 session,
-    trades_logic::TradesPosition& trades_position) {
+    swp_logic::TradesPosition& trades_position) {
   net_reply::TradesPosition r_trades_position;
   int32 result  = OpenPosition(trades_position);
   if (result != 0){
@@ -99,7 +99,7 @@ void TradesManager::OnTimePosition(
 }
 
 int32 TradesManager::OpenPosition(
-    trades_logic::TradesPosition& trades_position) {
+    swp_logic::TradesPosition& trades_position) {
   bool r = false;
   trades_logic::GoodsInfo good_info;
   {
@@ -130,7 +130,7 @@ int32 TradesManager::OpenPosition(
   quotation.set_type(FORXE_TYPE);
   GetQuotations(key, quotation);
   if(quotation.current_unix_time()==0)
-    return NO_HAVE_QUOTATIONS_DATA;
+    return NO_HAVE_POSITIONS_DATA;
   trades_position.set_goods_key(key);
   trades_position.set_symbol(good_info.symbol());
   trades_position.set_name(good_info.name());
@@ -161,7 +161,7 @@ bool TradesManager::DistributionTask() {
   base_logic::WLockGd lk(lock_);
   time_t current_time = time(NULL);
   trades_cache_->task_temp_list_.sort(trades_logic::TimeTask::cmp);
-  std::list<trades_logic::TradesPosition> result_list;
+  std::list<swp_logic::TradesPosition> result_list;
   QUOTATIONS_MAP quotations;
   GetAllQuotatiosnNoLock(FORXE_TYPE, quotations);
   if (quotations.size() <= 0)
@@ -176,7 +176,7 @@ bool TradesManager::DistributionTask() {
       //时间到平仓
       TRADES_MAP::iterator trades_map_it = trades_cache_->all_trades_map_.find(
           time_task.id());
-      trades_logic::TradesPosition trades_position = trades_map_it->second;
+      swp_logic::TradesPosition trades_position = trades_map_it->second;
       QUOTATIONS_MAP::iterator quotations_map_it = quotations.find(
           trades_position.goods_key());
       swp_logic::Quotations& quotation = quotations_map_it->second;
@@ -196,7 +196,7 @@ bool TradesManager::DistributionTask() {
 }
 
 void TradesManager::SetTimePosition(
-    trades_logic::TradesPosition& trades_position) {
+    swp_logic::TradesPosition& trades_position) {
   base_logic::WLockGd lk(lock_);
   TRADES_MAP user_trades_map;
   PLAT_TRADES_MAP::iterator plat_trades_it = trades_cache_->plat_trades_map_
@@ -275,17 +275,24 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 session,
     return;
 
   net_reply::AllTradesPosition net_trades_positions;
-  std::list <trades_logic::TradesPosition> trades_list;
+  std::list <swp_logic::TradesPosition> trades_list;
 
   for (TRADES_MAP::iterator it = trades_map.begin(); it != trades_map.end();
       it++){
-    trades_logic::TradesPosition trades_position = it->second;
+    swp_logic::TradesPosition trades_position = it->second;
     trades_list.push_back(trades_position);
   }
+  //没有对应的历史记录
+   if (trades_list.size() <=0){
+     send_error(socket,ERROR_TYPE,ERROR_TYPE,NO_HAVE_POSITIONS_DATA);
+     return;
+   }
   //trades_list.sort(trades_logic::TradesPosition:)
+
+   trades_list.sort(swp_logic::TradesPosition::close_after);
   //遍历发送
   while (trades_list.size() > 0 && t_count < count)  {
-    trades_logic::TradesPosition trades_position = trades_list.front();
+    swp_logic::TradesPosition trades_position = trades_list.front();
     trades_list.pop_front();
     t_start++;
     if (t_start < pos)

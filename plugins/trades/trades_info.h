@@ -118,6 +118,7 @@ class TimeTask {
 };
 
 
+/*
 class TradesPosition {
  public:
   TradesPosition();
@@ -405,7 +406,7 @@ class TradesPosition {
   };
   Data* data_;
 };
-
+*/
 
 class GoodsInfo {
  public:

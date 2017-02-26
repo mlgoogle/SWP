@@ -153,13 +153,17 @@ bool Quotationslogic::OnTimeout(struct server *srv, char *id, int opcode,
 }
 
 bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket, struct PacketHead *packet) {
-  quotations_logic::net_request::KChartTimeLine kchar_time;
+  quotations_logic::net_request::KChartTimeLine kchart_time;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  kchar_time.set_http_packet(packet_control->body_);
+  bool r = kchart_time.set_http_packet(packet_control->body_);
+  if (!r){
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    return false;
+  }
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendKChartLine(
-      socket, packet->session_id, kchar_time.chart_type(), kchar_time.exchange_name(),
-      kchar_time.platform_name(), kchar_time.symbol(), kchar_time.start_time(),
-      kchar_time.count());
+      socket, packet->session_id, kchart_time.chart_type(), kchart_time.exchange_name(),
+      kchart_time.platform_name(), kchart_time.symbol(), kchart_time.start_time(),
+      kchart_time.count());
   return true;
 }
 

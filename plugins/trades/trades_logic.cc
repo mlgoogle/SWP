@@ -104,6 +104,7 @@ bool Tradeslogic::Init() {
   if (config == NULL)
     return false;
   r = config->LoadConfig(path);
+  LOG_MSG2("path : %s", path.c_str());
   trades_logic::TradesEngine::GetSchdulerManager();
   trades_db_ = new trades_logic::TradesDB(config);
   trades_logic::TradesEngine::GetSchdulerManager()->InitDB(trades_db_);
@@ -124,6 +125,10 @@ void Tradeslogic::FreeInstance() {
 }
 
 bool Tradeslogic::OnTradesConnect(struct server *srv, const int socket) {
+  std::string ip;
+  int port;
+  logic::SomeUtils::GetIPAddress(socket, ip, port);
+  LOG_MSG2("ip {%s} prot {%d}", ip.c_str(), port);
   return true;
 }
 
@@ -261,7 +266,7 @@ bool Tradeslogic::OnOpenPosition(struct server* srv, int socket,
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
-  trades_logic::TradesPosition trades_position;
+  swp_logic::TradesPosition trades_position;
   trades_position.create_position_id();
   trades_position.set_uid(open_position.id());
   trades_position.set_buy_sell(open_position.buy_sell());
