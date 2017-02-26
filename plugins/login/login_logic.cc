@@ -1,6 +1,7 @@
 // Copyright (c) 2016 The login Authors. All rights reserved.
 // login_logic.cc
 
+#include "net/comm_head.h"
 #include "pub/comm/comm_head.h"
 #include "login/login_logic.h"
 
@@ -23,11 +24,17 @@
 #include "public/basic/native_library.h"
 #include "base/logic/base_values.h"
 #include "login/login_opcode.h"
-//#include "pub/share/data_share_mgr.h"
+#include "pub/share/data_share_mgr.h"
 #include "login/login_proto.h"
+#include "public/basic/md5sum.h"
+#include "logic/logic_unit.h"
+#include "net/packet_processing.h"
+#include "pub/util/util.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/login/login_config.xml"
 
+#define SHELL_SMS "./verify_code_sms.sh"
+#define SMS_KEY "yd1742653sd"
 namespace login {
 Loginlogic* Loginlogic::instance_ = NULL;
 
@@ -36,11 +43,13 @@ Loginlogic::Loginlogic() {
 
   if (!Init())
     assert(0);
+  
+  InitLog();
 }
 
 void Loginlogic::InitLog() {
   //初始化日志名
-  google::InitGoogleLogging("login");
+  google::InitGoogleLogging("actuals");
 
   //初始化info级别日志存储位置以及日志文件开头 ./info/info_20160808-105851.4743
   google::SetLogDestination(google::INFO, "./log/info_");
@@ -86,6 +95,7 @@ bool Loginlogic::Init() {
   }
   login_mysql_ = new LoginMysql(config);
   //  InitShareData();
+  data_share_mgr_ = share::DataShareMgr::GetInstance();
   return true;
 }
 
@@ -125,27 +135,27 @@ bool Loginlogic::OnLoginConnect(struct server *srv, const int socket) {
 
 bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
                                     const void *msg, const int len) {
-  bool r = false;
-  int32 err = 0;
-  char* msg_c = new char[len + 1];
-  memset(msg_c, 0, len+1);
-  memcpy(msg_c, msg, len);
-  LOG(INFO) << "OnLoginMessage:len-" << len;
-  PacketHead packet(msg_c);
-  delete[] msg_c;
-  msg_c = NULL;
-  if (packet.type() == LOGIN_TYPE) {
-	switch (packet.operate_code()) {
+  if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
+    return false;
+
+  PacketHead *packet = NULL;
+  if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
+    //    LOG_ERROR2("UnpackStream Error socket:%d", socket);
+    return false;
+  }
+
+  if (packet->type == LOGIN_TYPE) {
+	switch (packet->operate_code) {
       case REGISTER_ACCOUNT_REQ: {
-        RegisterAccount(socket, &packet);
+        OnRegisterAccount(socket, packet);
         break;
       }
       case USER_LOGIN_REQ: {
-        UserLogin(socket, &packet);
+        OnUserLogin(socket, packet);
         break;
       }
       case CHANGE_PASSWD_REQ: {
-		ChangePasswd(socket, &packet);
+        OnChangePasswd(socket, packet);
         break;
       }
 	}
@@ -154,90 +164,104 @@ bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
   return false;
 }
 	
-int32 Loginlogic::RegisterAccount(const int32 socket, PacketHead* packet) {
+int32 Loginlogic::OnRegisterAccount(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    RegisterAccountRecv rev(*packet);
-    err = rev.Deserialize();
-    if (err < 0)
-      break;
-    /*if (time(NULL) - rev.timestamp() > 15 * 60) {
+    net_request::RegisterAccount register_account;
+    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
+    register_account.set_http_packet(packet_recv->body_);
+    if (time(NULL) - register_account.timestamp() > 15000 * 60) {
       err = VERIFY_CODE_OVERDUE;
       break;
     }
     std::stringstream ss;
-    ss << SMS_KEY << rev.timestamp() << rev.verify_code() << rev.phone_num();
-	base::MD5Sum md5(ss.str());
-    if (md5.GetHash() != rev.token()) {
+    ss << SMS_KEY << register_account.timestamp() << register_account.verify_code() << register_account.phone_num();
+    base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != register_account.verify_token()) {
       err = VERIFY_CODE_ERR;
       break;
-	  }*/
-    DicValue dic;
-    //err = login_mysql_->RegisterInsertAndSelect(rev.phone_num(), rev.passwd(), &dic);
+    }
+    //DicValue dic;
+    //err = login_mysql_->RegisterInsertAndSelect(register_account.phone_num(), register_account.passwd(), &dic);
     //if (err < 0)
-	// break;
-	//    SendMsg(socket, packet, &dic, REGISTER_ACCOUNT_RLY);
-	//dic.SetString("phone", rev.phone_num());
-	//dic.SetString("pwd", rev.passwd());
-	packet->set_reserved(socket);
-	SendPacket(server_fd_, packet);
+    // break;
+    //    ////SendMsg(socket, packet, &dic, REGISTER_ACCOUNT_RLY, err);
+    //dic.SetString("phone", register_account.phone_num());
+    //dic.SetString("pwd", register_account.passwd());
+    packet->reserved = socket;
+    LOG(INFO) << "recv socket:" << packet->reserved;
+    send_message(server_fd_, packet);
   } while (0);
   if (err < 0) {
-    SendError(socket, packet, err, REGISTER_ACCOUNT_RLY);
+    send_error(socket, LOGIN_TYPE, REGISTER_ACCOUNT_RLY, err);
   }
   return err;
 }
 
-int32 Loginlogic::UserLogin(const int32 socket, PacketHead* packet) {
+int32 Loginlogic::OnUserLogin(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  LoginRecv rev(*packet);
   do {
-	  /*err = rev.Deserialize();
-    if (err < 0)
-	break;*/
+    //net_request::UserLogin user_login;
+    //struct PacketControl* packet_recv = (struct PacketControl*) (packet);
+    //user_login.set_http_packet(packet_recv->body_);
     //if (UserIsLogin(rev.phone_num())) {
       // todo
     //}
-	packet->set_reserved(socket);
-	SendPacket(server_fd_, packet);
-	LOG(INFO)<< "UserLogin set socket:" << packet->reserved();
+    packet->reserved = socket;
+    send_message(server_fd_, packet);
   } while (0);
   if (err < 0) {
-    SendError(socket, packet, err, USER_LOGIN_RLY);
+    send_error(socket, LOGIN_TYPE, USER_LOGIN_RLY, err);
   }
-  LOG(INFO)<< "UserLogin finish err:" << err;
+  LOG(INFO) << "UserLogin finish err:" << err;
   return err;
 }
 
-int32 Loginlogic::ChangePasswd(const int32 socket, PacketHead* packet) {
+int32 Loginlogic::OnChangePasswd(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    ChangePasswdRecv rev(*packet);
-    err = rev.Deserialize();
-    if (err < 0)
+    net_request::ChangePasswd change_passwd;
+    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
+    change_passwd.set_http_packet(packet_recv->body_);
+    if (time(NULL) - change_passwd.timestamp() > 1500 * 60) {
+      err = VERIFY_CODE_OVERDUE;
       break;
-    /*UserInfo* p = data_share_mgr_->GetUser(rev.uid());
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << change_passwd.timestamp() << change_passwd.verify_code() << change_passwd.phone_num();
+    base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != change_passwd.verify_token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+	}
+    /*UserInfo* p = data_share_mgr_->GetUser(change_passwd.uid());
     if (p == NULL || !p->is_login()) {
       err = USER_NOT_IN_CACHE;
       break;
 	  }
     LOG(INFO) << "pwd:" << p->passwd();
-    if (p->passwd() != rev.old_passwd()) {
+    if (p->passwd() != change_passwd.old_passwd()) {
       err = CHANGE_OLD_PWD_ERR;
       break;
 	  } else */{
-      if (rev.type() == ChangePasswdRecv::passwdLogin)
-        SendPacket(server_fd_, packet);
-	  else if (rev.type() == ChangePasswdRecv::passwdExchange)
-        err = login_mysql_->ChangePasswdUpdate(rev.phone_num(), rev.passwd());
-      if (err < 0)
-        break;
-      //p->set_passwd(rev.new_passwd());
-      SendMsg(socket, packet, NULL, CHANGE_PASSWD_RLY);
+	  int32 type = change_passwd.type();
+    if (type == net_request::ChangePasswd::PASSWD_LOGIN) {
+      packet->reserved = socket; 
+      send_message(server_fd_, packet);
+    } else if (type == net_request::ChangePasswd::PASSWD_TRADE) {
+        err = login_mysql_->ChangePasswdUpdate(change_passwd.phone_num(), change_passwd.passwd());
+        if (err < 0)
+          break;
+        struct PacketControl packet_control;
+        MAKE_HEAD(packet_control, CHANGE_PASSWD_RLY, LOGIN_TYPE, 0, 0, 0);
+        send_message(socket, &packet_control);
+      }
+      //p->set_passwd(change_passwd.new_passwd());
+      ////SendMsg(socket, packet, NULL, CHANGE_PASSWD_RLY, err);
     }
   } while (0);
   if (err < 0) {
-    SendError(socket, packet, err, CHANGE_PASSWD_RLY);
+    send_error(socket, LOGIN_TYPE, CHANGE_PASSWD_RLY, err);
   }
   return err;
 }
@@ -260,96 +284,125 @@ bool Loginlogic::OnBroadcastConnect(struct server *srv, const int socket,
 
 bool Loginlogic::OnBroadcastMessage(struct server *srv, const int socket,
                                       const void *msg, const int len) {
-  bool r = false;
-  int32 err = 0;
-  char* msg_c = new char[len + 1];
-  memset(msg_c, 0, len+1);
-  memcpy(msg_c, msg, len);
-  LOG(INFO) << "OnBroadcastMessage:len-" << len;
-  PacketHead packet(msg_c);
-  delete[] msg_c;
-  msg_c = NULL;
-  if (packet.type() == LOGIN_TYPE) {
-	switch (packet.operate_code()) {
-	  case REGISTER_ACCOUNT_RLY: {
-		RegisterAccountReply(socket, &packet);
+  if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
+    return false;
+
+  PacketHead *packet = NULL;
+  if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
+    //    LOG_ERROR2("UnpackStream Error socket:%d", socket);
+    return false;
+  }
+  
+  if (packet->type == LOGIN_TYPE) {
+	switch (packet->operate_code) {
+  case REGISTER_ACCOUNT_RLY: {
+		OnRegisterAccountReply(socket, packet);
 		break;
 	  }
       case USER_LOGIN_RLY: {
-        UserLoginReply(socket, &packet);
+        OnUserLoginReply(socket, packet);
         break;
       }
+  case CHANGE_PASSWD_RLY: {
+    send_message(packet->reserved, packet);
+    break;
+  }
 	}
-    return true;
+  return true;
   }
   return false;
-  return true; ///////
 }
 
-int32 Loginlogic::RegisterAccountReply(const int32 socket, PacketHead* packet) {
+int32 Loginlogic::OnRegisterAccountReply(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    RegisterAccountRecv rev(*packet);
-    err = rev.Deserialize();
-      if (err < 0)
-        break;
-  	if (rev.phone_num() != "") {
+    net_request::RegisterAccount register_account;
+    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
+    register_account.set_http_packet(packet_recv->body_);
+    if (err < 0)
+      break;
+    /*if (time(NULL) - rev.timestamp() > 15 * 60) {
+      err = VERIFY_CODE_OVERDUE;
+      break;
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << rev.timestamp() << rev.verify_code() << rev.phone_num();
+	base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != rev.token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+	  }*/
+  	if (register_account.phone_num() != "") {
       DicValue dic;
-      err = login_mysql_->RegisterInsertAndSelect(rev.phone_num(), rev.passwd(), &dic);
+      err = login_mysql_->RegisterInsertAndSelect(register_account.phone_num(), register_account.passwd(), &dic);
       if (err < 0)
   	  break;
-  	  SendMsg(packet->reserved(), packet, &dic, REGISTER_ACCOUNT_RLY);
-	} else {
-	  SendPacket(packet->reserved(), packet);
-	}
+      struct PacketControl packet_control;
+      MAKE_HEAD(packet_control, REGISTER_ACCOUNT_RLY, LOGIN_TYPE, 0, 0, 0);
+      packet_control.body_ = &dic;
+      send_message(packet->reserved, &packet_control);
+  	  //SendMsg(packet->reserved, packet, &dic, REGISTER_ACCOUNT_RLY, err);
+    } else {
+      send_message(packet->reserved, packet);
+    }
   } while (0);
   if (err < 0) {
-    SendError(socket, packet, err, REGISTER_ACCOUNT_RLY);
+    send_error(socket, LOGIN_TYPE, REGISTER_ACCOUNT_RLY, err);
   }
   return err;
 }
 	
-int32 Loginlogic::UserLoginReply(const int32 socket, PacketHead* packet) {
+int32 Loginlogic::OnUserLoginReply(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  LoginRecv rev(*packet);
-  int32 client_sock = packet->reserved();
   do {
-    err = rev.Deserialize();
-    //if (err < 0)
-	// break;
-    if (UserIsLogin(rev.phone_num())) {
+    net_request::UserLogin user_login;
+    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
+    user_login.set_http_packet(packet_recv->body_);
+    if (UserIsLogin(user_login.phone_num())) {
       // todo
     }
-	if (rev.phone_num() != "") {
-	  char client_ip[64];
-	  struct sockaddr_in client_addr;
-	  int addr_len = sizeof(client_addr);
-      getpeername(client_sock, (struct sockaddr*)&client_addr, (socklen_t*)&addr_len);	
-	  getnameinfo((struct sockaddr*)&client_addr, addr_len,
-				  client_ip, sizeof(client_ip), 0, 0, NI_NUMERICHOST);
-      DicValue dic;
-      err = login_mysql_->UserLoginSelect(rev.phone_num(), client_ip, &dic);
-      LOG(INFO)<< "UserLoginReply err:" << err;
-      if (err < 0)
-        break;
-	  if (rev.token() != "")
-	    dic.SetString("token", rev.token());
-      SendMsg(packet->reserved(), packet, &dic, USER_LOGIN_RLY);
-      //AddUser(socket, &dic, rev.user_type());
-	} else {
-		LOG(INFO)<< "token err here";
-	  SendPacket(packet->reserved(), packet);
-	  return -1;
-	}
-		//SendError(packet->reserved(), packet, PHONE_OR_PASSWD_ERR, USER_LOGIN_RLY);
+    if (user_login.phone_num() != "") {
+      ////////////CHANGE
+      std::string client_ip;
+      util::GetIPAddress(packet->reserved, &client_ip, NULL);
+    DicValue dic;
+    err = login_mysql_->UserLoginSelect(user_login.phone_num(), client_ip, &dic);
+    if (err < 0)
+      break;
+    LOG(INFO) << "packet->reserved:" << packet->reserved;
+	  if (user_login.token() != "")
+	    dic.SetString("token", user_login.token());
+    struct PacketControl packet_control;
+    MAKE_HEAD(packet_control, USER_LOGIN_RLY, LOGIN_TYPE, 0, 0, 0);
+    packet_control.body_ = &dic;
+    send_message(packet->reserved, &packet_control);
+    //SendMsg(packet->reserved, packet, &dic, USER_LOGIN_RLY, err);
+    AddUser(socket, &dic, user_login.token());
+    } else {
+      LOG(INFO)<< "token err here";
+      send_message(packet->reserved, packet);
+      return -1;
+    }
+		//SendError(packet->reserved, packet, PHONE_OR_PASSWD_ERR, USER_LOGIN_RLY, err);
   } while (0);
-	LOG(INFO)<< "UserLoginReply socket:" << packet->reserved();
   if (err < 0) {
-	SendError(packet->reserved(), packet, err, USER_LOGIN_RLY);
+    send_error(packet->reserved, LOGIN_TYPE, USER_LOGIN_RLY, err);
   }
   LOG(INFO)<< "UserLoginReply finish err:" << err;
   return err;
 }
+  
+void Loginlogic::AddUser(int32 fd, DicValue* v, std::string token) {
+    UserInfo* user = NULL;
+    //游客
+    user = new UserInfo();
+    user->Serialization(v);
+    user->set_is_login(true);
+    user->set_socket_fd(fd);
+    user->set_token(token);
+    LOG(INFO) << "adduser login :" << user->uid();
+    data_share_mgr_->AddUser(user);
+  }
 
 bool Loginlogic::OnBroadcastClose(struct server *srv, const int socket) {
   server_fd_ = -1;
@@ -383,6 +436,41 @@ void* Loginlogic::AutoReconnectToServer(void* arg) {
 }
 
 int Loginlogic::SendFull(int socket, const char *buffer, size_t nbytes) {
+  ssize_t amt = 0;
+  ssize_t total = 0;
+  const char *buf = buffer;
+
+  do {
+    amt = nbytes;
+    amt = send(socket, buf, amt, 0);
+    buf = buf + amt;
+    nbytes -= amt;
+    total += amt;
+  } while (amt != -1 && nbytes > 0);
+
+  LOG(INFO) << "SendFull:" << total;
+  return (int) (amt == -1 ? amt : total);
+}
+
+void Loginlogic::SendPacket(const int socket, PacketHead* packet) {
+
+  int packet_length = packet->packet_length;
+  LOG(INFO) << "SendPacket packet_length:" << packet_length << ", head:" << HEAD_LENGTH;
+  LOG(INFO) << (char*)(packet + HEAD_LENGTH + 5);
+  char* s = new char[packet_length + 1];
+  //LOG(INFO)<< "packet body:" << packet->body_str();
+  //memset(s, 0, packet->packet_length);
+  memcpy(s, &packet, packet_length);
+  s[packet_length] = '\0';
+  //memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),
+  //      packet->body_str().length());
+  int total = SendFull(socket, s, packet_length);
+  delete[] s;
+  s = NULL;
+  LOG_IF(ERROR, total != packet_length) << "send packet wrong";
+}
+
+  /*int Loginlogic::SendFull(int socket, const char *buffer, size_t nbytes) {
   ssize_t amt = 0;
   ssize_t total = 0;
   const char *buf = buffer;
@@ -432,7 +520,7 @@ void Loginlogic::SendMsg(const int socket, PacketHead* packet, DicValue* dic,
   send.AdapterLen();
   send.set_operate_code(opcode);
   SendPacket(socket, &send);
-}
+  }*/
 
 }  // namespace bigv
 

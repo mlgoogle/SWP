@@ -26,7 +26,7 @@ struct BufHead {
   int32 reserved;
 };
 
-class PacketHead {
+/*class PacketHead {
  public:
   PacketHead();
   PacketHead(char* packet);
@@ -80,7 +80,7 @@ class PacketErr:public PacketHead {
   inline int32 error() { return error_; }
  private:
   int32 error_;
-};
+  };*/
 
 #pragma pack(pop)
 #endif  // PUB_NET_PROTO_BUF_H_

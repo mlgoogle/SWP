@@ -21,17 +21,17 @@ class LoginMysql {
  public:
   int32 RegisterInsertAndSelect(std::string phone_num, std::string passwd,
                                 DicValue* dic);
-  int32 UserLoginSelect(std::string phone_num, const char* client_ip, DicValue* dic);
+  int32 UserLoginSelect(std::string phone_num, std::string& client_ip, DicValue* dic);
 
   int32 UserDetailSelect(std::string uids, DicValue* dic);
-  int32 ChangePasswdUpdate(std::string phone_num, std::string passwd);
+  int32 ChangePasswdUpdate(std::string phone, std::string passwd);
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type, DicValue* dic);
 
-  static void CallUserLoginSelect(void* param, Value* value);
-  static void CallUserDetailSelect(void* param, Value* value);
-  static void CallRegisterInsertAndSelect(void* param, Value* value);
-  static void CallCheckPasswdSelect(void* param, Value* value);
-  static void CallChangePasswdSelect(void* param, Value* value);
+  static void CallUserLoginSelect(void* param, base_logic::Value* value);
+  static void CallUserDetailSelect(void* param, base_logic::Value* value);
+  static void CallRegisterInsertAndSelect(void* param, base_logic::Value* value);
+  static void CallCheckPasswdSelect(void* param, base_logic::Value* value);
+  static void CallChangePasswdSelect(void* param, base_logic::Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

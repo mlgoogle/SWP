@@ -6,10 +6,11 @@
 #ifndef PLUGINS_LOGIN_LOGIN_LOGIC_H_
 #define PLUGINS_LOGIN_LOGIN_LOGIC_H_
 
+#include "net/comm_head.h"
 #include "core/common.h"
-#include "login/typedef.h"
 #include "login/proto_buf.h"
 #include "login/login_mysql.h"
+#include "pub/share/data_share_mgr.h"
 #include <list> 
 #include <pthread.h>
 
@@ -47,13 +48,14 @@ class Loginlogic {
   bool InitShareData();
   void InitLog();
   
-  int32 RegisterAccount(const int32 socket, PacketHead* packet);
-  int32 UserLogin(const int32 socket, PacketHead* packet);
+  int32 OnRegisterAccount(const int32 socket, PacketHead* packet);
+  int32 OnUserLogin(const int32 socket, PacketHead* packet);
   bool UserIsLogin(std::string u);
-  int32 ChangePasswd(const int32 socket, PacketHead* packet);
+  int32 OnChangePasswd(const int32 socket, PacketHead* packet);
 
-  int32 RegisterAccountReply(const int32 socket, PacketHead* packet);
-  int32 UserLoginReply(const int32 socket, PacketHead* packet);
+  int32 OnRegisterAccountReply(const int32 socket, PacketHead* packet);
+  int32 OnUserLoginReply(const int32 socket, PacketHead* packet);
+  void AddUser(int32 fd, DicValue* v, std::string token);
   
   int SendFull(int socket, const char *buffer, size_t nbytes);
   void SendMsg(const int socket, PacketHead* packet, DicValue* dic,
@@ -63,6 +65,7 @@ class Loginlogic {
   
   LoginMysql* login_mysql_;
   int32 server_fd_;
+  share::DataShareMgr* data_share_mgr_;
 };
 
 }  // namespace login
