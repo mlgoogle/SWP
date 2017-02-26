@@ -57,11 +57,6 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
   int32 temp;
   int error_code;
   std::string error_str;
-  BUILDUNPACKET();
-  base_logic::ValueSerializer *engine =
-      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  if (engine == NULL) {
-    LOG_ERROR("engine create null");
 
   packet::DataInPacket in(
       reinterpret_cast<char*>(const_cast<void*>(packet_stream)), len);
@@ -91,7 +86,6 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
       return false;
     }
 
-    //LOG_DEBUG2("%s",body_stream.c_str());
 
     base_logic::DictionaryValue *value = (base_logic::DictionaryValue*) engine
         ->Deserialize(&body_stream, &error_code, &error_str);
@@ -125,7 +119,8 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
 }
 
 void PacketProsess::DeletePacket(const void *packet_stream, int32 len,
-                                 struct PacketHead *packet_head) {
+                                 struct PacketHead *packet_head){
+
 }
 
 void PacketProsess::DumpPacket(const struct PacketHead *packet_head) {

@@ -12,7 +12,6 @@
 #include "logic/logic_comm.h"
 #include "logic/logic_unit.h"
 #include "net/errno.h"
-#include "net/comm_head.h"
 #include <string>
 
 #define DEFAULT_CONFIG_PATH "./plugins/quotations/quotations_config.xml"
