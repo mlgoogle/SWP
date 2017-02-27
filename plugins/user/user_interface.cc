@@ -9,9 +9,9 @@
 #include <vector>
 #include <time.h>
 #include <sys/socket.h>
+#include <sstream>
 
 #include "public/basic/md5sum.h"
-#include "glog/logging.h"
 
 #include "user/user_proto.h"
 #include "user/user_opcode.h"
@@ -226,13 +226,15 @@ int32 UserInterface::OnUnbindBankcard(const int32 socket, PacketHead* packet) {
       break;
       }*/
     err = user_mysql_->UnbindBankcardDelete(unbind_bankcard.phone_num(), unbind_bankcard.bankcard_id());
-    //LOG(INFO) << "unbind before send";
+    LOG_MSG("unbind before send");
+    LOG_MSG("unbind before send");
     if (err < 0)
       break;
     struct PacketControl packet_control;
     MAKE_HEAD(packet_control, UNBIND_BANKCARD_RLY, USER_TYPE, 0, 0, 0);
     packet_control.body_ = NULL;
-    //LOG(INFO) << "unbind before send";
+    LOG_MSG("unbind before send");
+    LOG_MSG("unbind before send");
     send_message(socket, &packet_control);
     //SendMsg(socket, packet, NULL, UNBIND_BANKCARD_RLY);
   } while (0);
@@ -453,8 +455,8 @@ int32 UserInterface::OnObtainVerifyCode(const int32 socket, PacketHead* packet) 
     ss << SMS_KEY << timestamp_ << rand_code_ << obtain_verify_code.phone_num();
     base::MD5Sum md5(ss.str());
     dic.SetString(L"vToken", md5.GetHash().c_str());
-    //LOG(INFO) << "token:" << ss.str();
-    //LOG(INFO) << "md5 token:" << md5.GetHash();
+    LOG_MSG2("token:", ss.str());
+    LOG_MSG2("md5 token:", md5.GetHash());
     ss.str("");
     ss.clear();
     ss << obtain_verify_code.phone_num() << ":" << obtain_verify_code.verify_type();
@@ -469,7 +471,8 @@ int32 UserInterface::OnObtainVerifyCode(const int32 socket, PacketHead* packet) 
     ss.clear();
     ss << SHELL_SMS << " " << obtain_verify_code.phone_num() << " " << rand_code_ << " "
        << obtain_verify_code.verify_type();
-    //LOG(INFO) << ss.str();
+    LOG_MSG(ss.str());
+    LOG_MSG(ss.str());
     system(ss.str().c_str());
   } while (0);
   if (err < 0) {
@@ -534,17 +537,17 @@ int32 UserInterface::OnWXPlaceOrder(const int32 socket, PacketHead* packet) {
       if (dic != NULL) {
         std::string return_code;
         dic->GetString(L"return_code", &return_code);
-        //LOG(INFO) << "return_code:" << return_code;
+        LOG_MSG2("return_code:", return_code);
         //下单成功
         if (return_code.find("SUCCESS") != std::string::npos) {
           std::string result_code;
           dic->GetString(L"result_code", &result_code);
-          //LOG(INFO) << "result_code:" << result_code;
+          LOG_MSG2("result_code:", result_code);
           //业务逻辑成功
           if (result_code.find("SUCCESS") != std::string::npos) {
             std::string prepay_id;
             dic->GetString(L"prepay_id", &prepay_id);
-            //LOG(INFO) << "prepay_id:" << prepay_id;
+            LOG_MSG2("prepay_id:", prepay_id);
             int npos1 = prepay_id.find("<![CDATA[");
             int npos2 = prepay_id.find("]]>");
             prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
@@ -553,7 +556,7 @@ int32 UserInterface::OnWXPlaceOrder(const int32 socket, PacketHead* packet) {
             wx_order.PreSerialize(&recharge_dic);
             struct PacketControl packet_control;
             MAKE_HEAD(packet_control, WX_PLACE_ORDER_RLY, USER_TYPE, 0, 0, 0);
-            packet_control.body_ = NULL;
+            packet_control.body_ = &recharge_dic;
             send_message(socket, &packet_control);
             //SendMsg(socket, packet, &recharge_dic, WX_PLACE_ORDER_RLY);
             // todo 下单成功 ，记录微信订单信息
@@ -575,64 +578,6 @@ int32 UserInterface::OnWXPlaceOrder(const int32 socket, PacketHead* packet) {
   if (err < 0) {
     send_error(socket, USER_TYPE, WX_PLACE_ORDER_RLY, err);
     //SendError(socket, packet, err, WX_PLACE_ORDER_RLY);
-  }
-  return err;
-}
-
-int32 UserInterface::OnUnionpayPlaceOrder(const int32 socket, PacketHead* packet) {
-  int32 err = 0;
-  do {
-    net_request::UnionpayPlaceOrder unionpay_place_order;
-    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
-    unionpay_place_order.set_http_packet(packet_recv->body_);
-    //记录订单信息
-    DicValue recharge_dic;
-    err = user_mysql_->RechargeInfoInsertAndSelect(unionpay_place_order.uid(), unionpay_place_order.price(),
-                                                   &recharge_dic);
-    if (err < 0)
-      break;
-    int64 recharge_id;
-    recharge_dic.GetBigInteger(L"rid", &recharge_id);
-    std::string ip;
-    //访问微信下单接口
-    /*
-    if (util::GetIPAddress(socket, &ip, NULL))
-      unionpayorder.set_spbill_create_ip(ip);
-    unionpayorder.set_body(unionpayplace_order.title());
-    unionpayorder.set_out_trade_no(recharge_id);
-    unionpayorder.set_total_fee(unionpayplace_order.price() * 100);*/
-    //basic_logic::DictionaryValue dic;
-    DicValue dic;
-    dic.SetBigInteger(L"rid", recharge_id);
-    UnionpayOrder unionpay_order;
-    unionpay_order.set_price(unionpay_place_order.price());
-    std::string unionpay_result = unionpay_order.PlaceOrder();
-    dic.SetString(L"tn", unionpay_result);
-    //LOG(INFO) << "kkkkkk tn:" << unionpay_result;
-            struct PacketControl packet_control;
-            MAKE_HEAD(packet_control, UNIONPAY_PLACE_ORDER_RLY, USER_TYPE, 0, 0, 0);
-            packet_control.body_ = &dic;
-            send_message(socket, &packet_control);
-            //SendMsg(socket, packet, &recharge_dic, UNIONPAY_PLACE_ORDER_RLY);
-            // todo 下单成功 ，记录微信订单信息
-
-            /*          } else {
-            err = UNIONPAY_PLACE_ORDER_ERR;
-            break;
-          }
-        } else {
-          err = UNIONPAY_PLACE_ORDER_ERR;
-          break;
-        }
-        }*/
-    } while (0);
-  //base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
-  //                                               deserializer);
-
-  //} while (0);
-  if (err < 0) {
-    send_error(socket, USER_TYPE, UNIONPAY_PLACE_ORDER_RLY, err);
-    //SendError(socket, packet, err, UNIONPAY_PLACE_ORDER_RLY);
   }
   return err;
 }
@@ -687,8 +632,8 @@ int32 UserInterface::OnWXPayServerResponse(const int32 socket,
     //支付成功
     DicValue dic;
     if (wx_pay_server.appid() != APPID && wx_pay_server.mch_id() != MCH_ID) {
-      //LOG(ERROR) << "WXPAY SERVER RESULT appid:[" << wx_pay_server.appid() << "]";
-      //LOG(ERROR) << "WXPAY SERVER RESULT mch_id:[" << wx_pay_server.mch_id() << "]";
+      LOG_ERROR2("WXPAY SERVER RESULT appid:[%d]", wx_pay_server.appid());
+      LOG_ERROR2("WXPAY SERVER RESULT mch_id:[%d]", wx_pay_server.mch_id());
       break;
     }
     if (wx_pay_server.pay_result() == 1) {
@@ -711,32 +656,95 @@ int32 UserInterface::OnWXPayServerResponse(const int32 socket,
   return err;
 }
 
+int32 UserInterface::OnUnionpayPlaceOrder(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    net_request::UnionpayPlaceOrder unionpay_place_order;
+    struct PacketControl* packet_recv = (struct PacketControl*) (packet);
+    err = unionpay_place_order.set_http_packet(packet_recv->body_);
+    if (err < 0) 
+      break;
+    //记录订单信息
+    DicValue recharge_dic;
+    err = user_mysql_->RechargeInfoInsertAndSelect(unionpay_place_order.uid(), unionpay_place_order.price(),
+                                                   &recharge_dic);
+    if (err < 0)
+      break;
+    int64 recharge_id;
+    recharge_dic.GetBigInteger(L"rid", &recharge_id);
+    std::string ip;
+    //访问微信下单接口
+    /*
+    if (util::GetIPAddress(socket, &ip, NULL))
+      unionpayorder.set_spbill_create_ip(ip);
+    unionpayorder.set_body(unionpayplace_order.title());
+    unionpayorder.set_out_trade_no(recharge_id);
+    unionpayorder.set_total_fee(unionpayplace_order.price() * 100);*/
+    //basic_logic::DictionaryValue dic;
+    DicValue dic;
+    dic.SetBigInteger(L"rid", recharge_id);
+    UnionpayOrder unionpay_order;
+    unionpay_order.set_price(unionpay_place_order.price());
+    std::string unionpay_result = unionpay_order.PlaceOrder();
+    dic.SetString(L"tn", unionpay_result);
+    LOG_MSG2("kkkkkk tn:%s", unionpay_result.c_str());
+            struct PacketControl packet_control;
+            MAKE_HEAD(packet_control, UNIONPAY_PLACE_ORDER_RLY, USER_TYPE, 0, 0, 0);
+            packet_control.body_ = &dic;
+            send_message(socket, &packet_control);
+            //SendMsg(socket, packet, &recharge_dic, UNIONPAY_PLACE_ORDER_RLY);
+            // todo 下单成功 ，记录微信订单信息
+
+            /*          } else {
+            err = UNIONPAY_PLACE_ORDER_ERR;
+            break;
+          }
+        } else {
+          err = UNIONPAY_PLACE_ORDER_ERR;
+          break;
+        }
+        }*/
+    } while (0);
+  //base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
+  //                                               deserializer);
+
+  //} while (0);
+  if (err < 0) {
+    send_error(socket, USER_TYPE, UNIONPAY_PLACE_ORDER_RLY, err);
+    //SendError(socket, packet, err, UNIONPAY_PLACE_ORDER_RLY);
+  }
+  return err;
+}
+
 int32 UserInterface::CloseSocket(const int fd) {
   data_share_mgr_->UserOffline(fd);
   return 0;
 }
 
 int32 UserInterface::OnAlipayServer(const int32 socket, PacketHead* packet) {
-  //LOG(INFO) << "alipay server req";
+  LOG_MSG("alipay server req");
   return 0;
 }
 
 int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
-  //LOG(INFO) << "alipay client req";
+  LOG_MSG("alipay client req");
   return 0;
 }
 
 
   /*int32 UserInterface::OnDeviceToken(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  //LOG(INFO) << "DeviceToken";
+  LOG_MSG("DeviceToken");
+  LOG_MSG("DeviceToken");
   do {
     DeviceToken rev;
-    //LOG(INFO) << "DeviceToken Deserialize err:" << err;
+    LOG_MSG("DeviceToken Deserialize err:" << err);
+    LOG_MSG("DeviceToken Deserialize err:" << err);
     if (err < 0)
       break;
     int result = data_share_mgr_->AddDeviceToken(rev.uid(), rev.device_token());
-    //LOG(INFO) << "AddDeviceToken result:" << result;
+    LOG_MSG("AddDeviceToken result:" << result);
+    LOG_MSG("AddDeviceToken result:" << result);
     if (result >= 0)
       err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
     if (err < 0)
@@ -744,7 +752,8 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
     //SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
   } while (0);
   if (err < 0) {
-    //LOG(INFO) << "DeviceToken SendError err:" << err;
+    LOG_MSG("DeviceToken SendError err:" << err);
+    LOG_MSG("DeviceToken SendError err:" << err);
     //SendError(socket, packet, err, DEVICE_TOKEN_RLY);
   }
   return err;
@@ -784,7 +793,8 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
   /*void UserInterface::SendPacket(const int socket, PacketHead* packet) {
 
   char* s = new char[packet->packet_length];
-  //LOG(INFO) << "packet body:" << packet->body_str();
+  LOG_MSG("packet body:" << packet->body_str());
+  LOG_MSG("packet body:" << packet->body_str());
   memset(s, 0, packet->packet_length());
   memcpy(s, &packet->head(), HEAD_LENGTH);
   memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),

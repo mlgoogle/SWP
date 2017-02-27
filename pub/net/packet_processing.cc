@@ -7,7 +7,6 @@
 #include "protocol/data_packet.h"
 #include <list>
 #include <string>
-#include "glog/logging.h" ///////////////////
 
 #define DUMPPACKBUF 4096 * 10
 
@@ -55,7 +54,6 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 
 bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
                                    struct PacketHead **packet_head) {
-
     int32 temp;
     int error_code;
     std::string error_str;
@@ -67,14 +65,14 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
       return false;
     }
 
-    //LOG_DEBUG2("%s",body_stream.c_str());
-
     base_logic::DictionaryValue *value =
       (base_logic::DictionaryValue*)engine->Deserialize(&body_stream, &error_code, &error_str);
-
     struct PacketControl *packet_control = new struct PacketControl;
     FILLPACKET();
     (*packet_head) = (struct PacketHead*)(packet_control);
+    if (value == NULL)
+      return false;
+
     if (engine) {delete engine; engine = NULL;}
     return true;
   }

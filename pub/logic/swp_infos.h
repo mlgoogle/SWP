@@ -48,98 +48,122 @@ class Quotations {
   }
 
   void set_platform_name(const std::string& platform) {
-    data_->platform_name_ = platform;
+    if (data_)
+      data_->platform_name_ = platform;
   }
 
   void set_symbol(const std::string& symbol) {
-    data_->symbol_ = symbol;
+    if (data_)
+      data_->symbol_ = symbol;
   }
 
   void set_exchange_name(const std::string& exchange_name) {
-    data_->exchange_name_ = exchange_name;
+    if (data_)
+      data_->exchange_name_ = exchange_name;
   }
 
   void set_current_price(const double current_price) {
-    data_->current_price_ = current_price;
+    if (data_)
+      data_->current_price_ = current_price;
   }
 
   void set_high_price(const double high_price) {
-    data_->high_price_ = high_price;
+    if (data_)
+      data_->high_price_ = high_price;
   }
 
   void set_low_price(const double low_price) {
-    data_->low_price_ = low_price;
+    if (data_)
+      data_->low_price_ = low_price;
   }
 
   void set_opening_today_price(const double opening_today_price) {
-    data_->opening_today_price_ = opening_today_price;
+    if (data_)
+      data_->opening_today_price_ = opening_today_price;
   }
 
   void set_closed_yesterday_price(const double closed_yesterday_price) {
-    data_->closed_yesterday_price_ = closed_yesterday_price;
+    if (data_)
+      data_->closed_yesterday_price_ = closed_yesterday_price;
   }
 
   void set_change(const double change) {
-    data_->change_ = change;
+    if (data_)
+      data_->change_ = change;
   }
 
   void set_pchg(const double pchg) {
-    data_->pchg_ = pchg;
+    if (data_)
+      data_->pchg_ = pchg;
   }
 
   void set_type(const int32 type) {
-    data_->type_ = type;
+    if (data_)
+      data_->type_ = type;
   }
 
   void set_current_unix_time(const int64 current_unix_time) {
-    data_->current_unix_time_ = current_unix_time;
+    if (data_)
+      data_->current_unix_time_ = current_unix_time;
   }
 
   const std::string& platform() const {
-    return data_->platform_name_;
+    if (data_)
+      return data_->platform_name_;
   }
 
   const std::string& symbol() const {
-    return data_->symbol_;
+    if (data_)
+      return data_->symbol_;
   }
 
   const std::string& exchange_name() const {
-    return data_->exchange_name_;
+    if (data_)
+      return data_->exchange_name_;
   }
   const double current_price() const {
-    return data_->current_price_;
+    if (data_)
+      return data_->current_price_;
   }
 
   const double high_price() const {
-    return data_->high_price_;
+    if (data_)
+      return data_->high_price_;
   }
 
   const double low_price() const {
-    return data_->low_price_;
+    if (data_)
+      return data_->low_price_;
   }
 
   const double opening_today_price() const {
-    return data_->opening_today_price_;
+    if (data_)
+      return data_->opening_today_price_;
   }
 
   const double closed_yesterday_price() const {
-    return data_->closed_yesterday_price_;
+    if (data_)
+      return data_->closed_yesterday_price_;
   }
 
   const double change() const {
-    return data_->change_;
+    if (data_)
+      return data_->change_;
   }
 
   const double pchg() const {
-    return data_->pchg_;
+    if (data_)
+      return data_->pchg_;
   }
 
   const int64 current_unix_time() const {
-    return data_->current_unix_time_;
+    if (data_)
+      return data_->current_unix_time_;
   }
 
   const int32 type() const {
-    return data_->type_;
+    if (data_)
+      return data_->type_;
   }
 
   std::string ValueSerialize();
@@ -179,10 +203,14 @@ class Quotations {
     int64 current_unix_time_;
 
     static bool before(const Data* t_info, const Data* r_info){
+      if (t_info == NULL || r_info == NULL)
+        return false;
       return t_info->current_unix_time_ <= r_info->current_unix_time_;
     }
 
     static bool after(const Data* t_info, const Data* r_info){
+      if (t_info == NULL || r_info == NULL)
+        return false;
       return t_info->current_unix_time_ > r_info->current_unix_time_;
     }
 

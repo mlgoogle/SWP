@@ -8,6 +8,7 @@
 #include "net/comm_head.h"
 #include "protocol/data_packet.h"
 #include <stddef.h>
+#include "logic/logic_comm.h"
 
 #define PRINT_TITLE(v)                                                         \
   j += snprintf(buf + j, DUMPPACKBUF - j, "\n-------- %s --------\n", v)
@@ -66,7 +67,7 @@
   (packet_control)->session_id = session_id;                                     \
   (packet_control)->reserved = reserved;                                         \
                   if (!value) \
-//LOG(INFO) << "aaaaaaaaaaaa value null"; \
+                    LOG_MSG("aaaaaaaaaaaa value null"); \
   (packet_control)->body_ = value;
 
 #define _MAKE_HEAD(head, _packet_length, _operate_code, _data_length, _type,   \

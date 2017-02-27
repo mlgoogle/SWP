@@ -13,8 +13,8 @@
 #include "logic/logic_unit.h"
 #include "net/errno.h"
 #include "net/comm_head.h"
+#include "comm/comm_head.h"
 #include <string>
-#include "glog/logging.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/quotations/quotations_config.xml"
 
@@ -42,7 +42,7 @@ bool Quotationslogic::Init() {
   quotations_redis_ = new quotations_logic::QuotationsRedis(config);
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitRedis(
       quotations_redis_);
-  //quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
+  quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitFoxreData();
   return true;
 }
@@ -64,7 +64,6 @@ bool Quotationslogic::OnQuotationsConnect(struct server *srv,
   int port;
   logic::SomeUtils::GetIPAddress(socket, ip, port);
   LOG_MSG2("ip {%s} prot {%d}", ip.c_str(), port);
-  //LOG(INFO) << "on quotations connect";
   return true;
 }
 
@@ -77,11 +76,12 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
 
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
     LOG_ERROR2("UnpackStream Error socket %d", socket);
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    //send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    //send_error(socket,ERROR_TYPE,ERROR_TYPE,JSON_FORMAT_ERR);
+    send_error(socket, ERROR_TYPE, packet->operate_code + 1, JSON_FORMAT_ERR);
     return false;
   }
 
-  ////LOG(INFO) << "packet processing";
   if (packet->type == QUOTATIONS_TYPE
       && logic::SomeUtils::VerifyToken(packet)) {
     switch (packet->operate_code) {
@@ -100,9 +100,8 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
       default:
         break;
     }
-    return true;
   }
-  return false;
+  return true; /////////////////
 }
 
 bool Quotationslogic::OnQuotationsClose(struct server *srv, const int socket) {
@@ -176,7 +175,7 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_htt_packet(packet_control->body_);
   if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    //send_error(socket,ERROR_TYPE,ERROR_TYPE,JSON_FORMAT_ERR);
     return false;
   }
   if (real_time.symbol_infos_ != NULL)
@@ -192,7 +191,7 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
 
   bool r = time_line.set_htt_packet(packet_control->body_);
   if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,JSON_FORMAT_ERR);
     return false;
   }
 
@@ -210,7 +209,7 @@ bool Quotationslogic::OnQutations(struct server* srv, int socket,
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_http_packet(packet_control->body_);
   if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,JSON_FORMAT_ERR);
     return false;
   }
   quotations.set_change(real_time.change());

@@ -12,6 +12,8 @@
 
 LIB_DIR = ./../../../mylib
 SRC_DIR = ../..
+SRC_PUB = ${SRC_DIR}/pub
+SRC_PUB_SHARE = ${SRC_PUB}/share
 USER_DIR = ./../../pub
 SO_DIR = ./../../bin/plugins
 
@@ -19,7 +21,7 @@ THIRD_PATH = $(LIB_DIR)/public
 
 CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 
-#LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
+LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 LINK_PATHS = -L./ -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
@@ -44,7 +46,6 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I${SRC_DIR} \
 				-I$(LIB_DIR)/basic \
 				-I$(THIRD_PATH)\
-				-I$(CUSTOM_THIRD_PATH)/glog/include \
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
@@ -125,6 +126,9 @@ data_mysql_engine.o :  $(USER_DIR)/storage/data_mysql_engine.cc $(USER_DIR)/stor
 data_redis_engine.o :  $(USER_DIR)/storage/data_redis_engine.cc $(USER_DIR)/storage/data_redis_engine.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/data_redis_engine.cc $(INCLUDE_PATHS)
 	
+data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_share_mgr.h 
+	${CXX} ${CXXFLAGS} ${CPPFLAGS} -c ${SRC_PUB_SHARE}/data_share_mgr.cc ${INCLUDE_PATHS}
+
 mysql_pool.o :  $(USER_DIR)/storage/mysql_pool.cc $(USER_DIR)/storage/mysql_pool.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/mysql_pool.cc $(INCLUDE_PATHS)
 
@@ -133,7 +137,7 @@ redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool
 	
 
 $(PLUGIN) : quotations_init.o  quotations_logic.o schduler_engine.o quotations_proto_buf.o quotations_redis.o\
-	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o mysql_pool.o redis_pool.o\
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a ${LIB_DIR}/third_party/glog/lib/libglog.a
+	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o data_share_mgr.o mysql_pool.o redis_pool.o\
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
 	$^ -o $@

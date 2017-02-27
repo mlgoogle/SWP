@@ -40,6 +40,8 @@ void Quotations::ValueDeserialize(std::string& str) {
   if (engine == NULL) {
     LOG_ERROR("engine create null");
   }
+  if (data_)
+    return;
   base_logic::DictionaryValue* dict =  (base_logic::DictionaryValue*)engine->Deserialize(&str,&error_code,&error_str);
   dict->GetReal(L"current_price", &data_->current_price_);
   dict->GetReal(L"high_price", &data_->high_price_);
@@ -57,6 +59,8 @@ void Quotations::ValueDeserialize(std::string& str) {
 std::string Quotations::ValueSerialize() {
   std::string json_content;
   base_logic::DictionaryValue dict;
+  if (data_)
+    return "";
   dict.SetReal(L"current_price", data_->current_price_);
   dict.SetReal(L"high_price", data_->high_price_);
   dict.SetReal(L"low_price", data_->low_price_);
