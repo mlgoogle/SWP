@@ -48,13 +48,15 @@ void QuotationsManager::InitRedisData(const std::string& hash_name,
                                       int32 atype) {
   std::list<swp_logic::Quotations> list;
   quotations_redis_->ReadHisTimeGoodsData(hash_name, list);
-  list.sort(swp_logic::Quotations::before);
-  while (list.size() > 0) {
+  list.sort(swp_logic::Quotations::after);
+  int32 all = 1440;
+  while (list.size() > 0 && all > 0) {
     swp_logic::Quotations quotations = list.front();
     list.pop_front();
     quotations.set_type(atype);
     SetQuotationsUnit(quotations);
     SetKQuotations(quotations);
+    all--;
   }
 }
 

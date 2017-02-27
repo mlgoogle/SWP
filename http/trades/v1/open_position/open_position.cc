@@ -25,12 +25,9 @@
 
 int main(int agrc, char* argv[]) {
   fcgi_module::FcgiModule fcgi_client;
-  std::string core_sock_file = "/var/www/tmp/swpcorefile";
-  fcgi_client.Init("61.147.114.87",16001,TRADES_TYPE,
+  fcgi_client.Init(BIND_HOST, BIND_PORT,TRADES_TYPE,
                    R_TRADES_OPEN_POSITION,1);
 
-  //fcgi_client.Init(core_sock_file,HISTORY_TYPE,
-                  // R_HISTORY_TRADES,1);
   fcgi_client.Run();
   fcgi_client.Close();
   return 0;

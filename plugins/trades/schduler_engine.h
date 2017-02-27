@@ -13,7 +13,7 @@
 typedef std::map<int32, trades_logic::GoodsInfo> GOODS_MAP;
 typedef std::map<int32, GOODS_MAP> PLAT_GOODS_MAP; /*对应平台能交易的商品*/
 
-typedef std::map<int64, trades_logic::TradesPosition> TRADES_MAP; /*交易记录 uid或pid<->Trades*/
+typedef std::map<int64, swp_logic::TradesPosition> TRADES_MAP; /*交易记录 uid或pid<->Trades*/
 typedef std::map<int32, TRADES_MAP> GOODS_TRADES_MAP;/*交易标的  商品ID<->交易记录*/
 typedef std::map<int64, GOODS_TRADES_MAP> PLAT_TRADES_MAP;
 
@@ -60,11 +60,11 @@ class TradesManager {
                            const int64 uid,const int32 pos, const int32 count = 10);
 
   void OnTimePosition(const int socket, const int64 session,
-                      trades_logic::TradesPosition& trades_position);
+                      swp_logic::TradesPosition& trades_position);
 
-  int32 OpenPosition(trades_logic::TradesPosition& trades_position);
+  int32 OpenPosition(swp_logic::TradesPosition& trades_position);
 
-  void SetTimePosition(trades_logic::TradesPosition& trades_position);
+  void SetTimePosition(swp_logic::TradesPosition& trades_position);
 
   void SetQuotations(swp_logic::Quotations& quotation);
 

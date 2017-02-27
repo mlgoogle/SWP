@@ -14,6 +14,7 @@
 
 namespace history_logic {
 
+/*
 enum BSTYPE {
   BUY_TYPE = 1,
   SELL_TYPE = 2
@@ -46,6 +47,10 @@ class TradesPosition {
     if (data_ != NULL) {
       data_->Release();
     }
+  }
+
+  static bool close_after(const TradesPosition& t_trades_position, const TradesPosition& r_trades_position){
+    return Data::close_after(t_trades_position.data_, r_trades_position.data_);
   }
 
   void ValueSerialization(base_logic::DictionaryValue* dict);
@@ -275,6 +280,11 @@ class TradesPosition {
           deferred_(0.0) {
     }
 
+    static bool close_after(const Data* t_data,
+                      const Data* r_data) {
+      return t_data->close_position_time_ > r_data->close_position_time_;
+    }
+
    public:
     int64 uid_;
     int64 position_id_;
@@ -311,7 +321,7 @@ class TradesPosition {
     int refcount_;
   };
   Data* data_;
-};
+};*/
 
 }  // namespace history_logic
 

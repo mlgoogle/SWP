@@ -34,10 +34,10 @@ void HistoryManager::InitDB(history_logic::HistoryDB* history_db) {
 }
 
 void HistoryManager::InitHistoryTradesData() {
-  std::list<history_logic::TradesPosition> list;
+  std::list<swp_logic::TradesPosition> list;
   history_db_->OnHistroyTradesRecord(&list);
   while (list.size() > 0) {
-    history_logic::TradesPosition trades = list.front();
+    swp_logic::TradesPosition trades = list.front();
     list.pop_front();
     SetHistoryTradesNoLock(trades);
   }
@@ -46,7 +46,7 @@ void HistoryManager::InitHistoryTradesData() {
 void HistoryManager::SendHistoryTrades(const int socket, const int64 session,
                                        const int64 uid, const int64 pos,
                                        const int64 count) {
-  std::list<history_logic::TradesPosition> trades_list;
+  std::list<swp_logic::TradesPosition> trades_list;
   {
     base_logic::RLockGd lk(lock_);
     GetHistoryTradesNoLock(uid, trades_list, 0, 0);
@@ -63,9 +63,9 @@ void HistoryManager::SendHistoryTrades(const int socket, const int64 session,
   int32 t_count = 0;
 
   history_logic::net_reply::AllTradesPosition net_trades_positions;
-
+  trades_list.sort(swp_logic::TradesPosition::close_after);
   while (trades_list.size() > 0 && t_count < count) {
-    history_logic::TradesPosition trades_position = trades_list.front();
+    swp_logic::TradesPosition trades_position = trades_list.front();
     trades_list.pop_front();
     t_start++;
     if (t_start < pos)
@@ -119,7 +119,7 @@ void HistoryManager::SendHistoryTrades(const int socket, const int64 session,
 }
 
 void HistoryManager::GetHistoryTradesNoLock(
-    const int64 uid, std::list<history_logic::TradesPosition>& list,
+    const int64 uid, std::list<swp_logic::TradesPosition>& list,
     const int64 pos, const int64 count) {
   TRADES_MAP trades_map;
   base::MapGet<ALL_TRADES_MAP, ALL_TRADES_MAP::iterator, int64, TRADES_MAP>(
@@ -127,13 +127,13 @@ void HistoryManager::GetHistoryTradesNoLock(
 
   for (TRADES_MAP::iterator it = trades_map.begin(); it != trades_map.end();
       it++) {
-    history_logic::TradesPosition trades = it->second;
+    swp_logic::TradesPosition trades = it->second;
     list.push_back(trades);
   }
 }
 
 void HistoryManager::SetHistoryTradesNoLock(
-    history_logic::TradesPosition& trades) {
+    swp_logic::TradesPosition& trades) {
   TRADES_MAP trades_map;
   base::MapGet<ALL_TRADES_MAP, ALL_TRADES_MAP::iterator, int64, TRADES_MAP>(
       history_cache_->all_trades_map_, trades.uid(), trades_map);

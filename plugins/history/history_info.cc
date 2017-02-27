@@ -6,7 +6,7 @@
 #include "logic/logic_comm.h"
 
 namespace history_logic {
-
+/*
 TradesPosition::TradesPosition() {
   data_ = new Data();
 }
@@ -56,6 +56,6 @@ void TradesPosition::ValueSerialization(base_logic::DictionaryValue* dict) {
     data_->result_ = true;
   else
     data_->result_ = false;
-}
+}*/
 
 }  // namespace trades_logic

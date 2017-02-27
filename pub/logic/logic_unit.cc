@@ -385,7 +385,7 @@ const static std::map<int, const char*>::value_type init_value[] = {
 
   std::map<int, const char*>::value_type(NO_HAVE_PLATFORM, "平台没有交易的商品"),
   std::map<int, const char*>::value_type(NO_HAVE_TRADES_GOODS, "交易的商品不存在"),
-  std::map<int, const char*>::value_type(NO_HAVE_QUOTATIONS_DATA, "当前商品暂停交易"),
+  //  std::map<int, const char*>::value_type(NO_HAVE_QUOTATIONS_DATA, "当前商品暂停交易"),
   std::map<int, const char*>::value_type(NO_HAVE_CHARGE, "扣费失败"),
   std::map<int, const char*>::value_type(NO_HAVE_GOODS_DATA, "没有商品数据"),
   

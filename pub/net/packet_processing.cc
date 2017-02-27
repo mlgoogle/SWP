@@ -30,25 +30,25 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
   struct PacketControl *packet_control = (struct PacketControl *)(packet_head);
   base_logic::DictionaryValue *value = packet_control != NULL ? packet_control->body_ : NULL;
 
-  if (value) {
-    base_logic::ValueSerializer *engine =
-      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+  base_logic::ValueSerializer *engine = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON);
     if (engine == NULL) {
       LOG_ERROR("engine create null");
       return false;
     }
     r = engine->Serialize((*value), &body_stream);
-    delete engine;
-    engine = NULL;
-  }
 
   BUILDPAKCET(body_stream.length());
 
-  //LOG_DEBUG2("%s",body_stream.c_str());
+  LOG_DEBUG2("%s",body_stream.c_str());
 
   *packet_stream = reinterpret_cast<void *>(const_cast<char *>(out.GetData()));
   *packet_stream_length = PACKET_HEAD_LENGTH + body_stream.length();
 
+  if (engine) {
+    delete engine;
+    engine = NULL;
+  }
   return true;
 }
 
@@ -83,11 +83,6 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
   int32 temp;
   int error_code;
   std::string error_str;
-  BUILDUNPACKET();
-  base_logic::ValueSerializer *engine =
-      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  if (engine == NULL) {
-    LOG_ERROR("engine create null");
 
   packet::DataInPacket in(
       reinterpret_cast<char*>(const_cast<void*>(packet_stream)), len);
@@ -117,10 +112,14 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
       return false;
     }
 
-    //LOG_DEBUG2("%s",body_stream.c_str());
 
     base_logic::DictionaryValue *value = (base_logic::DictionaryValue*) engine
         ->Deserialize(&body_stream, &error_code, &error_str);
+
+    if (value == NULL) {
+      LOG_ERROR("json error");
+      return false;
+    }
 
     struct PacketControl *packet_control = new struct PacketControl;
     FILLPACKET()
@@ -130,23 +129,24 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
       delete engine;
       engine = NULL;
     }
-  }else if (packet_length == PACKET_HEAD_LENGTH) {
+  } else if (packet_length == PACKET_HEAD_LENGTH) {
     (*packet_head) = new struct PacketHead;
-    (*packet_head)->packet_length = packet_length;                               \
-    (*packet_head)->is_zip_encrypt = is_zip_encrypt;                             \
-    (*packet_head)->type = type;                                                 \
-    (*packet_head)->signature = signature;                                       \
-    (*packet_head)->operate_code = operate_code;                                 \
-    (*packet_head)->data_length = data_length;                                   \
-    (*packet_head)->timestamp = timestamp;                                       \
-    (*packet_head)->session_id = session_id;                                     \
+    (*packet_head)->packet_length = packet_length;
+    (*packet_head)->is_zip_encrypt = is_zip_encrypt;
+    (*packet_head)->type = type;
+    (*packet_head)->signature = signature;
+    (*packet_head)->operate_code = operate_code;
+    (*packet_head)->data_length = data_length;
+    (*packet_head)->timestamp = timestamp;
+    (*packet_head)->session_id = session_id;
     (*packet_head)->reserved = reserved;
   }
   return true;
   }*/
 
 void PacketProsess::DeletePacket(const void *packet_stream, int32 len,
-                                 struct PacketHead *packet_head) {
+                                 struct PacketHead *packet_head){
+
 }
 
 void PacketProsess::DumpPacket(const struct PacketHead *packet_head) {
@@ -194,11 +194,12 @@ std::string PacketProsess::StrUnpacket(const void *packet_stream, int32 len) {
   int32 reserved = in.Read32();
   if (packet_length == PACKET_HEAD_LENGTH || len == PACKET_HEAD_LENGTH)
     return empty;
-  else if (packet_length < PACKET_HEAD_LENGTH || len < PACKET_HEAD_LENGTH
-      || packet_length != len)
-    return empty;
+  /* else if (packet_length < PACKET_HEAD_LENGTH || len < PACKET_HEAD_LENGTH
+   || packet_length != len)
+   return empty;*/
 
-  std::string body_stream = in.ReadData(data_length, temp);
+  std::string string_stream = in.ReadData(data_length, temp);
+  std::string body_stream = string_stream.substr(0, data_length);
   //LOG_DEBUG2("%s",body_stream.c_str());
   return body_stream;
 }

@@ -10,16 +10,17 @@
 
 # Where to find user code.
 
-LIB_DIR = ./../../../mylib
+#LIB_DIR = ./../../../mylib
 SRC_DIR = ../..
 SRC_PUB = ${SRC_DIR}/pub
 SRC_PUB_SHARE = ${SRC_PUB}/share
+LIB_DIR = ./../../../library
 USER_DIR = ./../../pub
 SO_DIR = ./../../bin/plugins
 
-THIRD_PATH = $(LIB_DIR)/public
+THIRD_PATH = $(LIB_DIR)/mylib/public
 
-CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
+CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
 
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 LINK_PATHS = -L./ -L/usr/lib64/mysql
@@ -42,16 +43,17 @@ CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 PLUGIN = $(SO_DIR)/quotations/quotations.so
 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
-				-I$(LIB_DIR) \
+				-I$(LIB_DIR)/mylib \
 				-I${SRC_DIR} \
-				-I$(LIB_DIR)/basic \
+				-I$(LIB_DIR)/mylib/basic \
+				-I$(LIB_DIR)/mylib/BasicCore \
 				-I$(THIRD_PATH)\
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
-				-I$(LIB_DIR)/base\
+				-I$(LIB_DIR)/mylib/base\
 				-I../\
 
 
@@ -138,6 +140,6 @@ redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool
 
 $(PLUGIN) : quotations_init.o  quotations_logic.o schduler_engine.o quotations_proto_buf.o quotations_redis.o\
 	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o data_share_mgr.o mysql_pool.o redis_pool.o\
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
 	$^ -o $@

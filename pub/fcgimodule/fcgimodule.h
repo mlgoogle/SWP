@@ -27,6 +27,8 @@
 
 // fcgi project module
 #define RESTFUL_CORE_SOCK_FILE "/var/www/tmp/jindowincorefile"
+#define BIND_HOST  "61.147.114.87"
+#define BIND_PORT  16001
 namespace fcgi_module {
 
 enum HttpRequestType{

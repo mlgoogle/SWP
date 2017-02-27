@@ -20,7 +20,7 @@ HistoryDB::~HistoryDB() {
 }
 
 bool HistoryDB::OnHistroyTradesRecord(
-    std::list<history_logic::TradesPosition>* list) {
+    std::list<swp_logic::TradesPosition>* list) {
   bool r = false;
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
 
@@ -34,7 +34,7 @@ bool HistoryDB::OnHistroyTradesRecord(
     return false;
   dict->GetList(L"resultvalue", &listvalue);
   while (listvalue->GetSize()) {
-    history_logic::TradesPosition trades;
+    swp_logic::TradesPosition trades;
     base_logic::Value *result_value;
     listvalue->Remove(0, &result_value);
     base_logic::DictionaryValue *dict_result_value =

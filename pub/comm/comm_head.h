@@ -17,7 +17,7 @@ enum TIME_TASK {
   USER_TYPE = 1,
   CHAT_TYPE = 2,
   LOGIN_TYPE = 3
-  };*/
+};*/
 
 enum PACKET_ERROR {
   JSON_FORMAT_ERR = -100,

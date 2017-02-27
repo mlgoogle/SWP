@@ -12,7 +12,7 @@
 
 namespace history_logic {
 
-typedef std::map<int64, history_logic::TradesPosition> TRADES_MAP;/*交易ID为key*/
+typedef std::map<int64, swp_logic::TradesPosition> TRADES_MAP;/*交易ID为key*/
 typedef std::map<int64, TRADES_MAP> ALL_TRADES_MAP;/*用户ID 为key*/
 
 class HistoryCache {
@@ -30,8 +30,8 @@ class HistoryManager {
                          const int64 pos, const int64 count = 10);
  private:
   void Init();
-  void SetHistoryTradesNoLock(history_logic::TradesPosition& trades);
-  void GetHistoryTradesNoLock(const int64 uid, std::list<history_logic::TradesPosition>& list,
+  void SetHistoryTradesNoLock(swp_logic::TradesPosition& trades);
+  void GetHistoryTradesNoLock(const int64 uid, std::list<swp_logic::TradesPosition>& list,
                               const int64 pos = 0, const int64 count = 10);
  private:
   history_logic::HistoryDB* history_db_;

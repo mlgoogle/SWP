@@ -19,7 +19,7 @@ TradesDB::~TradesDB() {
   }
 }
 
-bool TradesDB::OnOpenPosition(trades_logic::TradesPosition& trades) {
+bool TradesDB::OnOpenPosition(swp_logic::TradesPosition& trades) {
   bool r = false;
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
   std::string sql;
@@ -65,7 +65,7 @@ bool TradesDB::OnOpenPosition(trades_logic::TradesPosition& trades) {
   return r;
 }
 
-bool TradesDB::OnClosePosition(std::list<trades_logic::TradesPosition>* list) {
+bool TradesDB::OnClosePosition(std::list<swp_logic::TradesPosition>* list) {
   bool r = false;
   //call actuals.proc_ClosePosition(3773378865228031997,7.33,12.1,-1)
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
@@ -73,7 +73,7 @@ bool TradesDB::OnClosePosition(std::list<trades_logic::TradesPosition>* list) {
   base_logic::DictionaryValue *info_value = NULL;
   int32 result = 0;
   while ((*list).size() > 0) {
-    trades_logic::TradesPosition trades_position = (*list).front();
+    swp_logic::TradesPosition trades_position = (*list).front();
     (*list).pop_front();
     int32 int_result = 0;
     int_result = trades_position.result() ? 1 : -1;

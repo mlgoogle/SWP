@@ -214,16 +214,6 @@ bool FcgiModule::PostRequestMethod(const std::string & content) {
 #endif
   os << content;
 
-  /*
-   char* addr = getenv("REMOTE_ADDR");
-   os << content << "&remote_addr=" << addr << "&type=" << api_type_
-   << "&operate_code=" << operate_code_ << "&log_type=" << log_type_ << "\n";
-   // logger 暂时不用
-   //api_logger_.LogMsg(os.str().c_str(), os.str().length());
-
-   r = net::core_get(0, os.str().c_str(), os.str().length(), respone, flag,
-   code);
-   */
 
   void *packet_stream = NULL;
   int32 packet_stream_length = 0;
@@ -237,12 +227,20 @@ bool FcgiModule::PostRequestMethod(const std::string & content) {
                                 os.str().c_str(), &packet_stream,
                                 &packet_stream_length);
 
+
+  respone.clear();
   r = net::core_get(0, reinterpret_cast<char*>(packet_stream),
                     packet_stream_length,respone, flag,
                     code);
 
+  LOG_DEBUG2("respone length %d,r %d",respone.length(),r);
 
-  std::string r_repone = net::PacketProsess::StrUnpacket((void*) (respone.c_str()), respone.length());
+  std::string r_repone;
+  r_repone.clear();
+  if (r)
+    r_repone = net::PacketProsess::StrUnpacket((void*) (respone.c_str()), respone.length());
+  else
+    r_repone = respone;
   if (!r_repone.empty() && r) {
     printf("Content-type: application/json;charset=utf-8\r\n"
            "\r\n"
