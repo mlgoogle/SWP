@@ -132,6 +132,7 @@ class SomeUtils {
   }
 };
 
+  extern std::map<int, const char*> error_code_msgs;
 }
 
 #define send_message(socket, packet) \
@@ -143,6 +144,7 @@ class SomeUtils {
     MAKE_HEAD(packet_control, opcode, type, 0, 0, 0); \
     base_logic::DictionaryValue dic;                                  \
     dic.SetInteger(L"errorCode", error_code); \
+    dic.SetString(L"errorMsg", logic::error_code_msgs[error_code]);  \
     packet_control.body_ = &dic; \
     send_message(socket, &packet_control); \
   } while(0)

@@ -392,7 +392,7 @@ const static std::map<int, const char*>::value_type init_value[] = {
   std::map<int, const char*>::value_type(NO_HAVE_HISTROY_DATA, "没有对应的历史数据")
 }; 
 
-std::map<int, const char*> error_code_msg(init_value,
+std::map<int, const char*> error_code_msgs(init_value,
         init_value + sizeof(init_value) / sizeof(init_value[0]));
 
 }  //  namespace logic

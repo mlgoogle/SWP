@@ -112,7 +112,6 @@ int32 LoginMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
     ss << "call proc_ChangePasswdSelect(" << uid << ",'" << oldpass << "','"
        << newpass << "'," << ctype << "," << ptype << ")";
     LOG_DEBUG2("%s", ss.str().c_str);
-    LOG_DEBUG2("%s", ss.str().c_str);
     r = mysql_engine_->ReadData(ss.str(), dic, CallChangePasswdSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -200,7 +199,6 @@ void LoginMysql::CallChangePasswdSelect(void* param, base_logic::Value* value) {
       }
     }
   } else {
-    LOG_ERROR ("CallChangePasswdSelect count < 0");
     LOG_ERROR ("CallChangePasswdSelect count < 0");
   }
   dict->Remove(L"sql", &value);

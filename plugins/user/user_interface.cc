@@ -227,13 +227,11 @@ int32 UserInterface::OnUnbindBankcard(const int32 socket, PacketHead* packet) {
       }*/
     err = user_mysql_->UnbindBankcardDelete(unbind_bankcard.phone_num(), unbind_bankcard.bankcard_id());
     LOG_MSG("unbind before send");
-    LOG_MSG("unbind before send");
     if (err < 0)
       break;
     struct PacketControl packet_control;
     MAKE_HEAD(packet_control, UNBIND_BANKCARD_RLY, USER_TYPE, 0, 0, 0);
     packet_control.body_ = NULL;
-    LOG_MSG("unbind before send");
     LOG_MSG("unbind before send");
     send_message(socket, &packet_control);
     //SendMsg(socket, packet, NULL, UNBIND_BANKCARD_RLY);
@@ -455,7 +453,6 @@ int32 UserInterface::OnObtainVerifyCode(const int32 socket, PacketHead* packet) 
     ss << SMS_KEY << timestamp_ << rand_code_ << obtain_verify_code.phone_num();
     base::MD5Sum md5(ss.str());
     dic.SetString(L"vToken", md5.GetHash().c_str());
-    LOG_MSG2("token:", ss.str());
     LOG_MSG2("md5 token:", md5.GetHash());
     ss.str("");
     ss.clear();
@@ -471,7 +468,6 @@ int32 UserInterface::OnObtainVerifyCode(const int32 socket, PacketHead* packet) 
     ss.clear();
     ss << SHELL_SMS << " " << obtain_verify_code.phone_num() << " " << rand_code_ << " "
        << obtain_verify_code.verify_type();
-    LOG_MSG(ss.str());
     LOG_MSG(ss.str());
     system(ss.str().c_str());
   } while (0);
@@ -735,15 +731,12 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
   /*int32 UserInterface::OnDeviceToken(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   LOG_MSG("DeviceToken");
-  LOG_MSG("DeviceToken");
   do {
     DeviceToken rev;
-    LOG_MSG("DeviceToken Deserialize err:" << err);
     LOG_MSG("DeviceToken Deserialize err:" << err);
     if (err < 0)
       break;
     int result = data_share_mgr_->AddDeviceToken(rev.uid(), rev.device_token());
-    LOG_MSG("AddDeviceToken result:" << result);
     LOG_MSG("AddDeviceToken result:" << result);
     if (result >= 0)
       err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
@@ -752,7 +745,6 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
     //SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
   } while (0);
   if (err < 0) {
-    LOG_MSG("DeviceToken SendError err:" << err);
     LOG_MSG("DeviceToken SendError err:" << err);
     //SendError(socket, packet, err, DEVICE_TOKEN_RLY);
   }
@@ -793,7 +785,6 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
   /*void UserInterface::SendPacket(const int socket, PacketHead* packet) {
 
   char* s = new char[packet->packet_length];
-  LOG_MSG("packet body:" << packet->body_str());
   LOG_MSG("packet body:" << packet->body_str());
   memset(s, 0, packet->packet_length());
   memcpy(s, &packet->head(), HEAD_LENGTH);

@@ -111,7 +111,7 @@ void Quotations::ValueDeserialize(std::string& str) {
 std::string Quotations::ValueSerialize() {
   std::string json_content;
   base_logic::DictionaryValue dict;
-  if (data_)
+  if (!data_)
     return "";
   dict.SetReal(L"current_price", data_->current_price_);
   dict.SetReal(L"high_price", data_->high_price_);

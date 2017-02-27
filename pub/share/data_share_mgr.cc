@@ -7,7 +7,6 @@
 
 #include <sys/unistd.h>
 #include <sys/socket.h>
-#include "glog/logging.h"
 
 #include "base/logic/logic_comm.h"
 //#include "logic/logic_comm.h"

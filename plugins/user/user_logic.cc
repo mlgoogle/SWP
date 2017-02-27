@@ -47,19 +47,16 @@ bool Userlogic::Init() {
   Result res = pushInit(host, appKey, masterSecret, "编码");
    if(res!=SUCCESS){
      LOG_ERROR("DataShareMgr pushInit err");
-     LOG_ERROR("DataShareMgr pushInit err");
    }
   user_manager_ = UserManager::GetInstance();
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;
   if (config == NULL) {
     LOG_ERROR("Userlogic config init error");
-    LOG_ERROR("Userlogic config init error");
     return false;
   }
   r = config->LoadConfig(path);
   if (!r) {
-    LOG_ERROR("user config load error");
     LOG_ERROR("user config load error");
     return false;
   }
@@ -74,14 +71,11 @@ bool Userlogic::InitShareData() {
   handle = basic::load_native_library("./data.so");
   if (handle==NULL){
     LOG_ERROR("Can't load path data.so\n");
-    LOG_ERROR("Can't load path data.so\n");
   }
-  LOG_MSG("load data.so success");
   LOG_MSG("load data.so success");
   share::DataShareMgr* (*pengine) (void);
   pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
   if(pengine==NULL){
-    LOG_ERROR("Can't find GetDataShareMgr\n");
     LOG_ERROR("Can't find GetDataShareMgr\n");
     return false;
   }
@@ -147,7 +141,6 @@ bool Userlogic::OnBroadcastMessage(struct server *srv, const int socket,
   memcpy(msg_c, msg, len);
   msg_c[len] = '\0';
   LOG_MSG("OnBroadcastMessage:len-" << len);
-  LOG_MSG("OnBroadcastMessage:len-" << len);
   PacketHead packet_head(msg_c);
   delete[] msg_c;
   msg_c = NULL;
@@ -162,7 +155,6 @@ bool Userlogic::OnBroadcastClose(struct server *srv, const int socket) {
   if (pthread_create(&tid, 0, Userlogic::AutoReconnectToServer, (void*)srv) == 0)
 	pthread_detach(tid);
   else
-	LOG_ERROR("can not create thread AutoReconnectToserver");
 	LOG_ERROR("can not create thread AutoReconnectToserver");
   
   return true;
@@ -211,5 +203,5 @@ bool Userlogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
   return true;
 }
 
-}  // namespace bigv
+}  // namespace user
 

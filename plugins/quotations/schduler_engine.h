@@ -49,8 +49,6 @@ class QuotationsCache {
 typedef std::map<std::string, QUOTATIONS_LIST> QUOTATIONS_MAP; /*现货ID，行情*/
 typedef std::map<int64,QUOTATIONS_MAP> QUOTATIONS_ALL_MAP; /*股票,现货,期货 QUOTATIONS_MAP*/
 
-namespace quotations_logic {
-
 /*class QuotationsCache {
  public:
   QUOTATIONS_ALL_MAP  quotations_map_;

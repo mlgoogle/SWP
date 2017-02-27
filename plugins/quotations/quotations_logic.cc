@@ -12,13 +12,15 @@
 #include "logic/logic_comm.h"
 #include "logic/logic_unit.h"
 #include "net/errno.h"
-#include "net/comm_head.h"
+//#include "net/comm_head.h"
 #include "comm/comm_head.h"
 #include <string>
 
 #define DEFAULT_CONFIG_PATH "./plugins/quotations/quotations_config.xml"
 
-namespace quatations_logic {
+
+using namespace quotations_logic;
+namespace quotations_logic {
 
 Quotationslogic *Quotationslogic::instance_ = NULL;
 
@@ -39,7 +41,7 @@ bool Quotationslogic::Init() {
   r = config->LoadConfig(path);
 
   quotations_logic::QuotationsEngine::GetSchdulerManager();
-  quotations_redis_ = new quotations_logic::QuotationsRedis(config);
+  quotations_redis_ = new QuotationsRedis(config);
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitRedis(
       quotations_redis_);
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
@@ -159,11 +161,11 @@ bool Quotationslogic::OnTimeout(struct server *srv, char *id, int opcode,
 }
 
 bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket, struct PacketHead *packet) {
-  quotations_logic::net_request::KChartTimeLine kchart_time;
+  net_request::KChartTimeLine kchart_time;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = kchart_time.set_http_packet(packet_control->body_);
   if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    send_error(socket,ERROR_TYPE,ERROR_TYPE,JSON_FORMAT_ERR);
     return false;
   }
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendKChartLine(
@@ -175,7 +177,7 @@ bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket, struct Pa
 
 bool Quotationslogic::OnRealTime(struct server* srv, int socket,
                                  struct PacketHead *packet) {
-  quotations_logic::net_request::RealTime real_time;
+  net_request::RealTime real_time;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_htt_packet(packet_control->body_);
   if (!r){
@@ -190,7 +192,7 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
 
 bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
                                  struct PacketHead *packet) {
-  quotations_logic::net_request::TimeLine time_line;
+  net_request::TimeLine time_line;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
 
   bool r = time_line.set_htt_packet(packet_control->body_);
@@ -208,7 +210,7 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
 
 bool Quotationslogic::OnQutations(struct server* srv, int socket,
                                   struct PacketHead *packet) {
-  quotations_logic::net_other::RealTime real_time;
+  net_other::RealTime real_time;
   swp_logic::Quotations quotations;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_http_packet(packet_control->body_);
@@ -257,7 +259,6 @@ void Quotationslogic::Test() {
     delete goodsinfos;
     goodsinfos = NULL;
   }
-
 }
 
-}  // namespace trades_logic
+}  // namespace quotations_logic

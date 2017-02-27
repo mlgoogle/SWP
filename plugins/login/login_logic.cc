@@ -453,9 +453,7 @@ int Loginlogic::SendFull(int socket, const char *buffer, size_t nbytes) {
   int packet_length = packet->packet_length;
   LOG_MSG("SendPacket packet_length:%d head:%d", packet_length, HEAD_LENGTH);
   LOG_MSG((char*)(packet + HEAD_LENGTH + 5);
-  LOG_MSG((char*)(packet + HEAD_LENGTH + 5);
   char* s = new char[packet_length + 1];
-  //LOG_MSG("packet body:" << packet->body_str();
   //LOG_MSG("packet body:" << packet->body_str();
   //memset(s, 0, packet->packet_length);
   memcpy(s, &packet, packet_length);
@@ -488,7 +486,6 @@ void Loginlogic::SendPacket(const int socket, PacketHead* packet) {
 
   char* s = new char[packet->packet_length()];
   LOG_MSG("packet body:" << packet->body_str();
-  LOG_MSG("packet body:" << packet->body_str();
   memset(s, 0, packet->packet_length();
   memcpy(s, &packet->head(), HEAD_LENGTH);
   memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),
@@ -496,7 +493,6 @@ void Loginlogic::SendPacket(const int socket, PacketHead* packet) {
   int total = SendFull(socket, s, packet->packet_length();
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length() << "send packet wrong");
   LOG_IF(ERROR, total != packet->packet_length() << "send packet wrong");
 }
 
