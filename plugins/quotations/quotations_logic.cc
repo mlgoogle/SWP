@@ -6,6 +6,7 @@
 #include "quotations/operator_code.h"
 #include "quotations/errno.h"
 #include "quotations/schduler_engine.h"
+#include "logic/xml_parser.h"
 #include "logic/swp_infos.h"
 #include "config/config.h"
 #include "core/common.h"
@@ -74,7 +75,7 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
 
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
     LOG_ERROR2("UnpackStream Error socket %d", socket);
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
 
@@ -151,28 +152,37 @@ bool Quotationslogic::OnTimeout(struct server *srv, char *id, int opcode,
   return true;
 }
 
-bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket, struct PacketHead *packet) {
+bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket,
+                                       struct PacketHead *packet) {
   quotations_logic::net_request::KChartTimeLine kchart_time;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH){
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = kchart_time.set_http_packet(packet_control->body_);
-  if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendKChartLine(
-      socket, packet->session_id, kchart_time.chart_type(), kchart_time.exchange_name(),
-      kchart_time.platform_name(), kchart_time.symbol(), kchart_time.start_time(),
-      kchart_time.count());
+      socket, packet->session_id, kchart_time.chart_type(),
+      kchart_time.exchange_name(), kchart_time.platform_name(),
+      kchart_time.symbol(), kchart_time.start_time(), kchart_time.count());
   return true;
 }
 
 bool Quotationslogic::OnRealTime(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::RealTime real_time;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH){
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_htt_packet(packet_control->body_);
-  if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
   if (real_time.symbol_infos_ != NULL)
@@ -184,17 +194,21 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
 bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::TimeLine time_line;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH){
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
 
   bool r = time_line.set_htt_packet(packet_control->body_);
-  if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
 
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendTimeLine(
       socket, packet->session_id, time_line.atype(), time_line.exchange_name(),
-      time_line.platform_name(), time_line.symbol(),time_line.start_time(),
+      time_line.platform_name(), time_line.symbol(), time_line.start_time(),
       time_line.count());
   return true;
 }
@@ -205,8 +219,8 @@ bool Quotationslogic::OnQutations(struct server* srv, int socket,
   swp_logic::Quotations quotations;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_http_packet(packet_control->body_);
-  if (!r){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,FORMAT_ERRNO);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
   quotations.set_change(real_time.change());
@@ -245,7 +259,7 @@ void Quotationslogic::Test() {
   engine->Serialize((*goodsinfos), &body_stream);
 
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendRealTime(
-      13,0, goodsinfos);
+      13, 0, goodsinfos);
   if (goodsinfos) {
     delete goodsinfos;
     goodsinfos = NULL;
