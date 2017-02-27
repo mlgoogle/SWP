@@ -242,7 +242,7 @@ bool FcgiModule::PostRequestMethod(const std::string & content) {
   else
     r_repone = respone;
   if (!r_repone.empty() && r) {
-    printf("Content-type: application/json;charset=utf-8\r\n"
+    printf("Content-type: application/json;charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\n"
            "\r\n"
            "%s",
            r_repone.c_str());
