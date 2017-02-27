@@ -155,7 +155,7 @@ bool Quotationslogic::OnTimeout(struct server *srv, char *id, int opcode,
 bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket,
                                        struct PacketHead *packet) {
   quotations_logic::net_request::KChartTimeLine kchart_time;
-  if (packet->packet_length <= PACKET_HEAD_LENGTH){
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
@@ -166,16 +166,16 @@ bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket,
     return false;
   }
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendKChartLine(
-      socket, packet->session_id, kchart_time.chart_type(),
+      socket, packet->session_id, packet->reserved, kchart_time.chart_type(),
       kchart_time.exchange_name(), kchart_time.platform_name(),
-      kchart_time.symbol(), kchart_time.start_time(), kchart_time.count());
+      kchart_time.symbol(), kchart_time.start_time(),kchart_time.end_time(),kchart_time.count());
   return true;
 }
 
 bool Quotationslogic::OnRealTime(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::RealTime real_time;
-  if (packet->packet_length <= PACKET_HEAD_LENGTH){
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
@@ -187,14 +187,14 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
   }
   if (real_time.symbol_infos_ != NULL)
     quotations_logic::QuotationsEngine::GetSchdulerManager()->SendRealTime(
-        socket, packet->session_id, real_time.symbol_infos_);
+        socket, packet->session_id, packet->reserved, real_time.symbol_infos_);
   return true;
 }
 
 bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
                                  struct PacketHead *packet) {
   quotations_logic::net_request::TimeLine time_line;
-  if (packet->packet_length <= PACKET_HEAD_LENGTH){
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
@@ -207,9 +207,9 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
   }
 
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendTimeLine(
-      socket, packet->session_id, time_line.atype(), time_line.exchange_name(),
-      time_line.platform_name(), time_line.symbol(), time_line.start_time(),
-      time_line.count());
+      socket, packet->session_id, packet->reserved, time_line.atype(),
+      time_line.exchange_name(), time_line.platform_name(), time_line.symbol(),
+      time_line.start_time(), time_line.end_time(), time_line.count());
   return true;
 }
 
@@ -259,7 +259,7 @@ void Quotationslogic::Test() {
   engine->Serialize((*goodsinfos), &body_stream);
 
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendRealTime(
-      13, 0, goodsinfos);
+      13, 0, 0, goodsinfos);
   if (goodsinfos) {
     delete goodsinfos;
     goodsinfos = NULL;

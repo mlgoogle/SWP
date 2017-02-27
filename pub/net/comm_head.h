@@ -32,6 +32,11 @@ enum operatorcode {
 
 };
 
+enum NETTYPE {
+  SOCKET = 1,
+  HTTP = 2
+};
+
 //  packet_length 长度为原始数据长度
 struct PacketHead {
   int16 packet_length;

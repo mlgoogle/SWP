@@ -286,7 +286,8 @@ class KChartTimeLine {
         symbol_(NULL),
         chart_type_(NULL),
         start_time_(NULL),
-        count_(NULL){
+        end_time_(NULL),
+        count_(NULL) {
 
   }
 
@@ -307,9 +308,13 @@ class KChartTimeLine {
       delete chart_type_;
       chart_type_ = NULL;
     }
-    if (start_time_){
+    if (start_time_) {
       delete start_time_;
       start_time_ = NULL;
+    }
+    if (end_time_) {
+      delete end_time_;
+      end_time_ = NULL;
     }
     if (count_) {
       delete count_;
@@ -331,8 +336,11 @@ class KChartTimeLine {
     chart_type_ = new base_logic::FundamentalValue(chart_type);
   }
 
-  void set_start_time(const int64 start_time){
+  void set_start_time(const int64 start_time) {
     start_time_ = new base_logic::FundamentalValue(start_time);
+  }
+  void set_end_time(const int64 end_time) {
+    end_time_ = new base_logic::FundamentalValue(end_time);
   }
 
   void set_count(const int32 count) {
@@ -373,6 +381,12 @@ class KChartTimeLine {
     return start_time;
   }
 
+  const int64 end_time() const {
+    int64 end_time = 0;
+    end_time_->GetAsBigInteger(&end_time);
+    return end_time;
+  }
+
   const int32 count() const {
     int32 count = 0;
     count_->GetAsInteger(&count);
@@ -385,6 +399,7 @@ class KChartTimeLine {
   base_logic::StringValue* symbol_;
   base_logic::FundamentalValue* chart_type_;
   base_logic::FundamentalValue* start_time_;
+  base_logic::FundamentalValue* end_time_;
   base_logic::FundamentalValue* count_;
 };
 
@@ -526,7 +541,8 @@ class TimeLine {
         symbol_(NULL),
         atype_(NULL),
         start_time_(NULL),
-        count_(NULL){
+        end_time_(NULL),
+        count_(NULL) {
   }
 
   ~TimeLine() {
@@ -554,9 +570,13 @@ class TimeLine {
       delete atype_;
       atype_ = NULL;
     }
-    if (start_time_){
+    if (start_time_) {
       delete start_time_;
       start_time_ = NULL;
+    }
+    if (end_time_) {
+      delete end_time_;
+      end_time_ = NULL;
     }
 
     if (count_) {
@@ -591,8 +611,12 @@ class TimeLine {
     atype_ = new base_logic::FundamentalValue(atype);
   }
 
-  void set_start_time(const int64 start_time){
+  void set_start_time(const int64 start_time) {
     start_time_ = new base_logic::FundamentalValue(start_time);
+  }
+
+  void set_end_time(const int64 end_time) {
+    end_time_ = new base_logic::FundamentalValue(end_time);
   }
 
   void set_count(const int32 count) {
@@ -615,6 +639,12 @@ class TimeLine {
     int64 start_time = 0;
     start_time_->GetAsBigInteger(&start_time);
     return start_time;
+  }
+
+  const int64 end_time() const {
+    int64 end_time = 0;
+    end_time_->GetAsBigInteger(&end_time);
+    return end_time;
   }
 
   const int32 count() const {
@@ -655,6 +685,7 @@ class TimeLine {
   base_logic::StringValue* symbol_;
   base_logic::FundamentalValue* atype_;
   base_logic::FundamentalValue* start_time_;
+  base_logic::FundamentalValue* end_time_;
   base_logic::FundamentalValue* count_;
 };
 

@@ -198,18 +198,23 @@ void QuotationsManager::TimeEvent(int opcode, int time) {
 }
 
 void QuotationsManager::SendKChartLine(const int socket, const int64 session,
+                                       const int32 reversed,
                                        const int32 kchar_type,
                                        const std::string& exchange_name,
                                        const std::string& platform_name,
                                        const std::string& symbol,
                                        const int64 start_time,
+                                       const int64 end_time,
                                        const int32 count) {
   net_reply::KChartLine kchart_line;
   std::list<swp_logic::Quotations> list;
-  int32 base_num = 5;
-  base_num = base_num < count ? base_num : count;
+  int32 base_num = 20;
+  if (reversed /1000 == HTTP)
+    base_num = count;
+  else
+    base_num = base_num < count ? base_num : count;
   std::string key = platform_name + ":" + exchange_name + ":" + symbol;
-  GetKChartLine(kchar_type, key, list);
+  GetKChartLine(kchar_type, key, list, end_time);
   if (list.size() <= 0) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_KCHART_DATA);
     return;
@@ -222,12 +227,12 @@ void QuotationsManager::SendKChartLine(const int socket, const int64 session,
     if (quotations.current_unix_time() > start_time)
       continue;
     net_reply::RealTimeUnit* r_real_time_unit = new net_reply::RealTimeUnit;
-    r_real_time_unit->set_change(quotations.change());
-    r_real_time_unit->set_pchg(quotations.pchg());
+    //r_real_time_unit->set_change(quotations.change());
+    //r_real_time_unit->set_pchg(quotations.pchg());
     r_real_time_unit->set_opening_today_price(quotations.opening_today_price());
     r_real_time_unit->set_closed_yesterday_price(
         quotations.closed_yesterday_price());
-    r_real_time_unit->set_current_price(quotations.current_price());
+    //r_real_time_unit->set_current_price(quotations.current_price());
     r_real_time_unit->set_high_price(quotations.high_price());
     r_real_time_unit->set_low_price(quotations.low_price());
     r_real_time_unit->set_current_unix_time(quotations.current_unix_time());
@@ -259,18 +264,22 @@ void QuotationsManager::SendKChartLine(const int socket, const int64 session,
 }
 
 void QuotationsManager::SendTimeLine(const int socket, const int64 session,
-                                     const int32 atype,
+                                     const int32 reversed, const int32 atype,
                                      const std::string& exchange_name,
                                      const std::string& platform_name,
                                      const std::string& symbol,
                                      const int64 start_time,
+                                     const int64 end_time,
                                      const int32 count) {
   net_reply::TimeLine time_line;
   std::list<swp_logic::Quotations> list;
-  int32 base_num = 5;
-  base_num = base_num < count ? base_num : count;
+  int32 base_num = 20;
+  if (reversed /1000 == HTTP)
+    base_num = count;
+  else
+    base_num = base_num < count ? base_num : count;
   std::string key = platform_name + ":" + exchange_name + ":" + symbol;
-  GetTimeLine(atype, key, list);
+  GetTimeLine(atype, key, list, end_time);
   if (list.size() <= 0) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_TIME_LINE_DATA);
     return;
@@ -289,8 +298,8 @@ void QuotationsManager::SendTimeLine(const int socket, const int64 session,
     r_real_time_unit->set_closed_yesterday_price(
         quotations.closed_yesterday_price());
     r_real_time_unit->set_current_price(quotations.current_price());
-    r_real_time_unit->set_high_price(quotations.high_price());
-    r_real_time_unit->set_low_price(quotations.low_price());
+    //r_real_time_unit->set_high_price(quotations.high_price());
+    //r_real_time_unit->set_low_price(quotations.low_price());
     r_real_time_unit->set_current_unix_time(quotations.current_unix_time());
     r_real_time_unit->set_exchange_name(quotations.exchange_name());
     r_real_time_unit->set_platform_name(quotations.platform());
@@ -318,6 +327,7 @@ void QuotationsManager::SendTimeLine(const int socket, const int64 session,
 }
 
 void QuotationsManager::SendRealTime(const int socket, const int64 session,
+                                     const int32 reversed,
                                      base_logic::ListValue* value) {
   net_reply::RealTime net_reply_real_time;
   for (base_logic::ListValue::iterator it = value->begin(); it != value->end();
@@ -360,7 +370,8 @@ void QuotationsManager::SendRealTime(const int socket, const int64 session,
 
 void QuotationsManager::GetKChartLine(const int32 chart_type,
                                       const std::string& key,
-                                      std::list<swp_logic::Quotations>& list) {
+                                      std::list<swp_logic::Quotations>& list,
+                                      const int64 end_time) {
   bool r = false;
   base_logic::RLockGd lk(lock_);
   K_HIS_QUOTATIONS_MAP his_quotations_map;
@@ -375,13 +386,16 @@ void QuotationsManager::GetKChartLine(const int32 chart_type,
   int64 start_pan = ((time(NULL) * 24 * 60 * 60) * 24 * 60 * 60)
       - (8 * 60 * 60);  //当前为东八区
 
+  if (end_time != 0)
+    start_pan = end_time;
+
   his_quotations_list.sort(swp_logic::Quotations::after);
   QUOTATIONS_LIST::iterator it = his_quotations_list.begin();
   for (; it != his_quotations_list.end(); it++) {
     swp_logic::Quotations quotations = (*it);
     //LOG_MSG2("count:{%d} index:{%d} unix_time:{%lld}", quotations_list.size(),
     //  i,quotations.current_unix_time());
-    if (quotations.current_unix_time() > start_pan)
+    if (quotations.current_unix_time() >= start_pan)
       list.push_back(quotations);
     else
       break;
@@ -390,7 +404,8 @@ void QuotationsManager::GetKChartLine(const int32 chart_type,
 
 void QuotationsManager::GetTimeLine(const int32 atype,
                                     const std::string& symbol,
-                                    std::list<swp_logic::Quotations>& list) {
+                                    std::list<swp_logic::Quotations>& list,
+                                    const int64 end_time) {
   bool r = false;
   base_logic::RLockGd lk(lock_);
   QUOTATIONS_MAP exchange_quotations;
@@ -408,6 +423,8 @@ void QuotationsManager::GetTimeLine(const int32 atype,
 //遍历
   int64 start_pan = ((time(NULL) * 24 * 60 * 60) * 24 * 60 * 60)
       - (8 * 60 * 60);  //当前为东八区
+  if (end_time != 0)
+    start_pan  = end_time;
   int i = 0;
   QUOTATIONS_LIST::iterator it = quotations_list.begin();
   for (; it != quotations_list.end(); it++) {
@@ -415,7 +432,7 @@ void QuotationsManager::GetTimeLine(const int32 atype,
     swp_logic::Quotations quotations = (*it);
     //LOG_MSG2("count:{%d} index:{%d} unix_time:{%lld}", quotations_list.size(),
     //  i,quotations.current_unix_time());
-    if (quotations.current_unix_time() > start_pan)
+    if (quotations.current_unix_time() >= start_pan)
       list.push_back(quotations);
     else
       break;
@@ -444,7 +461,7 @@ void QuotationsManager::GetRealTime(const int32 atype,
 
 void QuotationsManager::LoginQuotationsCenter(const int socket) {
   quotations_logic::net_other::Login login;
-  login.set_aid(10002);
+  login.set_aid(10012);
   login.set_atype(4);
   login.set_passowrd("1234567x");
   struct PacketControl packet_control;

@@ -61,12 +61,11 @@ void TradesManager::SetGoodsUnit(trades_logic::GoodsInfo& goods_info) {
   trades_cache_->trades_map_[goods_info.platform_id()] = goods_map;
 }
 
-void TradesManager::OnTimePosition(
-    const int socket, const int64 session,
-    swp_logic::TradesPosition& trades_position) {
+void TradesManager::OnTimePosition(const int socket, const int64 session,
+                                   swp_logic::TradesPosition& trades_position) {
   net_reply::TradesPosition r_trades_position;
-  int32 result  = OpenPosition(trades_position);
-  if (result != 0){
+  int32 result = OpenPosition(trades_position);
+  if (result != 0) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_CHARGE);
     return;
   }
@@ -98,8 +97,7 @@ void TradesManager::OnTimePosition(
   send_message(socket, &packet_control);
 }
 
-int32 TradesManager::OpenPosition(
-    swp_logic::TradesPosition& trades_position) {
+int32 TradesManager::OpenPosition(swp_logic::TradesPosition& trades_position) {
   bool r = false;
   trades_logic::GoodsInfo good_info;
   {
@@ -129,7 +127,7 @@ int32 TradesManager::OpenPosition(
 
   quotation.set_type(FORXE_TYPE);
   GetQuotations(key, quotation);
-  if(quotation.current_unix_time()==0)
+  if (quotation.current_unix_time() == 0)
     return NO_HAVE_POSITIONS_DATA;
   trades_position.set_goods_key(key);
   trades_position.set_symbol(good_info.symbol());
@@ -149,10 +147,10 @@ int32 TradesManager::OpenPosition(
 
   r = trades_db_->OnOpenPosition(trades_position);
   //放入定时队列中
-  if (r){
+  if (r) {
     SetTimePosition(trades_position);
     return 0;
-  }else{
+  } else {
     return NO_HAVE_CHARGE;
   }
 }
@@ -265,11 +263,15 @@ void TradesManager::SetQuotations(swp_logic::Quotations& quotation) {
 }
 
 void TradesManager::SendCurrentPosition(const int socket, const int64 session,
-                                        const int64 uid,const int32 pos, const int32 count) {
+                                        const int32 reversed, const int64 uid,
+                                        const int32 pos, const int32 count) {
   base_logic::RLockGd lk(lock_);
   TRADES_MAP trades_map;
-  int32 base_num = 5;
-  base_num = base_num < count ? base_num : count;
+  int32 base_num = 20;
+  if (reversed /1000 == HTTP)
+    base_num = count;
+  else
+    base_num = base_num < count ? base_num : count;
   int32 t_start = 0;
   int32 t_count = 0;
 
@@ -279,23 +281,23 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 session,
     return;
 
   net_reply::AllTradesPosition net_trades_positions;
-  std::list <swp_logic::TradesPosition> trades_list;
+  std::list<swp_logic::TradesPosition> trades_list;
 
   for (TRADES_MAP::iterator it = trades_map.begin(); it != trades_map.end();
-      it++){
+      it++) {
     swp_logic::TradesPosition trades_position = it->second;
     trades_list.push_back(trades_position);
   }
   //没有对应的历史记录
-   if (trades_list.size() <=0){
-     send_error(socket,ERROR_TYPE,ERROR_TYPE,NO_HAVE_POSITIONS_DATA);
-     return;
-   }
+  if (trades_list.size() <= 0) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_POSITIONS_DATA);
+    return;
+  }
   //trades_list.sort(trades_logic::TradesPosition:)
 
-   trades_list.sort(swp_logic::TradesPosition::close_after);
+  trades_list.sort(swp_logic::TradesPosition::close_after);
   //遍历发送
-  while (trades_list.size() > 0 && t_count < count)  {
+  while (trades_list.size() > 0 && t_count < count) {
     swp_logic::TradesPosition trades_position = trades_list.front();
     trades_list.pop_front();
     t_start++;
@@ -349,12 +351,15 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 session,
 }
 
 void TradesManager::SendGoods(const int socket, const int64 session,
-                              const int32 pid, const int32 start,
-                              const int32 count) {
+                              const int32 reversed, const int32 pid,
+                              const int32 start, const int32 count) {
   base_logic::WLockGd lk(lock_);
   GOODS_MAP goods_map;
-  int32 base_num = 5;
-  base_num = base_num < count ? base_num : count;
+  int32 base_num = 20;
+  if (reversed /1000 == HTTP)
+    base_num = count;
+  else
+    base_num = base_num < count ? base_num : count;
   int32 t_start = 0;
   int32 t_count = 0;
 
@@ -373,7 +378,7 @@ void TradesManager::SendGoods(const int socket, const int64 session,
     goods_list.push_back(goods);
   }
 
-  if (goods_list.size()<=0){
+  if (goods_list.size() <= 0) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_GOODS_DATA);
     return;
   }

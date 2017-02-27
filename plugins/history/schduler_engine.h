@@ -26,12 +26,14 @@ class HistoryManager {
   virtual ~HistoryManager();
   void InitDB(history_logic::HistoryDB* history_db);
   void InitHistoryTradesData();
-  void SendHistoryTrades(const int socket,const int64 session, const int64 uid,
-                         const int64 pos, const int64 count = 10);
+  void SendHistoryTrades(const int socket, const int64 session,
+                         const int32 reversed, const int64 uid, const int64 pos,
+                         const int64 count = 10);
  private:
   void Init();
   void SetHistoryTradesNoLock(swp_logic::TradesPosition& trades);
-  void GetHistoryTradesNoLock(const int64 uid, std::list<swp_logic::TradesPosition>& list,
+  void GetHistoryTradesNoLock(const int64 uid,
+                              std::list<swp_logic::TradesPosition>& list,
                               const int64 pos = 0, const int64 count = 10);
  private:
   history_logic::HistoryDB* history_db_;
@@ -60,7 +62,6 @@ class HistoryEngine {
       schduler_engine_ = new HistoryEngine();
     return schduler_engine_;
   }
-
 
   static void FreeSchdulerManager() {
     if (schduler_mgr_) {

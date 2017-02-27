@@ -223,7 +223,7 @@ bool FcgiModule::PostRequestMethod(const std::string & content) {
   int16 operate_code = operate_code_;
   int8 t_is_zip_encrypt = 0;
   const int8 t_type = api_type_;
-  net::PacketProsess::StrPacket(operate_code_, t_is_zip_encrypt, t_type, 0, 0,
+  net::PacketProsess::StrPacket(operate_code_, t_is_zip_encrypt, t_type, 0, 2001,
                                 os.str().c_str(), &packet_stream,
                                 &packet_stream_length);
 

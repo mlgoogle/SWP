@@ -44,8 +44,8 @@ void HistoryManager::InitHistoryTradesData() {
 }
 
 void HistoryManager::SendHistoryTrades(const int socket, const int64 session,
-                                       const int64 uid, const int64 pos,
-                                       const int64 count) {
+                                       const int32 reversed, const int64 uid,
+                                       const int64 pos, const int64 count) {
   std::list<swp_logic::TradesPosition> trades_list;
   {
     base_logic::RLockGd lk(lock_);
@@ -53,12 +53,16 @@ void HistoryManager::SendHistoryTrades(const int socket, const int64 session,
   }
 
   //没有对应的历史记录
-  if (trades_list.size() <=0){
-    send_error(socket,ERROR_TYPE,ERROR_TYPE,NO_HAVE_HISTROY_DATA);
+  if (trades_list.size() <= 0) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_HISTROY_DATA);
     return;
   }
   int32 base_num = 10;
-  base_num = base_num < count ? base_num : count;
+  if (reversed /1000 == HTTP)
+    base_num = count;
+  else
+    base_num = base_num < count ? base_num : count;
+
   int32 t_start = 0;
   int32 t_count = 0;
 
@@ -132,8 +136,7 @@ void HistoryManager::GetHistoryTradesNoLock(
   }
 }
 
-void HistoryManager::SetHistoryTradesNoLock(
-    swp_logic::TradesPosition& trades) {
+void HistoryManager::SetHistoryTradesNoLock(swp_logic::TradesPosition& trades) {
   TRADES_MAP trades_map;
   base::MapGet<ALL_TRADES_MAP, ALL_TRADES_MAP::iterator, int64, TRADES_MAP>(
       history_cache_->all_trades_map_, trades.uid(), trades_map);

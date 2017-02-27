@@ -93,6 +93,7 @@ bool TimeLine::set_htt_packet(base_logic::DictionaryValue* value) {
   int64 big_count;
   int32 count;
   int64 start_time;
+  int64 end_time;
 
   if (value == NULL)
     return false;
@@ -138,6 +139,13 @@ bool TimeLine::set_htt_packet(base_logic::DictionaryValue* value) {
   if (!r)
     start_time = time(NULL);
   set_start_time(start_time);
+
+  r = value->GetBigInteger(L"endTime", &end_time);
+  if (r){
+    set_end_time(end_time);
+  }else{
+    set_end_time(0);
+  }
 
   r = value->GetBigInteger(L"count", &big_count);
   if (r)
@@ -198,6 +206,7 @@ bool KChartTimeLine::set_http_packet(base_logic::DictionaryValue* value) {
   int64 big_count;
   int32 count;
   int64 start_time;
+  int64 end_time;
 
   if (value == NULL)
     return false;
@@ -231,6 +240,13 @@ bool KChartTimeLine::set_http_packet(base_logic::DictionaryValue* value) {
   if (!r)
     start_time = time(NULL);
   set_start_time(start_time);
+
+  r = value->GetBigInteger(L"endTime", &end_time);
+  if (r){
+    set_end_time(end_time);
+  }else{
+    set_end_time(0);
+  }
 
   r = value->GetBigInteger(L"count", &big_count);
   if (r)
