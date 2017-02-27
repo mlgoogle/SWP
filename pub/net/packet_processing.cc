@@ -40,7 +40,7 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 
   BUILDPAKCET(body_stream.length());
 
-  LOG_DEBUG2("%s",body_stream.c_str());
+  //LOG_DEBUG2("%s",body_stream.c_str());
 
   *packet_stream = reinterpret_cast<void *>(const_cast<char *>(out.GetData()));
   *packet_stream_length = PACKET_HEAD_LENGTH + body_stream.length();

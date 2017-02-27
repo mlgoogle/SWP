@@ -235,9 +235,13 @@ void TradesManager::GetQuotationsNoLock(const std::string& key,
                                         swp_logic::Quotations& quotation) {
   QUOTATIONS_ALL_MAP::iterator quotations_all_it = trades_cache_
       ->quotations_map_.find(quotation.type());
+  if (quotations_all_it == trades_cache_->quotations_map_.end())
+    return;
   QUOTATIONS_MAP quotations = quotations_all_it->second;
 
   QUOTATIONS_MAP::iterator quotations_it = quotations.find(key);
+  if (quotations_it == quotations.end())
+    return;
   quotation = quotations_it->second;
   // quotations[key] = quotation;
 }
