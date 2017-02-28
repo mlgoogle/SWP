@@ -45,6 +45,14 @@ class QuotationsCache {
   K_ALL_QUOTATIONS_MAP    current_k_all_map_;
   K_ALL_HIS_QUOTATIONS_MAP k_history_all_map_;
 };
+  
+typedef std::map<std::string, QUOTATIONS_LIST> QUOTATIONS_MAP; /*现货ID，行情*/
+typedef std::map<int64,QUOTATIONS_MAP> QUOTATIONS_ALL_MAP; /*股票,现货,期货 QUOTATIONS_MAP*/
+
+/*class QuotationsCache {
+ public:
+  QUOTATIONS_ALL_MAP  quotations_map_;
+};*/
 
 class QuotationsManager {
  public:
@@ -76,7 +84,7 @@ class QuotationsManager {
 
   void TimeEvent(int opcode, int time);
 
-  void InitRedis(quotations_logic::QuotationsRedis* quotations_redis);
+  void InitRedis(QuotationsRedis* quotations_redis);
 
   void InitGoodsData();
 
@@ -106,7 +114,10 @@ class QuotationsManager {
   void Init();
  private:
   QuotationsCache *quotations_cache_;
-  quotations_logic::QuotationsRedis* quotations_redis_;
+  QuotationsRedis* quotations_redis_;
+  //void TimeEvent(int opcode, int time);
+ private:
+  //QuotationsCache *quotations_cache_;
   struct threadrw_t *lock_;
 };
 

@@ -4,6 +4,8 @@
 #include "pub/comm/comm_head.h"
 
 namespace login {
+#define HEARTBEAT_REQ 3000
+	
 #define REGISTER_ACCOUNT_REQ LOGIN_TYPE*1000 + 1
 #define REGISTER_ACCOUNT_RLY LOGIN_TYPE*1000 + 2
 

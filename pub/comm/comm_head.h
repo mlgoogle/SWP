@@ -12,12 +12,12 @@ enum TIME_TASK {
   ORDER_STATUS_CHECK = 103, //定时监测未支付的订单
 };
 
-enum PACKET_TYPE {
+/*enum PACKET_TYPE {
   ERROR_TYPE = 0,
   USER_TYPE = 1,
   CHAT_TYPE = 2,
   LOGIN_TYPE = 3
-};
+};*/
 
 enum PACKET_ERROR {
   JSON_FORMAT_ERR = -100,

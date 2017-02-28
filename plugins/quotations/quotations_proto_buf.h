@@ -8,6 +8,7 @@
 #include "logic/base_values.h"
 #include <list>
 #include <string>
+#include "logic/logic_comm.h"
 
 namespace quotations_logic {
 
@@ -680,24 +681,29 @@ class RealTimeUnit {
   }
 
   void set_change(const double change) {
+    LOG_DEBUG2("change:%f", change);
     change_ = new base_logic::FundamentalValue(change);
   }
 
   void set_pchg(const double pchg) {
+    LOG_DEBUG2("pchg:%f", pchg);
     pchg_ = new base_logic::FundamentalValue(pchg);
   }
 
   void set_opening_today_price(const double opening_today_price) {
+    LOG_DEBUG2("opening_today_price:%f", opening_today_price);
     opening_today_price_ = new base_logic::FundamentalValue(
         opening_today_price);
   }
 
   void set_closed_yesterday_price(const double closed_yesterday_price) {
+    LOG_DEBUG2("closed_yesterday_price:%f", closed_yesterday_price);
     closed_yesterday_price_ = new base_logic::FundamentalValue(
         closed_yesterday_price);
   }
 
   void set_current_price(const double current_price) {
+    LOG_DEBUG2("current_price:%f", current_price);
     current_price_ = new base_logic::FundamentalValue(current_price);
   }
 
@@ -706,10 +712,12 @@ class RealTimeUnit {
   }
 
   void set_high_price(const double high_price) {
+    LOG_DEBUG2("high_price:%f", high_price);
     high_price_ = new base_logic::FundamentalValue(high_price);
   }
 
   void set_low_price(const double low_price) {
+    LOG_DEBUG2("low_price:%f", low_price);
     low_price_ = new base_logic::FundamentalValue(low_price);
   }
 

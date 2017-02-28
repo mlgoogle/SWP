@@ -14,6 +14,7 @@
 #include "logic/logic_unit.h"
 #include "net/errno.h"
 #include <string>
+#include "pub/comm/comm_head.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/trades/trades_config.xml"
 
@@ -144,24 +145,28 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
     return false;
   }
 
-  switch (packet->operate_code) {
-    case R_TRADES_GOODS_DATA: {
-      OnPlatformsGoods(srv, socket, packet);
-      break;
+  if (packet->type == TRADES_TYPE
+      && logic::SomeUtils::VerifyToken(packet)) {
+    switch (packet->operate_code) {
+      case R_TRADES_GOODS_DATA: {
+        OnPlatformsGoods(srv, socket, packet);
+        break;
+      }
+      case R_TRADES_OPEN_POSITION: {
+        OnOpenPosition(srv, socket, packet);
+        break;
+      }
+  
+      case R_TRADES_CURRENT_POSITION: {
+        OnCurrentPosition(srv, socket, packet);
+        break;
+      }
+      default:
+        break;
     }
-    case R_TRADES_OPEN_POSITION: {
-      OnOpenPosition(srv, socket, packet);
-      break;
-    }
-
-    case R_TRADES_CURRENT_POSITION: {
-      OnCurrentPosition(srv, socket, packet);
-      break;
-    }
-    default:
-      break;
+    return true;
   }
-  return true;
+  return false;
 }
 
 bool Tradeslogic::OnTradesClose(struct server *srv, const int socket) {
@@ -248,7 +253,7 @@ bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = goods.set_http_packet(packet_control->body_);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, JSON_FORMAT_ERR);
     return false;
   }
   trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(
@@ -263,7 +268,7 @@ bool Tradeslogic::OnOpenPosition(struct server* srv, int socket,
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = open_position.set_http_packet(packet_control->body_);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, JSON_FORMAT_ERR);
     return false;
   }
   swp_logic::TradesPosition trades_position;
@@ -284,7 +289,7 @@ bool Tradeslogic::OnCurrentPosition(struct server* srv, int socket,
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = current_position.set_http_packet(packet_control->body_);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, JSON_FORMAT_ERR);
     return false;
   }
   trades_logic::TradesEngine::GetSchdulerManager()->SendCurrentPosition(

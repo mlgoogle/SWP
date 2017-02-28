@@ -9,6 +9,18 @@
 #include "logic/logic_comm.h"
 #include "basic/md5sum.h"
 #include "basic/radom_in.h"
+#include "pub/comm/user_info.h"
+#include "login/login_logic.h"
+#include "login/login_opcode.h"
+#include <cerrno>
+#include "comm/comm_head.h"
+#include "login/errno.h"
+#include "user/errno.h"
+#include "quotations/errno.h"
+#include "trades/errno.h"
+#include "history/errno.h"
+#include "user/user_opcode.h"
+#include "logic/logic_comm.h"
 
 namespace logic {
 
@@ -40,9 +52,69 @@ void SomeUtils::CreateToken(const int64 uid, const std::string& password,
   (*token) = md5.GetHash();
 }
 
-bool SomeUtils::VerifyToken(const int64 uid, const std::string& password,
-                            const std::string& token) {
-  return true;
+share::DataShareMgr* SomeUtils::GetShareDataMgr() {
+  basic::libhandle  handle = NULL;
+  handle = basic::load_native_library("./data.so");
+  if (handle==NULL){
+    LOG_ERROR("Can't load path data.so\n");
+  }
+  LOG_MSG("load data.so success");
+  share::DataShareMgr* (*pengine) (void);
+  pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
+  if(pengine==NULL){
+    LOG_ERROR("Can't find GetDataShareMgr\n");
+    return false;
+  }
+  return (*pengine)();
+}
+
+bool SomeUtils::VerifyToken(PacketHead* packet) {
+  base_logic::DictionaryValue* dic =
+    ((struct PacketControl*)packet)->body_;
+  int16 operate_code = packet->operate_code; 
+
+  if (operate_code == OBTAIN_VERIFY_CODE_REQ)
+    return true;
+  
+  if (dic) {
+    bool r;
+    int64 uid = 0;
+    r = dic->GetBigInteger(L"id", &uid);
+    if (r) {
+      std::string token;
+      r = dic->GetString(L"token", &token);
+      if (r) {
+        UserInfo* user_info = GetShareDataMgr()->GetUser(uid); //////NULL!
+        if (user_info) {
+          if (user_info->token() == token) 
+            return true;
+          else {
+            LOG_ERROR2("verify token not match id:%lld opcode:%d", uid, operate_code);
+            return false;
+          }
+        } else {
+          LOG_ERROR2("verify token not found UserInfo id:%lld", uid);
+          return false;
+        }
+      } else {
+          LOG_ERROR("verify token parse token error");
+        return false;
+      }
+    } else {
+      if (operate_code == REGISTER_ACCOUNT_REQ
+          || operate_code == USER_LOGIN_REQ
+          || operate_code == WXPAY_SERVER_REQ)
+        return true;
+      else {
+        LOG_ERROR("verify token no user id found");
+        return false;
+      }
+    }
+  } else {
+    std::string result;
+    LOG_ERROR2("verify token body NULL, opcode:%d", operate_code);
+    return false;
+  }
 }
 
 base_logic::Value* BaseValue::Deserialize(std::string* str) {
@@ -219,13 +291,20 @@ int32 SendUtils::SendFull(int socket, const char *buffer, size_t nbytes) {
   const char *buf = buffer;
   do {
     amt = nbytes;
+    
+    //////////////////
+    //struct timeval timeout = {3, 0};
+    //int ret = setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&timeout, sizeof(timeout));
+    //LOG_DEBUG2("setsockopt ret:%d", ret);
+    
     amt = send(socket, buf, amt, 0);
     if (-1 == amt) {
-      if (11 == errno)
+      break;
+      /*if (11 == errno)
         continue;
       else {
         break;
-      }
+        }*/
     }
     buf = buf + amt;
     nbytes -= amt;
@@ -254,7 +333,7 @@ bool SendUtils::SendMessage(int socket, struct PacketHead* packet,
   int32_t packet_stream_length = 0;
   int ret = 0;
   bool r1 = false;
-  if (socket <= 0 || packet == NULL)
+  if (socket <= 0)// || packet == NULL)
     return false;
 
   if (net::PacketProsess::PacketStream(packet, &packet_stream,
@@ -266,9 +345,10 @@ bool SendUtils::SendMessage(int socket, struct PacketHead* packet,
 
   ret = SendFull(socket, reinterpret_cast<char*>(packet_stream),
                  packet_stream_length);
+  LOG_DEBUG2("send:%d:%s", packet_stream_length, packet_stream);// + sizeof(*packet));
   //net::PacketProsess::HexEncode(packet_stream, packet_stream_length);
   if (ret != packet_stream_length) {
-    LOG_ERROR2("Sent msg failed in %s:%d", file, line);
+    LOG_ERROR2("Sent msg failed in %s:%d ret:%d packet_len:%d", file, line, ret, packet_stream_length);
     r = false;
     goto MEMFREE;
   } else {
@@ -284,5 +364,35 @@ bool SendUtils::SendMessage(int socket, struct PacketHead* packet,
   }
   return r;
 }
+  
+const static std::map<int, const char*>::value_type init_value[] = {
+  std::map<int, const char*>::value_type(JSON_FORMAT_ERR, "格式有误"),
+  std::map<int, const char*>::value_type(TOKEN_ERR_OR_NOTEXIST, "token错误或不存在"),
+  std::map<int, const char*>::value_type(SQL_EXEC_ERR, "sql执行错误"),
+  std::map<int, const char*>::value_type(VERIFY_CODE_OVERDUE, "验证码过期"),
+  std::map<int, const char*>::value_type(VERIFY_CODE_ERR, "验证码错误"),
+
+  std::map<int, const char*>::value_type(NO_USER, "没有此用户"),
+  std::map<int, const char*>::value_type(WX_PLACE_ORDER_ERR, "微信下单失败"),
+  std::map<int, const char*>::value_type(CREDIT_STATUS_ERR, "充值列表状态参数错误"),
+  
+  std::map<int, const char*>::value_type(PHONE_NUM_ERR, "不是有效手机号"),
+  std::map<int, const char*>::value_type(PHONE_OR_PASSWD_ERR, "手机号或密码错误"),
+
+  std::map<int, const char*>::value_type(NO_HAVE_REAL_TIME_DATA, "没有对应报价"),
+  std::map<int, const char*>::value_type(NO_HAVE_TIME_LINE_DATA, "没有对应的行情数据"),
+  std::map<int, const char*>::value_type(NO_HAVE_KCHART_DATA, "没有对应的K线数据"),
+
+  std::map<int, const char*>::value_type(NO_HAVE_PLATFORM, "平台没有交易的商品"),
+  std::map<int, const char*>::value_type(NO_HAVE_TRADES_GOODS, "交易的商品不存在"),
+  //  std::map<int, const char*>::value_type(NO_HAVE_QUOTATIONS_DATA, "当前商品暂停交易"),
+  std::map<int, const char*>::value_type(NO_HAVE_CHARGE, "扣费失败"),
+  std::map<int, const char*>::value_type(NO_HAVE_GOODS_DATA, "没有商品数据"),
+  
+  std::map<int, const char*>::value_type(NO_HAVE_HISTROY_DATA, "没有对应的历史数据")
+}; 
+
+std::map<int, const char*> error_code_msgs(init_value,
+        init_value + sizeof(init_value) / sizeof(init_value[0]));
 
 }  //  namespace logic

@@ -48,22 +48,22 @@ std::string PacketHead::Serialize(DicValue* dic) {
 
 void PacketHead::set_body_str(char* packet) {
   if (packet_length() != data_length() + HEAD_LENGTH) {
-    LOG(ERROR) << "something wrong with packet set_body";
-    LOG(ERROR) << "type:" << type() << "-operate_code:" \
+    //LOG(ERROR) << "something wrong with packet set_body";
+    //LOG(ERROR) << "type:" << type() << "-operate_code:" \
         << operate_code() << "-packet_length:" << packet_length() \
         << "-data_length:" << data_length();
 	return;
   }
-  LOG(INFO) << "type:" << (int)type() << "-operate_code:" \
+  //LOG(INFO) << "type:" << (int)type() << "-operate_code:" \
       << operate_code() << "-packet_length:" << packet_length() \
       << "-data_length:" << data_length();
-  LOG(INFO) << "is_zip_encrypt:" << (int)is_zip_encrypt() << "-signature:" \
+  //LOG(INFO) << "is_zip_encrypt:" << (int)is_zip_encrypt() << "-signature:" \
       << signature() << "-timestamp:" << timestamp();
 //  char* data = new char[data_length()+1];
 //  memset(data, 0, data_length()+1);
 //  memcpy(data, packet, data_length());
   body_str_ = packet;
-  LOG(INFO) << "body_str:" << body_str_;
+  //LOG(INFO) << "body_str:" << body_str_;
 //  delete[] data;
 }
 

@@ -5,11 +5,12 @@
 #include "wx_order.h"
 
 #include <iostream>
+#include <sstream>
 
 #include "public/basic/md5sum.h"
 #include "public/http/http_method.h"
-#include "glog/logging.h"
 #include "pub/util/util.h"
+#include "logic/logic_comm.h"
 
 
 WXOrder::WXOrder() {
@@ -37,9 +38,9 @@ void WXOrder::PlaceOrderSign() {
      << "&out_trade_no=" << out_trade_no << "&spbill_create_ip="
      << spbill_create_ip << "&total_fee=" << total_fee << "&trade_type="
      << trade_type << "&key=" << key;
-  LOG(INFO)<< "WX_ORDER_SIGN before:" << ss.str();
+  LOG_MSG2("WX_ORDER_SIGN before:%s", ss.str().c_str());
   base::MD5Sum md5sum(ss.str());
-  LOG(INFO)<< "WX_ORDER_SIGN_MD5 after:" << md5sum.GetHash();
+  LOG_MSG2("WX_ORDER_SIGN_MD5 after:%s", md5sum.GetHash().c_str());
   sign = md5sum.GetHash();
 }
 
@@ -54,9 +55,9 @@ void WXOrder::PreSign() {
   ss << "appid=" << appid << "&noncestr=" << nonce_str
      << "&package=Sign=WXPay" << "&partnerid=" << mch_id << "&prepayid="
      << prepayid << "&timestamp=" << timestamp << "&key=" << key;
-  LOG(INFO)<< "WX_PRE_SIGN before:" << ss.str();
+  LOG_MSG2("WX_PRE_SIGN before:%s", ss.str().c_str());
   base::MD5Sum md5sum(ss.str());
-  LOG(INFO)<< "WX_PRE_SIGN_MD5 after:" << md5sum.GetHash();
+  LOG_MSG2("WX_PRE_SIGN_MD5 after:%s", md5sum.GetHash().c_str());
   prepaysign = md5sum.GetHash();
 }
 
@@ -90,7 +91,7 @@ std::string WXOrder::PlaceOrder() {
   hmp.Post(PostFiled().c_str());
   std::string result;
   hmp.GetContent(result);
-  LOG(INFO)<< "http post result:" << result;
+  LOG_MSG2("http post result:%s", result);
   return result;
 }
 

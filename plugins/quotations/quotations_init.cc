@@ -21,26 +21,26 @@ static void *OnQuotationsStart() {
   quotations->name = "quotations";
   quotations->version = "1.0.0";
   quotations->provider = "kerry";
-  if (!quatations_logic::Quotationslogic::GetInstance())
+  if (!quotations_logic::Quotationslogic::GetInstance())
     assert(0);
   return quotations;
 }
 
 static handler_t OnQuotationsShutdown(struct server *srv, void *pd) {
-  quatations_logic::Quotationslogic::FreeInstance();
+  quotations_logic::Quotationslogic::FreeInstance();
 
   return HANDLER_GO_ON;
 }
 
 static handler_t OnQuotationsConnect(struct server *srv, int fd, void *data,
                                      int len) {
-  quatations_logic::Quotationslogic::GetInstance()->OnQuotationsConnect(srv, fd);
+  quotations_logic::Quotationslogic::GetInstance()->OnQuotationsConnect(srv, fd);
   return HANDLER_GO_ON;
 }
 
 static handler_t OnQuotationsMessage(struct server *srv, int fd, void *data,
                                      int len) {
-  bool r = quatations_logic::Quotationslogic::GetInstance()->OnQuotationsMessage(srv, fd,
+  bool r = quotations_logic::Quotationslogic::GetInstance()->OnQuotationsMessage(srv, fd,
                                                                     data, len);
   if (r)
     return HANDLER_GO_ON;
@@ -49,7 +49,7 @@ static handler_t OnQuotationsMessage(struct server *srv, int fd, void *data,
 }
 
 static handler_t OnQuotationsClose(struct server *srv, int fd) {
-  quatations_logic::Quotationslogic::GetInstance()->OnQuotationsClose(srv, fd);
+  quotations_logic::Quotationslogic::GetInstance()->OnQuotationsClose(srv, fd);
   return HANDLER_GO_ON;
 }
 
@@ -59,30 +59,30 @@ static handler_t OnUnknow(struct server *srv, int fd, void *data, int len) {
 
 static handler_t OnBroadcastConnect(struct server *srv, int fd, void *data,
                                     int len) {
-  quatations_logic::Quotationslogic::GetInstance()->OnBroadcastConnect(
+  quotations_logic::Quotationslogic::GetInstance()->OnBroadcastConnect(
       srv, fd, data, len);
   return HANDLER_GO_ON;
 }
 
 static handler_t OnBroadcastClose(struct server *srv, int fd) {
-  quatations_logic::Quotationslogic::GetInstance()->OnBroadcastClose(srv, fd);
+  quotations_logic::Quotationslogic::GetInstance()->OnBroadcastClose(srv, fd);
   return HANDLER_GO_ON;
 }
 
 static handler_t OnBroadcastMessage(struct server *srv, int fd, void *data,
                                     int len) {
-  quatations_logic::Quotationslogic::GetInstance()->OnBroadcastMessage(
+  quotations_logic::Quotationslogic::GetInstance()->OnBroadcastMessage(
       srv, fd, data, len);
   return HANDLER_GO_ON;
 }
 
 static handler_t OnIniTimer(struct server *srv) {
-  quatations_logic::Quotationslogic::GetInstance()->OnIniTimer(srv);
+  quotations_logic::Quotationslogic::GetInstance()->OnIniTimer(srv);
   return HANDLER_GO_ON;
 }
 
 static handler_t OnTimeOut(struct server *srv, char *id, int opcode, int time) {
-  quatations_logic::Quotationslogic::GetInstance()->OnTimeout(srv, id, opcode,
+  quotations_logic::Quotationslogic::GetInstance()->OnTimeout(srv, id, opcode,
                                                               time);
   return HANDLER_GO_ON;
 }

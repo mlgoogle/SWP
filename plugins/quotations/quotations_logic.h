@@ -10,7 +10,7 @@
 #include "net/comm_head.h"
 #include "net/packet_processing.h"
 
-namespace quatations_logic {
+namespace quotations_logic {
 
 class Quotationslogic {
 public:
@@ -56,7 +56,7 @@ private:
   bool Init();
 
 private:
-  quotations_logic::QuotationsRedis* quotations_redis_;
+  QuotationsRedis* quotations_redis_;
 };
 } // namespace quatations_logic
 

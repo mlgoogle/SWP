@@ -10,6 +10,36 @@ namespace login {
   
 namespace net_request {
 
+class Heartbeat {
+ public:
+  Heartbeat()
+    : uid_(NULL) {
+  }
+  
+  ~Heartbeat() {
+    if (uid_) {
+      delete uid_;
+      uid_ = NULL;
+    }
+  }
+  
+  int32 set_http_packet(base_logic::DictionaryValue* value);
+  
+  void set_uid(const int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  const int64 uid() {
+    int64 uid = 0;
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+  
+ private:
+  base_logic::FundamentalValue* uid_;
+};
+
 class RegisterAccount {
  public:
   RegisterAccount()
