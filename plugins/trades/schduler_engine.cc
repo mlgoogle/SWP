@@ -181,7 +181,16 @@ bool TradesManager::DistributionTask() {
       double close_price = quotation.current_price();
       trades_position.check_buy_sell(close_price);
       trades_position.c_gross_profit();
-
+      TRADES_MAP user_trades_map;
+      //删除用户持仓表
+      bool r = base::MapGet<USER_TRADES_MAP, USER_TRADES_MAP::iterator, int64,
+          TRADES_MAP>(trades_cache_->user_trades_map_,trades_position.uid(), user_trades_map);
+      if (r){
+        r = base::MapDel<TRADES_MAP,TRADES_MAP::iterator,int64>
+        (user_trades_map,trades_position.position_id());
+        if (r)
+          trades_cache_->user_trades_map_[trades_position.uid()] = user_trades_map;
+      }
       //写入结果数据库中,批量写入
       result_list.push_back(trades_position);
     } else {
@@ -315,8 +324,7 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 session,
     net_trades_position->set_gross_profit(0.0);
     net_trades_position->set_id(trades_position.uid());
     net_trades_position->set_interval(
-        trades_position.close_position_time()
-            - trades_position.open_position_time());
+        trades_position.close_position_time() - time(NULL));
     net_trades_position->set_is_deferred(trades_position.is_deferred());
     net_trades_position->set_limit(trades_position.limit());
     net_trades_position->set_name(trades_position.name());
