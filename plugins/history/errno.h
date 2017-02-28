@@ -5,7 +5,6 @@
 #define SWP_HISTORY_ERRNO_H_
 
 enum HISERRNO {
-  FORMAT_ERRNO = -100,
   NO_HAVE_HISTROY_DATA = -601
 
 };

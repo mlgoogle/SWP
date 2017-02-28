@@ -13,11 +13,15 @@
 #include "logic/logic_comm.h"
 #include "logic/logic_unit.h"
 #include "net/errno.h"
+//#include "net/comm_head.h"
+#include "comm/comm_head.h"
 #include <string>
 
 #define DEFAULT_CONFIG_PATH "./plugins/quotations/quotations_config.xml"
 
-namespace quatations_logic {
+
+using namespace quotations_logic;
+namespace quotations_logic {
 
 Quotationslogic *Quotationslogic::instance_ = NULL;
 
@@ -38,10 +42,10 @@ bool Quotationslogic::Init() {
   r = config->LoadConfig(path);
 
   quotations_logic::QuotationsEngine::GetSchdulerManager();
-  quotations_redis_ = new quotations_logic::QuotationsRedis(config);
+  quotations_redis_ = new QuotationsRedis(config);
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitRedis(
       quotations_redis_);
-  //quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
+  quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitFoxreData();
   return true;
 }
@@ -79,23 +83,26 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
     return false;
   }
 
-  switch (packet->operate_code) {
-    case R_QUOTATIONS_REAL_TIME_DATA: {
-      OnRealTime(srv, socket, packet);
-      break;
+  if (packet->type == QUOTATIONS_TYPE
+      && logic::SomeUtils::VerifyToken(packet)) {
+    switch (packet->operate_code) {
+      case R_QUOTATIONS_REAL_TIME_DATA: {
+        OnRealTime(srv, socket, packet);
+        break;
+      }
+      case R_QUOTATIONS_TIME_LINE_DATA: {
+        OnTimeLine(srv, socket, packet);
+        break;
+      }
+      case R_KCHART_TIME_LINE_DATA: {
+        OnKChartTimeLine(srv, socket, packet);
+        break;
+      }
+      default:
+        break;
     }
-    case R_QUOTATIONS_TIME_LINE_DATA: {
-      OnTimeLine(srv, socket, packet);
-      break;
-    }
-    case R_KCHART_TIME_LINE_DATA: {
-      OnKChartTimeLine(srv, socket, packet);
-      break;
-    }
-    default:
-      break;
   }
-  return true;
+  return true; /////////////////
 }
 
 bool Quotationslogic::OnQuotationsClose(struct server *srv, const int socket) {
@@ -174,6 +181,7 @@ bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket,
 
 bool Quotationslogic::OnRealTime(struct server* srv, int socket,
                                  struct PacketHead *packet) {
+
   quotations_logic::net_request::RealTime real_time;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
@@ -193,6 +201,7 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
 
 bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
                                  struct PacketHead *packet) {
+
   quotations_logic::net_request::TimeLine time_line;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
@@ -203,6 +212,7 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
   bool r = time_line.set_htt_packet(packet_control->body_);
   if (!r) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+
     return false;
   }
 
@@ -215,12 +225,13 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
 
 bool Quotationslogic::OnQutations(struct server* srv, int socket,
                                   struct PacketHead *packet) {
-  quotations_logic::net_other::RealTime real_time;
+  net_other::RealTime real_time;
   swp_logic::Quotations quotations;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_http_packet(packet_control->body_);
   if (!r) {
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+
     return false;
   }
   quotations.set_change(real_time.change());
@@ -264,7 +275,6 @@ void Quotationslogic::Test() {
     delete goodsinfos;
     goodsinfos = NULL;
   }
-
 }
 
-}  // namespace trades_logic
+}  // namespace quotations_logic

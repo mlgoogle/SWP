@@ -16,6 +16,7 @@
 
 #include "gtpush/IGtPush.h"
 #include "glog/logging.h"
+#include "logic/logic_comm.h"
 
 const double PI = 3.1415926535898;
 const double EARTH_R = 6371.393000;  //km
@@ -45,20 +46,20 @@ int SendFull(int socket, const char *buffer, size_t nbytes) {
     amt = nbytes;
     amt = send(socket, buf, amt, 0);
     if (-1 == amt) {
-      if (11 == errno)
+      /*if (11 == errno)
         continue;
       else {
         break;
-      }
+        }*/
     }
     buf = buf + amt;
     nbytes -= amt;
     total += amt;
   } while (nbytes > 0);
   return static_cast<int32>(amt == -1 ? amt : total);
-  /*LOG(ERROR) << "SendFull :: lock";
+  /*LOG_ERROR("SendFull :: lock";
    pthread_mutex_lock(&sock_send_mutex_lock);
-   LOG(ERROR) << "SendFull :: locked";
+   LOG_ERROR("SendFull :: locked";
    ssize_t amt = 0;
    ssize_t total = 0;
    const char *buf = buffer;
@@ -70,7 +71,7 @@ int SendFull(int socket, const char *buffer, size_t nbytes) {
    total += amt;
    } while (amt != -1 && nbytes > 0);
    pthread_mutex_unlock(&sock_send_mutex_lock);
-   LOG(ERROR) << "SendFull :: unlock";
+   LOG_ERROR("SendFull :: unlock";
    return amt == -1 ? amt : total;*/
 }
 
@@ -177,11 +178,11 @@ int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
   IPushResult result = { 0 };
 
   result = pushAPNMessageToSingle((char*) APPKEY, &templ, APPID, dt);
-  LOG(INFO)<< "print result:-------------";
+  //LOG_MSG("print result:-------------");
   for (int i = 0; i < result.size; i++) {
-    LOG(INFO)<< result.entry[i].key << ": " << result.entry[i].value;
+    //LOG_MSG(result.entry[i].key << ": " << result.entry[i].value;
   }
-  LOG(INFO)<< "print end:----------------";
+      //   LOG_MSG("print end:----------------");
   //打印结果
 //  printResult(result);
   return 0;

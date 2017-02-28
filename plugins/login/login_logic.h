@@ -42,12 +42,14 @@ class Loginlogic {
   bool OnTimeout(struct server *srv, char* id, int opcode, int time);
   
   static void* AutoReconnectToServer(void* arg);
+  UserInfo* GetUser(int64 uid) { data_share_mgr_->GetUser(uid); }
 
  private:
   bool Init();
   bool InitShareData();
   void InitLog();
   
+  int32 OnHeartbeat(const int32 socket, PacketHead* packet);
   int32 OnRegisterAccount(const int32 socket, PacketHead* packet);
   int32 OnUserLogin(const int32 socket, PacketHead* packet);
   bool UserIsLogin(std::string u);

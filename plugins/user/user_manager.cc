@@ -11,6 +11,7 @@
 
 #include "user/user_opcode.h"
 #include "user/user_interface.h"
+#include "logic/logic_comm.h"
 
 namespace user {
 UserManager* UserManager::instance_ = NULL;
@@ -39,7 +40,7 @@ UserManager::~UserManager() {
 int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   UserInterface* interface = UserInterface::GetInstance();
-  LOG(INFO)<< "AssignPacket opcode" << (int)packet->operate_code;
+  LOG_MSG2("AssignPacket opcode", (int)packet->operate_code);
   switch (packet->operate_code) {
     case HEARTBEAT_REQ: {
       interface->OnHeartbeat(socket, packet);

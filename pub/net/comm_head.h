@@ -20,11 +20,12 @@ enum PACKET_TYPE {
   HISTORY_TYPE = 6,
 };
 
+
 enum PRS {
-  NOZIP_AND_NOENCRYPT = 0,
-  ZIP_AND_NOENCRYPT = 1,
-  NOZIP_AND_ENCRYPT = 2,
-  ZIP_AND_ENCRYPT = 3
+    NOZIP_AND_NOENCRYPT = 0,
+    ZIP_AND_NOENCRYPT = 1,
+    NOZIP_AND_ENCRYPT = 2,
+    ZIP_AND_ENCRYPT = 3
 };
 
 enum operatorcode {
@@ -38,16 +39,16 @@ enum NETTYPE {
 };
 
 //  packet_length 长度为原始数据长度
-struct PacketHead {
-  int16 packet_length;
-  int8 is_zip_encrypt;
-  int8 type;
-  int16 signature;
-  int16 operate_code;
-  int16 data_length;
-  int32 timestamp;
-  int64 session_id;
-  int32 reserved;
+struct PacketHead{
+    int16 packet_length;
+    int8  is_zip_encrypt;
+    int8  type;
+    int16 signature;
+    int16 operate_code;
+    int16 data_length;
+    int32 timestamp;
+    int64 session_id;
+    int32 reserved;
 };
 
 struct PacketControl : public PacketHead {
