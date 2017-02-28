@@ -250,6 +250,10 @@ bool Tradeslogic::OnTimeout(struct server *srv, char *id, int opcode,
 bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
                                    struct PacketHead *packet) {
   trades_logic::net_request::Goods goods;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = goods.set_http_packet(packet_control->body_);
   if (!r) {
@@ -257,7 +261,8 @@ bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
     return false;
   }
   trades_logic::TradesEngine::GetSchdulerManager()->SendGoods(
-      socket, packet->session_id, goods.pid(), goods.start(), goods.count());
+      socket, packet->session_id, packet->reserved, goods.pid(), goods.start(),
+      goods.count());
   return true;
 
 }
@@ -265,6 +270,10 @@ bool Tradeslogic::OnPlatformsGoods(struct server* srv, int socket,
 bool Tradeslogic::OnOpenPosition(struct server* srv, int socket,
                                  struct PacketHead* packet) {
   trades_logic::net_request::OpenPosition open_position;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = open_position.set_http_packet(packet_control->body_);
   if (!r) {
@@ -286,6 +295,10 @@ bool Tradeslogic::OnOpenPosition(struct server* srv, int socket,
 bool Tradeslogic::OnCurrentPosition(struct server* srv, int socket,
                                     struct PacketHead* packet) {
   trades_logic::net_request::CurrentPosition current_position;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    return false;
+  }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = current_position.set_http_packet(packet_control->body_);
   if (!r) {
@@ -293,7 +306,7 @@ bool Tradeslogic::OnCurrentPosition(struct server* srv, int socket,
     return false;
   }
   trades_logic::TradesEngine::GetSchdulerManager()->SendCurrentPosition(
-      socket, packet->session_id, current_position.id(),
+      socket, packet->session_id, packet->reserved, current_position.id(),
       current_position.start(), current_position.count());
   return true;
 }

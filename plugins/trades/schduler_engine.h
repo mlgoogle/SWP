@@ -53,10 +53,10 @@ class TradesManager {
 
   void InitGoodsData();
 
-  void SendGoods(const int socket, const int64 session, const int32 pid,
+  void SendGoods(const int socket, const int64 session, const int32 reversed, const int32 pid,
                  const int32 start, const int32 count);
 
-  void SendCurrentPosition(const int socket, const int64 session,
+  void SendCurrentPosition(const int socket, const int64 session, const int32 reversed,
                            const int64 uid,const int32 pos, const int32 count = 10);
 
   void OnTimePosition(const int socket, const int64 session,

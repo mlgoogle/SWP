@@ -43,7 +43,7 @@ bool HistoryPosition::set_http_packet(base_logic::DictionaryValue* value) {
   if (r)
     count = big_count;
   else
-    count = 10000;
+    count = 10;
   set_count(count);
 
   return true;

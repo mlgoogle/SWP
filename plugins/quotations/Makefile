@@ -137,6 +137,9 @@ mysql_pool.o :  $(USER_DIR)/storage/mysql_pool.cc $(USER_DIR)/storage/mysql_pool
 redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/redis_pool.cc $(INCLUDE_PATHS)
 	
+xml_parser.o :  $(USER_DIR)/logic/xml_parser.cc $(USER_DIR)/logic/xml_parser.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/xml_parser.cc $(INCLUDE_PATHS)
+	
 
 $(PLUGIN) : quotations_init.o  quotations_logic.o schduler_engine.o quotations_proto_buf.o quotations_redis.o\
 	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o data_share_mgr.o mysql_pool.o redis_pool.o\
