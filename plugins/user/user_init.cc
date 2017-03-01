@@ -10,7 +10,7 @@
 #include "user/user_logic.h"
 #include "core/common.h"
 #include "core/plugins.h"
-#include "pub/comm/comm_struct.h"
+#include "comm/comm_struct.h"
 
 static void *OnUserStart() {
   signal(SIGPIPE, SIG_IGN);

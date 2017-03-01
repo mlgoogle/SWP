@@ -5,8 +5,8 @@
 #ifndef PLUGINS_USER_USER_PROTO_H_
 #define PLUGINS_USER_USER_PROTO_H_
 
-#include "pub/net/proto_buf.h"
-#include "glog/logging.h"
+#include "net/proto_buf.h"
+//#include "glog/logging.h"
 namespace user {
 
 namespace net_request {

@@ -4,7 +4,8 @@
 // Author: Paco.
 
 #include "pub/comm/user_info.h"
-#include "glog/logging.h"
+//#include "glog/logging.h"
+#include "logic/logic_comm.h"
 
 UserInfo::UserInfo() {
   data_ = new UserData();
@@ -16,7 +17,7 @@ UserInfo::UserInfo(const UserInfo& user) : data_(user.data_) {
 }
 
 UserInfo::~UserInfo() {
-  LOG(INFO) << "delete ~UserInfo()";
+  LOG_MSG("delete ~UserInfo()");
   if (data_ != NULL) {
     data_->DelRef();
   }
@@ -34,9 +35,9 @@ UserInfo& UserInfo::operator=(const UserInfo& user) {
 }
 
 void UserInfo::Serialization(DicValue* dic) {
-  dic->GetBigInteger(L"uid_", &data_->uid_);
-  dic->GetString(L"phone_num_", &data_->phone_num_);
-  dic->GetString(L"nickname_", &data_->nickname_);
-  dic->GetString(L"head_url_", &data_->head_url_);
-  dic->GetBigInteger(L"gender_",&data_->gender_);
+  dic->GetBigInteger(L"id", &data_->uid_);
+  dic->GetString(L"phone", &data_->phone_num_);
+  dic->GetString(L"screenName", &data_->nickname_);
+  dic->GetString(L"avatarLarge", &data_->head_url_);
+  dic->GetBigInteger(L"balance",&data_->gender_);
 }

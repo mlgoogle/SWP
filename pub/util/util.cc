@@ -3,10 +3,10 @@
 // Created on: 2016年8月15日.
 // Author: Paco.
 #include "pub/util/util.h"
-#include "base/thread/base_thread_lock.h"
-#include "base/thread/base_thread_handler.h"
-#include "base/logic/logic_comm.h"
-#include "public/basic/basictypes.h"
+#include "thread/base_thread_lock.h"
+#include "thread/base_thread_handler.h"
+#include "logic/logic_comm.h"
+#include "basic/basictypes.h"
 #include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -14,8 +14,9 @@
 #include <pthread.h>
 #include <cmath>
 
-#include "gtpush/IGtPush.h"
-#include "glog/logging.h"
+//#include "gtpush/IGtPush.h"
+//#include "glog/logging.h"
+#include "logic/logic_comm.h"
 
 const double PI = 3.1415926535898;
 const double EARTH_R = 6371.393000;  //km
@@ -130,6 +131,7 @@ int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
                    char* category) {
 
   //准备数据
+  /*
   Message msg = { 0 };
   msg.isOffline = 1;  //是否离线下发
   msg.offlineExpireTime = 1000 * 3600 * 2;  //离线下发有效期 毫秒
@@ -177,13 +179,13 @@ int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
   IPushResult result = { 0 };
 
   result = pushAPNMessageToSingle((char*) APPKEY, &templ, APPID, dt);
-  LOG(INFO)<< "print result:-------------";
+  //LOG_MSG("print result:-------------");
   for (int i = 0; i < result.size; i++) {
-    LOG(INFO)<< result.entry[i].key << ": " << result.entry[i].value;
+    //LOG_MSG(result.entry[i].key << ": " << result.entry[i].value;
   }
-  LOG(INFO)<< "print end:----------------";
+      //   LOG_MSG("print end:----------------");
   //打印结果
-//  printResult(result);
+//  printResult(result);*/
   return 0;
 }
 

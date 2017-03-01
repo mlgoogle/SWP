@@ -7,6 +7,7 @@
 #include "history/errno.h"
 #include "history/schduler_engine.h"
 #include "logic/swp_infos.h"
+#include "comm/comm_head.h"
 #include "config/config.h"
 #include "core/common.h"
 #include "logic/logic_comm.h"

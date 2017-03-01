@@ -39,6 +39,7 @@ void HistoryManager::InitHistoryTradesData() {
   while (list.size() > 0) {
     swp_logic::TradesPosition trades = list.front();
     list.pop_front();
+    LOG_DEBUG2("LIST %d",list.size());
     SetHistoryTradesNoLock(trades);
   }
 }

@@ -8,7 +8,7 @@
 
 #include "basic/basictypes.h"
 
-#include "pub/net/proto_buf.h"
+#include "net/proto_buf.h"
 #include "net/comm_head.h"
 
 

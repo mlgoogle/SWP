@@ -5,7 +5,7 @@
 #ifndef PLUGINS_USER_USER_OPCODE_H_
 #define PLUGINS_USER_USER_OPCODE_H_
 
-#include "pub/comm/comm_head.h"
+#include "comm/comm_head.h"
 
 namespace user {
 #define HEARTBEAT_REQ 1000
