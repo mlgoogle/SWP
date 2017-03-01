@@ -145,21 +145,6 @@ $(WEALTH_OBJECT_PATH)/$(WEALTHNAME)withdrawlist.o:
 	$(COMPILE) .$(WEALTHPROC_PATH)$(OTJERPROC_VERSION)/withdrawlist/withdrawlist.cc
 	
 	
-
-######################historyproc###############################################
-HISTORYNAME = history_
-HISTORYPROC_PATH = /history
-HISTORY_OBJECT_PATH = ./obj$(NEWSPROC_PATH)
-OTJERPROC_VERSION = /v1
-historyproc:$(HISTORYPROC_PATH)/his_position_list.fcgi
-
-$(HISTORYPROC_PATH)/his_position_list.fcgi: $(HISTORY_OBJECT_PATH)/$(HISTORYNAME)his_position_list.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)$(HISTORYPROC_PATH)$(OTJERPROC_VERSION)/his_position_list.fcgi
-	
-### 编译
-$(HISTORY_OBJECT_PATH)/$(HISTORYNAME)his_position_list.o:
-	$(COMPILE) .$(HISTORYPROC_PATH)$(OTJERPROC_VERSION)/his_position_list/his_position_list.cc
-	
 	
 ######################historyproc###############################################
 HISTORYNAME = history_
