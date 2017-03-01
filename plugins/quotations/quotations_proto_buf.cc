@@ -222,6 +222,41 @@ bool KChartTimeLine::set_http_packet(base_logic::DictionaryValue* value) {
     set_platform_name(platform_name);
   else
     return false;
+  /*  r = value->GetReal(L"opening_today_price", &opening_today_price);
+  if (r)
+    set_opening_today_price(opening_today_price);
+
+  r = value->GetReal(L"closed_yesterday_price", &closed_yesterday_price);
+  if (r)
+    set_closed_yesterday_price(closed_yesterday_price);
+
+  r = value->GetReal(L"current_price", &current_price);
+  if (r)
+    set_current_price(current_price);
+
+  r = value->GetReal(L"current_unix_time", &current_unix_time);
+  if (r)
+    set_current_unix_time(current_unix_time);
+
+  r = value->GetReal(L"low_price", &low_price);
+  if (r)
+    set_low_price(low_price);
+
+  r = value->GetReal(L"high_price", &high_price);
+  if (r)
+    set_high_price(high_price);
+
+  r = value->GetReal(L"type", &type);
+  if (r)
+    set_type(type);
+
+  r = value->GetString(L"exchange_name", &exchange_name);
+  if (r)
+    set_exchange_name(exchange_name);
+
+  r = value->GetString(L"platform_name", &platform_name);
+  if (r)
+  set_platform_name(platform_name);*/
 
   r = value->GetString(L"symbol", &symbol);
   if (r)

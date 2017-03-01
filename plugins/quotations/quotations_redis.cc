@@ -44,7 +44,7 @@ bool QuotationsRedis::ReadHisTimeGoodsData(
     r = string_value->GetAsString(&str);
     if (!r)
       continue;
-    quotations.ValueDeserialize(str);
+    //quotations.ValueDeserialize(str);
     quotations_list.push_back(quotations);
   }
   return r;

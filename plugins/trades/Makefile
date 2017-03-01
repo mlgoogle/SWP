@@ -10,13 +10,14 @@
 
 # Where to find user code.
 
-LIB_DIR = ./../../../library
+LIB_DIR = ./../../../mylib
+SRC_DIR = ../..
 USER_DIR = ./../../pub
 SO_DIR = ./../../bin/plugins
 
-THIRD_PATH = $(LIB_DIR)/mylib/public
+THIRD_PATH = $(LIB_DIR)/public
 
-CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
+CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
@@ -38,14 +39,17 @@ CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 PLUGIN = $(SO_DIR)/trades/trades.so
                 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
+				-I$(LIB_DIR) \
 				-I$(LIB_DIR)/BasicCore \
+				-I${SRC_DIR} \
 				-I$(THIRD_PATH)\
+				-I$(CUSTOM_THIRD_PATH)/glog/include \
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
-				-I$(LIB_DIR)/mylib/base\
+				-I$(LIB_DIR)/base\
 				-I../\
 				
 
@@ -132,6 +136,6 @@ redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool
 
 $(PLUGIN) : trades_init.o  trades_logic.o trades_db.o trades_info.o schduler_engine.o trades_proto_buf.o\
 	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o mysql_pool.o redis_pool.o\
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
 	$^ -o $@
