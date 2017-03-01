@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-#include "glog/logging.h"
+//#include "glog/logging.h"
 
 
 PacketHead::PacketHead(char* packet) {

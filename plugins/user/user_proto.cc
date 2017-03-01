@@ -7,12 +7,12 @@
 
 #include <typeinfo>
 
-#include "glog/logging.h"
-#include "base/logic/base_values.h"
-#include "public/basic/md5sum.h"
+//#include "glog/logging.h"
+#include "logic/base_values.h"
+#include "basic/md5sum.h"
 
-#include "pub/comm/comm_head.h"
-#include "pub/util/util.h"
+#include "comm/comm_head.h"
+#include "util/util.h"
 #include "logic/logic_comm.h"
 
 namespace user {

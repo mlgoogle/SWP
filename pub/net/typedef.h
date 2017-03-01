@@ -7,9 +7,9 @@
 
 #include <map>
 
-#include "pub/comm/user_info.h"
+#include "comm/user_info.h"
 //#include "pub/comm/share_guide.h"
-#include "base/logic/base_values.h"
+#include "logic/base_values.h"
 
 typedef std::map<int64, UserInfo*> UserMap;
 typedef std::map<int64, std::string> DeviceTokenMap;

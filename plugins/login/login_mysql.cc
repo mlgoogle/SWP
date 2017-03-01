@@ -6,8 +6,8 @@
 #include <mysql/mysql.h>
 #include <sstream>
 
-#include "pub/storage/data_engine.h"
-#include "pub/comm/comm_head.h"
+#include "storage/data_engine.h"
+#include "comm/comm_head.h"
 
 #include "login/errno.h"
 #include "logic/logic_comm.h"
@@ -26,26 +26,30 @@ LoginMysql::~LoginMysql() {
   mysql_engine_ = NULL;
 }
 
-int32 LoginMysql::RegisterInsertAndSelect(std::string phone_num, std::string passwd, DicValue* dic) {
+int32 LoginMysql::RegisterInsertAndSelect(std::string phone_num,
+                                          std::string passwd, DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
-  	std::stringstream ss;
-  	ss << "call proc_RegisterInsertAndSelect('" << phone_num << "','" << passwd << "')";
+    std::stringstream ss;
+    ss << "call proc_RegisterInsertAndSelect('" << phone_num << "','" << passwd
+        << "')";
     dic->SetString(L"sql", ss.str());
-  	LOG_DEBUG2("%s", ss.str().c_str());
-  	r = mysql_engine_->ReadData(0, (base_logic::Value*) (dic), CallRegisterInsertAndSelect);
-  	//注册一定有结果返回
-  	if (!r || dic->empty()) {
-  		err = SQL_EXEC_ERR;
-  		break;
-  	}
-  	//    dic->GetBigInteger(L"result")
+    LOG_DEBUG2("%s", ss.str().c_str());
+    r = mysql_engine_->ReadData(0, (base_logic::Value*) (dic),
+                                CallRegisterInsertAndSelect);
+    //注册一定有结果返回
+    if (!r || dic->empty()) {
+      err = SQL_EXEC_ERR;
+      break;
+    }
+    //    dic->GetBigInteger(L"result")
   } while (0);
   return err;
 }
 
-int32 LoginMysql::UserLoginSelect(std::string phone, std::string& client_ip,  DicValue* dic) {
+int32 LoginMysql::UserLoginSelect(std::string phone, std::string& client_ip,
+                                  DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
@@ -53,7 +57,8 @@ int32 LoginMysql::UserLoginSelect(std::string phone, std::string& client_ip,  Di
     ss << "call proc_UserLoginSelect('" << phone << "','" << client_ip << "')";
     dic->SetString(L"sql", ss.str());
     LOG_DEBUG2("%s", ss.str().c_str());
-    r = mysql_engine_->ReadData(0, (base_logic::Value*) (dic), CallUserLoginSelect);
+    r = mysql_engine_->ReadData(0, (base_logic::Value*) (dic),
+                                CallUserLoginSelect);
     if (!r) {
       err = SQL_EXEC_ERR;
       break;
@@ -74,8 +79,7 @@ int32 LoginMysql::ChangePasswdUpdate(std::string phone, std::string passwd) {
     ss << "call proc_ChangePasswdUpdate('" << phone << "','" << passwd << "');";
     DicValue dic;
     dic.SetString(L"sql", ss.str());
-    LOG_DEBUG2("%s", ss.str().c_str());
-    LOG_DEBUG2("%s", ss.str().c_str());
+    LOG_DEBUG2("%s", ss.str().c_str()); LOG_DEBUG2("%s", ss.str().c_str());
     r = mysql_engine_->WriteData(0, (base_logic::Value*) (&dic));
     if (!r)
       err = SQL_EXEC_ERR;
@@ -83,45 +87,45 @@ int32 LoginMysql::ChangePasswdUpdate(std::string phone, std::string passwd) {
   return err;
 }
 
-
 int32 LoginMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
-                                   DicValue* dic) {
+                                    DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_CheckPasswdSelect(" << uid << ",'" << pass << "'," << type
-       << ")";
+        << ")";
     LOG_DEBUG2("%s", ss.str().c_str());
-	/*    r = mysql_engine_->ReadData(ss.str(), dic, CallCheckPasswdSelect);
-    if (!r) {
-      err = SQL_EXEC_ERROR;
-      break;
-	  }*/
+    /*    r = mysql_engine_->ReadData(ss.str(), dic, CallCheckPasswdSelect);
+     if (!r) {
+     err = SQL_EXEC_ERROR;
+     break;
+     }*/
   } while (0);
   return err;
 }
 
-	/*int32 LoginMysql::ChangePasswdSelect(int64 uid, std::string oldpass,
-                                    std::string newpass, int64 ctype,
-                                    int64 ptype, DicValue* dic) {
-  int32 err = 0;
-  bool r = false;
-  do {
-    std::stringstream ss;
-    ss << "call proc_ChangePasswdSelect(" << uid << ",'" << oldpass << "','"
-       << newpass << "'," << ctype << "," << ptype << ")";
-    LOG_DEBUG2("%s", ss.str().c_str);
-    r = mysql_engine_->ReadData(ss.str(), dic, CallChangePasswdSelect);
-    if (!r) {
-      err = SQL_EXEC_ERROR;
-      break;
-    }
-  } while (0);
-  return err;
-  }*/
+/*int32 LoginMysql::ChangePasswdSelect(int64 uid, std::string oldpass,
+ std::string newpass, int64 ctype,
+ int64 ptype, DicValue* dic) {
+ int32 err = 0;
+ bool r = false;
+ do {
+ std::stringstream ss;
+ ss << "call proc_ChangePasswdSelect(" << uid << ",'" << oldpass << "','"
+ << newpass << "'," << ctype << "," << ptype << ")";
+ LOG(INFO)<< "sql:" << ss.str();
+ r = mysql_engine_->ReadData(ss.str(), dic, CallChangePasswdSelect);
+ if (!r) {
+ err = SQL_EXEC_ERROR;
+ break;
+ }
+ } while (0);
+ return err;
+ }*/
 
-void LoginMysql::CallRegisterInsertAndSelect(void* param, base_logic::Value* value) {
+void LoginMysql::CallRegisterInsertAndSelect(void* param,
+                                             base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
@@ -159,14 +163,13 @@ void LoginMysql::CallUserLoginSelect(void* param, base_logic::Value* value) {
         userinfo->SetString(L"screenName", rows[1]);
       if (rows[2] != NULL)
         userinfo->SetCharInteger(L"gender", atoi(rows[2]));
-	  dict->Set(L"userinfo", userinfo);
+      dict->Set(L"userinfo", userinfo);
     }
   } else {
     LOG_ERROR ("CallUserLoginSelect count < 0");
   }
   dict->Remove(L"sql", &value);
 }
-
 
 void LoginMysql::CallCheckPasswdSelect(void* param, base_logic::Value* value) {
   base_storage::DBStorageEngine* engine =
@@ -204,5 +207,5 @@ void LoginMysql::CallChangePasswdSelect(void* param, base_logic::Value* value) {
   dict->Remove(L"sql", &value);
 }
 
-} // namespace login
+}  // namespace login
 

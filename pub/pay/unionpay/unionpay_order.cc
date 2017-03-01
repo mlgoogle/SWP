@@ -6,17 +6,15 @@
 
 #include <iostream>
 #include <sstream>
-
-#include "public/basic/md5sum.h"
-#include "public/http/http_method.h"
-#include "pub/util/util.h"
+#include "basic/md5sum.h"
+#include "http/http_method.h"
+//#include "glog/logging.h"
+#include "util/util.h"
 #include "logic/logic_comm.h"
 
 //const char* UnionpayOrder::biz_type_ = "000201";
 //const char* UnionpayOrder::txn_sub_type_ = "01";
-//const char* UnionpayOrder::mer_id_ = "777290058110048";
-//const char* UnionpayOrder::mer_id_ = "808080211304858";
-const char* UnionpayOrder::mer_id_ = "104210242141007";
+const char* UnionpayOrder::mer_id_ = "777290058110048";
 
 UnionpayOrder::UnionpayOrder() {
   total_fee_ = 0;
@@ -44,9 +42,9 @@ void UnionpayOrder::PlaceOrderSign() {
      << "&out_trade_no=" << out_trade_no << "&spbill_create_ip="
      << spbill_create_ip << "&total_fee=" << total_fee << "&trade_type="
      << trade_type << "&key=" << key;
-  LOG_MSG("WX_ORDER_SIGN before:" << ss.str();
+  LOG_DEBUG2("WX_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
   base::MD5Sum md5sum(ss.str());
-  LOG_MSG("WX_ORDER_SIGN_MD5 after:" << md5sum.GetHash();
+  LOG_DEBUG2("WX_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
   sign = md5sum.GetHash();
 }
 
@@ -61,9 +59,9 @@ void UnionpayOrder::PreSign() {
   ss << "appid=" << appid << "&noncestr=" << nonce_str
      << "&package=Sign=WXPay" << "&partnerid=" << mch_id << "&prepayid="
      << prepayid << "&timestamp=" << timestamp << "&key=" << key;
-  LOG_MSG("WX_PRE_SIGN before:" << ss.str();
+  LOG_DEBUG2("WX_ORDER_SIGN before: %s",ss.str().c_str());
   base::MD5Sum md5sum(ss.str());
-  LOG_MSG("WX_PRE_SIGN_MD5 after:" << md5sum.GetHash();
+  LOG_DEBUG2("WX_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
   prepaysign = md5sum.GetHash();
 }
 
@@ -97,7 +95,7 @@ std::string UnionpayOrder::PlaceOrder() {
   hmp.Post(PostFiled().c_str());
   std::string result;
   hmp.GetContent(result);
-  LOG_MSG("http post result:" << result;
+  LOG(INFO)<< "http post result:" << result;
   return result;
   }*/
 
@@ -109,20 +107,22 @@ std::string UnionpayOrder::PlaceOrder() {
   char time_buf[128];
   snprintf(time_buf, 128, "%04d%02d%02d%02d%02d%02d", now->tm_year + 1900, now->tm_mon + 1, now->tm_mday,
            now->tm_hour, now->tm_min, now->tm_sec);
-  LOG_MSG2("time now:%s", time_buf);
+  //LOG(INFO) << "time now:" << time_buf;
+  LOG_DEBUG2("time now: %s",time_buf);
   std::string orderId = time_buf;
   std::string time_send = orderId;
   req_url << ACP_SERVER_URL << "?merId=" << mer_id_
           << "&txnTime=" << time_send << "&orderId="
           << orderId << "&txnAmt=" << price_;
-  LOG_MSG2("req url:%s", req_url.str().c_str());
+  LOG_DEBUG2("req url: %s",req_url.str().c_str());
   http::HttpMethodGet hmp(req_url.str());
   //std::string headers = "Content-Type: text/xml";
   //hmp.SetHeaders(headers);
   hmp.Get();
   std::string result;
   hmp.GetContent(result);
-          LOG_MSG2("http get result:%s", result.c_str());
+  //LOG(INFO)<< "http get result:" << result;
+  LOG_DEBUG2("http get result:: %s",result.c_str());
   return result;
 }
 

@@ -14,7 +14,7 @@
 #include "net/packet_processing.h"
 #include "logic/logic_comm.h"
 #include "basic/basic_util.h"
-#include "pub/share/data_share_mgr.h"
+#include "share/data_share_mgr.h"
 
 namespace logic {
 
@@ -142,9 +142,8 @@ class SomeUtils {
   do { \
     struct PacketControl packet_control; \
     MAKE_HEAD(packet_control, opcode, type, 0, 0, 0); \
-    base_logic::DictionaryValue dic;                                  \
+    base_logic::DictionaryValue dic; \
     dic.SetInteger(L"errorCode", error_code); \
-    dic.SetString(L"errorMsg", logic::error_code_msgs[error_code]);  \
     packet_control.body_ = &dic; \
     send_message(socket, &packet_control); \
   } while(0)

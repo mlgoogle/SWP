@@ -8,11 +8,11 @@
 #include <stdio.h>
 #include <map>
 
-#include "base/thread/base_thread_lock.h"
-#include "public/basic/basictypes.h"
+#include "thread/base_thread_lock.h"
+#include "basic/basictypes.h"
 
-#include "pub/comm/user_info.h"
-#include "pub/net/typedef.h"
+#include "comm/user_info.h"
+#include "net/typedef.h"
 
 namespace share {
 __attribute__((visibility("default")))

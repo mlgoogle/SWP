@@ -8,10 +8,10 @@
 #include <string>
 #include <list>
 
-#include "public/basic/basictypes.h"
-#include "base/logic/base_values.h"
+#include "basic/basictypes.h"
+#include "logic/base_values.h"
 
-#include "pub/comm/ref_base.h"
+#include "comm/ref_base.h"
 
 typedef base_logic::DictionaryValue DicValue;
 

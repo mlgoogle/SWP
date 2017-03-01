@@ -5,8 +5,8 @@
 #ifndef PLUGINS_USER_USER_INTERFACE_H_
 #define PLUGINS_USER_USER_INTERFACE_H_
 
-#include "public/basic/basictypes.h"
-#include "public/config/config.h"
+#include "basic/basictypes.h"
+#include "config/config.h"
 #include "net/proto_buf.h"
 #include "share/data_share_mgr.h"
 #include "net/comm_head.h"

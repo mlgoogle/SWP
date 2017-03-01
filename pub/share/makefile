@@ -3,7 +3,7 @@
 OUT_PUT = ${SO_DIR}/data.so 
 
 SRC_DIR = ../../
-LIB_DIR = ./../../../baselib
+LIB_DIR = ./../../../library
 SRC_PLUGINS = ${SRC_DIR}plugins
 SO_DIR = ${SRC_DIR}bin/
 SRC_PUB_NET = ${SRC_DIR}pub/net
@@ -21,9 +21,10 @@ CXXFLAGS += -g -Wextra -w -shared -fPIC
 INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${SRC_PLUGINS} \
 		-I${SRC_DIR} \
-		-I${LIB_DIR}/public \
-		-I${LIB_DIR}/base \
-		-I${LIB_DIR}/third_party/glog/include \
+		-I${LIB_DIR}/mylib/public \
+		-I${LIB_DIR}/mylib/base \
+		-I../\
+		
 
 all : ${OUT_PUT} del-temp-files
 
@@ -38,6 +39,6 @@ data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_sha
 
 ${OUT_PUT} :  data_share_mgr.o 
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
-		${LIB_DIR}/third_party/glog/lib/libglog.a ${LIB_DIR}/base/lib/mybase.a \
-		${LIB_DIR}/third_party/dmg_fp/lib/dmg_fp.a
+	${LIB_DIR}/mylib/base/lib/mybase.a \
+	${LIB_DIR}/mylib/third_party/dmg_fp/lib/dmg_fp.a
 

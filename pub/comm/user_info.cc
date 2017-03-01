@@ -4,7 +4,7 @@
 // Author: Paco.
 
 #include "pub/comm/user_info.h"
-#include "glog/logging.h"
+//#include "glog/logging.h"
 #include "logic/logic_comm.h"
 
 UserInfo::UserInfo() {

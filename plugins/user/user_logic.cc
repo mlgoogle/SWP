@@ -10,12 +10,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "gtpush/IGtPush.h"
 #include "core/common.h"
-#include "public/basic/basictypes.h"
-#include "public/config/config.h"
-#include "public/basic/native_library.h"
-#include "base/logic/base_values.h"
+#include "basic/basictypes.h"
+#include "config/config.h"
+#include "basic/native_library.h"
+#include "logic/base_values.h"
 
 #include "user/user_interface.h"
 #include "user/user_opcode.h"
@@ -44,10 +43,10 @@ Userlogic::~Userlogic() {
 
 bool Userlogic::Init() {
   bool r = false;
-  Result res = pushInit(host, appKey, masterSecret, "编码");
+  /*Result res = pushInit(host, appKey, masterSecret, "编码");
    if(res!=SUCCESS){
      LOG_ERROR("DataShareMgr pushInit err");
-   }
+   }*/
   user_manager_ = UserManager::GetInstance();
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;

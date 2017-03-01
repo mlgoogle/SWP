@@ -8,8 +8,8 @@
 #include <mysql/mysql.h>
 #include <sstream>
 
-#include "pub/storage/data_engine.h"
-#include "pub/comm/comm_head.h"
+#include "storage/data_engine.h"
+#include "comm/comm_head.h"
 
 #include "logic/logic_comm.h"
 

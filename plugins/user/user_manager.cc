@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#include "glog/logging.h"
+//#include "glog/logging.h"
 
 #include "user/user_opcode.h"
 #include "user/user_interface.h"
@@ -47,8 +47,8 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       break;
     }
     case USER_INFO_REQ: {
-	  interface->OnUserInfo(socket, packet);
-	  break;
+      interface->OnUserInfo(socket, packet);
+      break;
     }
     case ACCOUNT_INFO_REQ: {
 	  interface->OnAccountInfo(socket, packet);

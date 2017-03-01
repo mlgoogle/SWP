@@ -3,10 +3,10 @@
 // Created on: 2016年8月15日.
 // Author: Paco.
 #include "pub/util/util.h"
-#include "base/thread/base_thread_lock.h"
-#include "base/thread/base_thread_handler.h"
-#include "base/logic/logic_comm.h"
-#include "public/basic/basictypes.h"
+#include "thread/base_thread_lock.h"
+#include "thread/base_thread_handler.h"
+#include "logic/logic_comm.h"
+#include "basic/basictypes.h"
 #include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -14,8 +14,8 @@
 #include <pthread.h>
 #include <cmath>
 
-#include "gtpush/IGtPush.h"
-#include "glog/logging.h"
+//#include "gtpush/IGtPush.h"
+//#include "glog/logging.h"
 #include "logic/logic_comm.h"
 
 const double PI = 3.1415926535898;
@@ -46,20 +46,20 @@ int SendFull(int socket, const char *buffer, size_t nbytes) {
     amt = nbytes;
     amt = send(socket, buf, amt, 0);
     if (-1 == amt) {
-      /*if (11 == errno)
+      if (11 == errno)
         continue;
       else {
         break;
-        }*/
+      }
     }
     buf = buf + amt;
     nbytes -= amt;
     total += amt;
   } while (nbytes > 0);
   return static_cast<int32>(amt == -1 ? amt : total);
-  /*LOG_ERROR("SendFull :: lock";
+  /*LOG(ERROR) << "SendFull :: lock";
    pthread_mutex_lock(&sock_send_mutex_lock);
-   LOG_ERROR("SendFull :: locked";
+   LOG(ERROR) << "SendFull :: locked";
    ssize_t amt = 0;
    ssize_t total = 0;
    const char *buf = buffer;
@@ -71,7 +71,7 @@ int SendFull(int socket, const char *buffer, size_t nbytes) {
    total += amt;
    } while (amt != -1 && nbytes > 0);
    pthread_mutex_unlock(&sock_send_mutex_lock);
-   LOG_ERROR("SendFull :: unlock";
+   LOG(ERROR) << "SendFull :: unlock";
    return amt == -1 ? amt : total;*/
 }
 
@@ -131,6 +131,7 @@ int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
                    char* category) {
 
   //准备数据
+  /*
   Message msg = { 0 };
   msg.isOffline = 1;  //是否离线下发
   msg.offlineExpireTime = 1000 * 3600 * 2;  //离线下发有效期 毫秒
@@ -184,7 +185,7 @@ int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
   }
       //   LOG_MSG("print end:----------------");
   //打印结果
-//  printResult(result);
+//  printResult(result);*/
   return 0;
 }
 

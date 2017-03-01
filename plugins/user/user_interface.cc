@@ -11,13 +11,13 @@
 #include <sys/socket.h>
 #include <sstream>
 
-#include "public/basic/md5sum.h"
+#include "basic/md5sum.h"
 
 #include "user/user_proto.h"
 #include "user/user_opcode.h"
-#include "pub/util/util.h"
-#include "pub/pay/wxpay/wx_order.h"
-#include "pub/pay/unionpay/unionpay_order.h"
+#include "util/util.h"
+#include "pay/wxpay/wx_order.h"
+#include "pay/unionpay/unionpay_order.h"
 #include "net/packet_processing.h"
 #include "logic/logic_unit.h"
 
@@ -55,6 +55,9 @@ void UserInterface::InitConfig(config::FileConfig* config) {
 
 void UserInterface::InitShareDataMgr(share::DataShareMgr* data) {
   data_share_mgr_ = data;
+
+
+  
 }
 
 int32 UserInterface::OnUserInfo(const int32 socket, PacketHead* packet) {
@@ -574,6 +577,32 @@ int32 UserInterface::OnWXPlaceOrder(const int32 socket, PacketHead* packet) {
   if (err < 0) {
     send_error(socket, USER_TYPE, WX_PLACE_ORDER_RLY, err);
     //SendError(socket, packet, err, WX_PLACE_ORDER_RLY);
+    //记录订单信息
+    //访问微信下单接口
+    /*
+    if (util::GetIPAddress(socket, &ip, NULL))
+      unionpayorder.set_spbill_create_ip(ip);
+    unionpayorder.set_body(unionpayplace_order.title());
+    unionpayorder.set_out_trade_no(recharge_id);
+    unionpayorder.set_total_fee(unionpayplace_order.price() * 100);*/
+    //basic_logic::DictionaryValue dic;
+            //SendMsg(socket, packet, &recharge_dic, UNIONPAY_PLACE_ORDER_RLY);
+            // todo 下单成功 ，记录微信订单信息
+
+            /*          } else {
+            err = UNIONPAY_PLACE_ORDER_ERR;
+            break;
+          }
+        } else {
+          err = UNIONPAY_PLACE_ORDER_ERR;
+          break;
+        }
+        }*/
+  //base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
+  //                                               deserializer);
+
+  //} while (0);
+    //SendError(socket, packet, err, UNIONPAY_PLACE_ORDER_RLY);
   }
   return err;
 }
@@ -617,7 +646,6 @@ int32 UserInterface::OnWXPayClientResponse(const int32 socket,
   <return_code><![CDATA[SUCCESS]]></return_code>\
   <return_msg><![CDATA[OK]]></return_msg>\
 </xml>"
-
 int32 UserInterface::OnWXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
@@ -660,7 +688,6 @@ int32 UserInterface::OnUnionpayPlaceOrder(const int32 socket, PacketHead* packet
     err = unionpay_place_order.set_http_packet(packet_recv->body_);
     if (err < 0) 
       break;
-    //记录订单信息
     DicValue recharge_dic;
     err = user_mysql_->RechargeInfoInsertAndSelect(unionpay_place_order.uid(), unionpay_place_order.price(),
                                                    &recharge_dic);
@@ -669,14 +696,6 @@ int32 UserInterface::OnUnionpayPlaceOrder(const int32 socket, PacketHead* packet
     int64 recharge_id;
     recharge_dic.GetBigInteger(L"rid", &recharge_id);
     std::string ip;
-    //访问微信下单接口
-    /*
-    if (util::GetIPAddress(socket, &ip, NULL))
-      unionpayorder.set_spbill_create_ip(ip);
-    unionpayorder.set_body(unionpayplace_order.title());
-    unionpayorder.set_out_trade_no(recharge_id);
-    unionpayorder.set_total_fee(unionpayplace_order.price() * 100);*/
-    //basic_logic::DictionaryValue dic;
     DicValue dic;
     dic.SetBigInteger(L"rid", recharge_id);
     UnionpayOrder unionpay_order;
@@ -688,30 +707,12 @@ int32 UserInterface::OnUnionpayPlaceOrder(const int32 socket, PacketHead* packet
             MAKE_HEAD(packet_control, UNIONPAY_PLACE_ORDER_RLY, USER_TYPE, 0, 0, 0);
             packet_control.body_ = &dic;
             send_message(socket, &packet_control);
-            //SendMsg(socket, packet, &recharge_dic, UNIONPAY_PLACE_ORDER_RLY);
-            // todo 下单成功 ，记录微信订单信息
-
-            /*          } else {
-            err = UNIONPAY_PLACE_ORDER_ERR;
-            break;
-          }
-        } else {
-          err = UNIONPAY_PLACE_ORDER_ERR;
-          break;
-        }
-        }*/
     } while (0);
-  //base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
-  //                                               deserializer);
-
-  //} while (0);
   if (err < 0) {
     send_error(socket, USER_TYPE, UNIONPAY_PLACE_ORDER_RLY, err);
-    //SendError(socket, packet, err, UNIONPAY_PLACE_ORDER_RLY);
   }
   return err;
 }
-
 int32 UserInterface::CloseSocket(const int fd) {
   data_share_mgr_->UserOffline(fd);
   return 0;
@@ -730,14 +731,14 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
 
   /*int32 UserInterface::OnDeviceToken(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  LOG_MSG("DeviceToken");
+  LOG(INFO) << "DeviceToken";
   do {
     DeviceToken rev;
-    LOG_MSG("DeviceToken Deserialize err:" << err);
+    LOG(INFO) << "DeviceToken Deserialize err:" << err;
     if (err < 0)
       break;
     int result = data_share_mgr_->AddDeviceToken(rev.uid(), rev.device_token());
-    LOG_MSG("AddDeviceToken result:" << result);
+    LOG(INFO) << "AddDeviceToken result:" << result;
     if (result >= 0)
       err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
     if (err < 0)
@@ -745,7 +746,7 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
     //SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
   } while (0);
   if (err < 0) {
-    LOG_MSG("DeviceToken SendError err:" << err);
+    LOG(INFO) << "DeviceToken SendError err:" << err;
     //SendError(socket, packet, err, DEVICE_TOKEN_RLY);
   }
   return err;
@@ -785,7 +786,7 @@ int32 UserInterface::OnAlipayClient(const int32 socket, PacketHead* packet) {
   /*void UserInterface::SendPacket(const int socket, PacketHead* packet) {
 
   char* s = new char[packet->packet_length];
-  LOG_MSG("packet body:" << packet->body_str());
+  LOG(INFO) << "packet body:" << packet->body_str();
   memset(s, 0, packet->packet_length());
   memcpy(s, &packet->head(), HEAD_LENGTH);
   memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),

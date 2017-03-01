@@ -5,10 +5,10 @@
 #ifndef PLUGINS_USER_USER_MYSQL_H_
 #define PLUGINS_USER_USER_MYSQL_H_
 
-#include "public/config/config.h"
-#include "public/basic/basictypes.h"
+#include "config/config.h"
+#include "basic/basictypes.h"
 
-#include "pub/storage/data_engine.h"
+#include "storage/data_engine.h"
 
 //#include "pub/net/typedef.h"
 
