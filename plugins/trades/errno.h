@@ -4,6 +4,7 @@
 #ifndef SWP_TRADES_ERRNO_H_
 #define SWP_TRADES_ERRNO_H_
 
+#include "comm/comm_head.h"
 enum TRADESERRNO {
   NO_HAVE_PLATFORM = -501,
   NO_HAVE_TRADES_GOODS = -502,

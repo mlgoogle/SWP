@@ -12,6 +12,10 @@ enum TIME_TASK {
   ORDER_STATUS_CHECK = 103, //定时监测未支付的订单
 };
 
+enum PUBLIC_ERRNO {
+  FORMAT_ERRNO = -100
+};
+
 enum PACKET_ERROR {
   JSON_FORMAT_ERR = -100,
   PHONE_NUM_ERR = -103,
