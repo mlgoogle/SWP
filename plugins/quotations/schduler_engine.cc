@@ -208,7 +208,7 @@ void QuotationsManager::SendKChartLine(const int socket, const int64 session,
                                        const int32 count) {
   net_reply::KChartLine kchart_line;
   std::list<swp_logic::Quotations> list;
-  int32 base_num = 20;
+  int32 base_num = 50;
   if (reversed /1000 == HTTP)
     base_num = count;
   else
@@ -273,7 +273,7 @@ void QuotationsManager::SendTimeLine(const int socket, const int64 session,
                                      const int32 count) {
   net_reply::TimeLine time_line;
   std::list<swp_logic::Quotations> list;
-  int32 base_num = 20;
+  int32 base_num = 50;
   if (reversed /1000 == HTTP)
     base_num = count;
   else
@@ -383,7 +383,7 @@ void QuotationsManager::GetKChartLine(const int32 chart_type,
   r = base::MapGet<K_HIS_QUOTATIONS_MAP, K_HIS_QUOTATIONS_MAP::iterator,
       std::string, QUOTATIONS_LIST>(his_quotations_map, key,
                                     his_quotations_list);
-  int64 start_pan = ((time(NULL) * 24 * 60 * 60) * 24 * 60 * 60)
+  int64 start_pan = ((time(NULL) / 24 / 60 / 60) * 24 * 60 * 60)
       - (8 * 60 * 60);  //当前为东八区
 
   if (end_time != 0)
@@ -421,7 +421,7 @@ void QuotationsManager::GetTimeLine(const int32 atype,
 
   quotations_list.sort(swp_logic::Quotations::cmp);
 //遍历
-  int64 start_pan = ((time(NULL) * 24 * 60 * 60) * 24 * 60 * 60)
+  int64 start_pan = ((time(NULL) / 24 / 60 / 60) * 24 * 60 * 60)
       - (8 * 60 * 60);  //当前为东八区
   if (end_time != 0)
     start_pan  = end_time;

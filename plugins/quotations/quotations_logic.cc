@@ -83,8 +83,7 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
     return false;
   }
 
-  if (packet->type == QUOTATIONS_TYPE
-      && logic::SomeUtils::VerifyToken(packet)) {
+  if (packet->type == QUOTATIONS_TYPE) {
     switch (packet->operate_code) {
       case R_QUOTATIONS_REAL_TIME_DATA: {
         OnRealTime(srv, socket, packet);
