@@ -111,8 +111,7 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
     return false;
   }
   
-  if (packet->type == USER_TYPE
-      && logic::SomeUtils::VerifyToken(packet))
+  if (packet->type == USER_TYPE)
     user_manager_->AssignPacket(socket, packet);
   
   return true;

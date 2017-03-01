@@ -108,7 +108,7 @@ int32 UserInterface::OnAccountInfo(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     struct PacketControl packet_control;
-    MAKE_HEAD(packet_control, ACCOUNT_INFO_RLY, USER_TYPE, 0, 0, 0);
+    MAKE_HEAD(packet_control, ACCOUNT_INFO_RLY, USER_TYPE, 0, packet->session_id, 0);
     packet_control.body_ = &dic;
     send_message(socket, &packet_control);
     //SendMsg(socket, packet, &dic, ACCOUNT_INFO_RLY);
