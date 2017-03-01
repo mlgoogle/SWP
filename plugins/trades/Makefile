@@ -10,14 +10,14 @@
 
 # Where to find user code.
 
-LIB_DIR = ./../../../mylib
-SRC_DIR = ../..
+
+LIB_DIR = ./../../../library
 USER_DIR = ./../../pub
 SO_DIR = ./../../bin/plugins
 
-THIRD_PATH = $(LIB_DIR)/public
+THIRD_PATH = $(LIB_DIR)/mylib/public
 
-CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
+CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
 
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 

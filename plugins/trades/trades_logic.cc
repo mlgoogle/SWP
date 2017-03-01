@@ -14,7 +14,7 @@
 #include "logic/logic_unit.h"
 #include "net/errno.h"
 #include <string>
-#include "pub/comm/comm_head.h"
+#include "comm/comm_head.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/trades/trades_config.xml"
 
