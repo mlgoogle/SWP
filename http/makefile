@@ -51,8 +51,116 @@ OUTPUT_FILE = /var/www/cgi-bin/swp
 #############################################################################################################################
 all: clean proc delete-temp-file
 
-proc: historyproc quotationsproc tradesproc
+proc: historyproc quotationsproc tradesproc accountproc wealthyproc
 
+######################accountproc###############################################
+ACCOUNTNAME = account_
+ACCOUNTPROC_PATH = /account
+ACCOUNT_OBJECT_PATH = ./obj$(NEWSPROC_PATH)
+OTJERPROC_VERSION = /v1
+accountproc:$(ACCOUNTPROC_PATH)/accinfo.fcgi $(ACCOUNTPROC_PATH)/bankcard.fcgi $(ACCOUNTPROC_PATH)/bankname.fcgi\
+	$(ACCOUNTPROC_PATH)/bindcard.fcgi $(ACCOUNTPROC_PATH)/login.fcgi $(ACCOUNTPROC_PATH)/register.fcgi\
+	$(ACCOUNTPROC_PATH)/unbindcard.fcgi $(ACCOUNTPROC_PATH)/userinfo.fcgi $(ACCOUNTPROC_PATH)/verifycode.fcgi
+
+$(ACCOUNTPROC_PATH)/accinfo.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)accinfo.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/accinfo.fcgi
+
+$(ACCOUNTPROC_PATH)/bankcard.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)bankcard.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/bankcard.fcgi
+
+$(ACCOUNTPROC_PATH)/bankname.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)bankname.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/bankname.fcgi
+	
+$(ACCOUNTPROC_PATH)/bindcard.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)bindcard.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/bindcard.fcgi
+	
+$(ACCOUNTPROC_PATH)/login.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)login.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/login.fcgi
+
+$(ACCOUNTPROC_PATH)/register.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)register.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/register.fcgi
+	
+$(ACCOUNTPROC_PATH)/unbindcard.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)unbindcard.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/unbindcard.fcgi
+
+$(ACCOUNTPROC_PATH)/userinfo.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)userinfo.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/userinfo.fcgi
+
+$(ACCOUNTPROC_PATH)/verifycode.fcgi: $(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)verifycode.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/verifycode.fcgi
+	
+### 编译
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)accinfo.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/accinfo/accinfo.cc
+
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)bankcard.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/bankcard/bankcard.cc
+	
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)bankname.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/bankname/bankname.cc
+	
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)bindcard.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/bindcard/bindcard.cc
+	
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)login.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/login/login.cc
+	
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)register.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/register/register.cc
+
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)unbindcard.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/unbindcard/unbindcard.cc
+	
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)userinfo.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/userinfo/userinfo.cc
+	
+$(ACCOUNT_OBJECT_PATH)/$(ACCOUNTNAME)verifycode.o:
+	$(COMPILE) .$(ACCOUNTPROC_PATH)$(OTJERPROC_VERSION)/verifycode/verifycode.cc
+	
+
+######################wealthyproc###############################################
+WEALTHNAME = wealth_
+WEALTHPROC_PATH = /wealth
+WEALTH_OBJECT_PATH = ./obj$(NEWSPROC_PATH)
+OTJERPROC_VERSION = /v1
+wealthyproc:$(WEALTHPROC_PATH)/creditlist.fcgi $(WEALTHPROC_PATH)/withdrawcash.fcgi $(WEALTHPROC_PATH)/withdrawlist.fcgi
+
+$(WEALTHPROC_PATH)/creditlist.fcgi: $(WEALTH_OBJECT_PATH)/$(WEALTHNAME)creditlist.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(WEALTHPROC_PATH)$(OTJERPROC_VERSION)/creditlist.fcgi
+
+$(WEALTHPROC_PATH)/withdrawcash.fcgi: $(WEALTH_OBJECT_PATH)/$(WEALTHNAME)withdrawcash.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(WEALTHPROC_PATH)$(OTJERPROC_VERSION)/withdrawcash.fcgi
+	
+$(WEALTHPROC_PATH)/withdrawlist.fcgi: $(WEALTH_OBJECT_PATH)/$(WEALTHNAME)withdrawlist.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(WEALTHPROC_PATH)$(OTJERPROC_VERSION)/withdrawlist.fcgi
+	
+### 编译
+$(WEALTH_OBJECT_PATH)/$(WEALTHNAME)creditlist.o:
+	$(COMPILE) .$(WEALTHPROC_PATH)$(OTJERPROC_VERSION)/creditlist/creditlist.cc
+
+$(WEALTH_OBJECT_PATH)/$(WEALTHNAME)withdrawcash.o:
+	$(COMPILE) .$(WEALTHPROC_PATH)$(OTJERPROC_VERSION)/withdrawcash/withdrawcash.cc
+	
+$(WEALTH_OBJECT_PATH)/$(WEALTHNAME)withdrawlist.o:
+	$(COMPILE) .$(WEALTHPROC_PATH)$(OTJERPROC_VERSION)/withdrawlist/withdrawlist.cc
+	
+	
+
+######################historyproc###############################################
+HISTORYNAME = history_
+HISTORYPROC_PATH = /history
+HISTORY_OBJECT_PATH = ./obj$(NEWSPROC_PATH)
+OTJERPROC_VERSION = /v1
+historyproc:$(HISTORYPROC_PATH)/his_position_list.fcgi
+
+$(HISTORYPROC_PATH)/his_position_list.fcgi: $(HISTORY_OBJECT_PATH)/$(HISTORYNAME)his_position_list.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(HISTORYPROC_PATH)$(OTJERPROC_VERSION)/his_position_list.fcgi
+	
+### 编译
+$(HISTORY_OBJECT_PATH)/$(HISTORYNAME)his_position_list.o:
+	$(COMPILE) .$(HISTORYPROC_PATH)$(OTJERPROC_VERSION)/his_position_list/his_position_list.cc
+	
+	
 ######################historyproc###############################################
 HISTORYNAME = history_
 HISTORYPROC_PATH = /history
