@@ -145,8 +145,7 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
     return false;
   }
 
-  if (packet->type == TRADES_TYPE
-      && logic::SomeUtils::VerifyToken(packet)) {
+  if (packet->type == TRADES_TYPE) {
     switch (packet->operate_code) {
       case R_TRADES_GOODS_DATA: {
         OnPlatformsGoods(srv, socket, packet);

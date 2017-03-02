@@ -44,7 +44,6 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 
   *packet_stream = reinterpret_cast<void *>(const_cast<char *>(out.GetData()));
   *packet_stream_length = PACKET_HEAD_LENGTH + body_stream.length();
-
   if (engine) {
     delete engine;
     engine = NULL;
@@ -53,31 +52,6 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
 }
 
 bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
-                                   struct PacketHead **packet_head) {
-    int32 temp;
-    int error_code;
-    std::string error_str;
-    BUILDUNPACKET();
-    base_logic::ValueSerializer *engine =
-      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-    if (engine == NULL) {
-      LOG_ERROR("engine create null");
-      return false;
-    }
-
-    base_logic::DictionaryValue *value =
-      (base_logic::DictionaryValue*)engine->Deserialize(&body_stream, &error_code, &error_str);
-    struct PacketControl *packet_control = new struct PacketControl;
-    FILLPACKET();
-    (*packet_head) = (struct PacketHead*)(packet_control);
-    if (value == NULL)
-      return false;
-
-    if (engine) {delete engine; engine = NULL;}
-    return true;
-  }
-
-  /*bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
                                  struct PacketHead **packet_head) {
 
   int32 temp;
@@ -142,7 +116,7 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
     (*packet_head)->reserved = reserved;
   }
   return true;
-  }*/
+}
 
 void PacketProsess::DeletePacket(const void *packet_stream, int32 len,
                                  struct PacketHead *packet_head){
@@ -245,8 +219,7 @@ void PacketProsess::HexEncode(const void *bytes, size_t size) {
       sret[(i * 3) + 2] = '\40';
     else
       sret[(i * 3) + 2] = '\n';
-  }
-  LOG_DEBUG2("===start====\nopcode[%d]:\n%s\n====end====\n", head->operate_code,
+  }LOG_DEBUG2("===start====\nopcode[%d]:\n%s\n====end====\n", head->operate_code,
       sret.c_str());
 #endif
 }
