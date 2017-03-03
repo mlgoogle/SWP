@@ -138,10 +138,10 @@ class SomeUtils {
 #define send_message(socket, packet) \
   logic::SendUtils::GetInstance()->SendMessage(socket, packet, __FILE__, __LINE__)\
 
-#define send_error(socket, type, opcode, error_code) \
+#define send_error(socket, type, error_code, session) \
   do { \
     struct PacketControl packet_control; \
-    MAKE_HEAD(packet_control, opcode, type, 0, 0, 0); \
+    MAKE_HEAD(packet_control, ERROR_TYPE, type, 0, session, 0); \
     base_logic::DictionaryValue dic; \
     dic.SetInteger(L"errorCode", error_code); \
     packet_control.body_ = &dic; \

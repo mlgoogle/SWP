@@ -172,7 +172,7 @@ int32 Loginlogic::OnRegisterAccount(const int32 socket, PacketHead* packet) {
      send_message(server_fd_, packet);*/
   } while (0);
   if (err < 0) {
-    send_error(socket, LOGIN_TYPE, REGISTER_ACCOUNT_RLY, err);
+    send_error(socket, ERROR_TYPE, err, packet->session_id);
   }
   return err;
 }
@@ -194,7 +194,7 @@ int32 Loginlogic::OnUserLogin(const int32 socket, PacketHead* packet) {
     //send_message(server_fd_, packet);
   } while (0);
   if (err < 0) {
-    send_error(socket, LOGIN_TYPE, USER_LOGIN_RLY, err);
+    send_error(socket, ERROR_TYPE, err,packet->session_id);
   }LOG_MSG2("UserLogin finish err:%d", err);
   return err;
 }
@@ -246,7 +246,7 @@ int32 Loginlogic::OnChangePasswd(const int32 socket, PacketHead* packet) {
     }
   } while (0);
   if (err < 0) {
-    send_error(socket, LOGIN_TYPE, CHANGE_PASSWD_RLY, err);
+    send_error(socket, ERROR_TYPE, err,0);
   }
   return err;
 }
@@ -337,7 +337,7 @@ int32 Loginlogic::OnRegisterAccountReply(const int32 socket,
   } while (0);
   if (err < 0) {
     packet->type = ERROR_TYPE;
-    send_error(socket, LOGIN_TYPE, REGISTER_ACCOUNT_RLY, err);
+    send_error(socket, ERROR_TYPE, err, packet->session_id);
   }
   return err;
 }
@@ -377,7 +377,7 @@ int32 Loginlogic::OnUserLoginReply(const int32 socket, PacketHead* packet) {
     //SendError(packet->reserved, packet, PHONE_OR_PASSWD_ERR, USER_LOGIN_RLY, err);
   } while (0);
   if (err < 0) {
-    send_error(packet->reserved, LOGIN_TYPE, USER_LOGIN_RLY, err);
+    send_error(packet->reserved, ERROR_TYPE, err, packet->session_id);
   }LOG_MSG2("UserLoginReply finish err:%d", err);
   return err;
 }
@@ -416,7 +416,7 @@ int32 Loginlogic::OnUserLoginUnit(const int socket, const int64 session,
     DicValue dic;
     err = login_mysql_->UserLoginSelect(phone, client_ip, &dic);
     if (err < 0)
-      return err; LOG_MSG2("socket:%d", socket);
+      return err;LOG_MSG2("socket:%d", socket);
     if (token != "")
       dic.SetString("token", token);
     struct PacketControl packet_control;

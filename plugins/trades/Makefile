@@ -19,6 +19,7 @@ THIRD_PATH = $(LIB_DIR)/mylib/public
 CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
 
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
+
 # Flags passed to the preprocessor.
 CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG\
 	-D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG\
@@ -37,17 +38,14 @@ CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 PLUGIN = $(SO_DIR)/trades/trades.so
                 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
-				-I$(LIB_DIR) \
 				-I$(LIB_DIR)/BasicCore \
-				-I${SRC_DIR} \
 				-I$(THIRD_PATH)\
-				-I$(CUSTOM_THIRD_PATH)/glog/include \
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
-				-I$(LIB_DIR)/base\
+				-I$(LIB_DIR)/mylib/base\
 				-I../\
 				
 
@@ -134,6 +132,6 @@ redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool
 
 $(PLUGIN) : trades_init.o  trades_logic.o trades_db.o trades_info.o schduler_engine.o trades_proto_buf.o\
 	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o mysql_pool.o redis_pool.o\
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/third_party/lib/libhiredis.a
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient \
 	$^ -o $@

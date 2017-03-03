@@ -107,7 +107,7 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
   PacketHead *packet = NULL;
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
     LOG_ERROR2("UnpackStream Error socket:%d", socket);
-    send_error(socket, ERROR_TYPE, packet->operate_code + 1, JSON_FORMAT_ERR);
+    send_error(socket, ERROR_TYPE,ERROR_TYPE, JSON_FORMAT_ERR);
     return false;
   }
   
