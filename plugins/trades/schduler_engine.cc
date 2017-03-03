@@ -66,7 +66,7 @@ void TradesManager::OnTimePosition(const int socket, const int64 session,
   net_reply::TradesPosition r_trades_position;
   int32 result = OpenPosition(trades_position);
   if (result != 0) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_CHARGE);
+    send_error(socket, ERROR_TYPE, NO_HAVE_CHARGE, session);
     return;
   }
   r_trades_position.set_position_id(trades_position.position_id());
@@ -184,12 +184,14 @@ bool TradesManager::DistributionTask() {
       TRADES_MAP user_trades_map;
       //删除用户持仓表
       bool r = base::MapGet<USER_TRADES_MAP, USER_TRADES_MAP::iterator, int64,
-          TRADES_MAP>(trades_cache_->user_trades_map_,trades_position.uid(), user_trades_map);
-      if (r){
-        r = base::MapDel<TRADES_MAP,TRADES_MAP::iterator,int64>
-        (user_trades_map,trades_position.position_id());
+          TRADES_MAP>(trades_cache_->user_trades_map_, trades_position.uid(),
+                      user_trades_map);
+      if (r) {
+        r = base::MapDel<TRADES_MAP, TRADES_MAP::iterator, int64>(
+            user_trades_map, trades_position.position_id());
         if (r)
-          trades_cache_->user_trades_map_[trades_position.uid()] = user_trades_map;
+          trades_cache_->user_trades_map_[trades_position.uid()] =
+              user_trades_map;
       }
       //写入结果数据库中,批量写入
       result_list.push_back(trades_position);
@@ -277,7 +279,7 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 session,
   base_logic::RLockGd lk(lock_);
   TRADES_MAP trades_map;
   int32 base_num = 20;
-  if (reversed /1000 == HTTP)
+  if (reversed / 1000 == HTTP)
     base_num = count;
   else
     base_num = base_num < count ? base_num : count;
@@ -286,8 +288,10 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 session,
 
   bool r = base::MapGet<USER_TRADES_MAP, USER_TRADES_MAP::iterator, int64,
       TRADES_MAP>(trades_cache_->user_trades_map_, uid, trades_map);
-  if (!r)
+  if (!r){
+    send_error(socket, ERROR_TYPE, NO_HAVE_POSITIONS_DATA, session);
     return;
+  }
 
   net_reply::AllTradesPosition net_trades_positions;
   std::list<swp_logic::TradesPosition> trades_list;
@@ -299,7 +303,7 @@ void TradesManager::SendCurrentPosition(const int socket, const int64 session,
   }
   //没有对应的历史记录
   if (trades_list.size() <= 0) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_POSITIONS_DATA);
+    send_error(socket, ERROR_TYPE, NO_HAVE_POSITIONS_DATA, session);
     return;
   }
   //trades_list.sort(trades_logic::TradesPosition:)
@@ -364,7 +368,7 @@ void TradesManager::SendGoods(const int socket, const int64 session,
   base_logic::WLockGd lk(lock_);
   GOODS_MAP goods_map;
   int32 base_num = 20;
-  if (reversed /1000 == HTTP)
+  if (reversed / 1000 == HTTP)
     base_num = count;
   else
     base_num = base_num < count ? base_num : count;
@@ -374,7 +378,7 @@ void TradesManager::SendGoods(const int socket, const int64 session,
   bool r = base::MapGet<PLAT_GOODS_MAP, PLAT_GOODS_MAP::iterator, int32,
       GOODS_MAP>(trades_cache_->trades_map_, pid, goods_map);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_GOODS_DATA);
+    send_error(socket, ERROR_TYPE, NO_HAVE_GOODS_DATA, session);
     return;
   }
 
@@ -387,7 +391,7 @@ void TradesManager::SendGoods(const int socket, const int64 session,
   }
 
   if (goods_list.size() <= 0) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_GOODS_DATA);
+    send_error(socket, ERROR_TYPE, NO_HAVE_GOODS_DATA, session);
     return;
   }
 

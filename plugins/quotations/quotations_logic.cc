@@ -162,13 +162,13 @@ bool Quotationslogic::OnKChartTimeLine(struct server* srv, int socket,
                                        struct PacketHead *packet) {
   quotations_logic::net_request::KChartTimeLine kchart_time;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
     return false;
   }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = kchart_time.set_http_packet(packet_control->body_);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO,packet->session_id );
     return false;
   }
   quotations_logic::QuotationsEngine::GetSchdulerManager()->SendKChartLine(
@@ -183,13 +183,13 @@ bool Quotationslogic::OnRealTime(struct server* srv, int socket,
 
   quotations_logic::net_request::RealTime real_time;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
     return false;
   }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_htt_packet(packet_control->body_);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
     return false;
   }
   if (real_time.symbol_infos_ != NULL)
@@ -203,14 +203,14 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
 
   quotations_logic::net_request::TimeLine time_line;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
     return false;
   }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
 
   bool r = time_line.set_htt_packet(packet_control->body_);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
 
     return false;
   }
@@ -229,7 +229,7 @@ bool Quotationslogic::OnQutations(struct server* srv, int socket,
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_http_packet(packet_control->body_);
   if (!r) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
 
     return false;
   }

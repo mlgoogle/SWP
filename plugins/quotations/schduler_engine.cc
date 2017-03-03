@@ -216,7 +216,7 @@ void QuotationsManager::SendKChartLine(const int socket, const int64 session,
   std::string key = platform_name + ":" + exchange_name + ":" + symbol;
   GetKChartLine(kchar_type, key, list, end_time);
   if (list.size() <= 0) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_KCHART_DATA);
+    send_error(socket, ERROR_TYPE, NO_HAVE_KCHART_DATA,session);
     return;
   }
   list.sort(swp_logic::Quotations::after);
@@ -281,7 +281,7 @@ void QuotationsManager::SendTimeLine(const int socket, const int64 session,
   std::string key = platform_name + ":" + exchange_name + ":" + symbol;
   GetTimeLine(atype, key, list, end_time);
   if (list.size() <= 0) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_TIME_LINE_DATA);
+    send_error(socket, ERROR_TYPE, NO_HAVE_TIME_LINE_DATA,session);
     return;
   }
   list.sort(swp_logic::Quotations::cmp);

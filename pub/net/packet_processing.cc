@@ -27,16 +27,17 @@ bool PacketProsess::PacketStream(const PacketHead *packet_head,
   int32 reserved = packet_head->reserved;
 
   std::string body_stream;
-  struct PacketControl *packet_control = (struct PacketControl *)(packet_head);
-  base_logic::DictionaryValue *value = packet_control != NULL ? packet_control->body_ : NULL;
+  struct PacketControl *packet_control = (struct PacketControl *) (packet_head);
+  base_logic::DictionaryValue *value =
+      packet_control != NULL ? packet_control->body_ : NULL;
 
   base_logic::ValueSerializer *engine = base_logic::ValueSerializer::Create(
       base_logic::IMPL_JSON);
-    if (engine == NULL) {
-      LOG_ERROR("engine create null");
-      return false;
-    }
-    r = engine->Serialize((*value), &body_stream);
+  if (engine == NULL) {
+    LOG_ERROR("engine create null");
+    return false;
+  }
+  r = engine->Serialize((*value), &body_stream);
 
   BUILDPAKCET(body_stream.length());
 
@@ -86,7 +87,6 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
       return false;
     }
 
-
     base_logic::DictionaryValue *value = (base_logic::DictionaryValue*) engine
         ->Deserialize(&body_stream, &error_code, &error_str);
 
@@ -119,7 +119,7 @@ bool PacketProsess::UnpackStream(const void *packet_stream, int32 len,
 }
 
 void PacketProsess::DeletePacket(const void *packet_stream, int32 len,
-                                 struct PacketHead *packet_head){
+                                 struct PacketHead *packet_head) {
 
 }
 

@@ -55,7 +55,7 @@ void HistoryManager::SendHistoryTrades(const int socket, const int64 session,
 
   //没有对应的历史记录
   if (trades_list.size() <= 0) {
-    send_error(socket, ERROR_TYPE, ERROR_TYPE, NO_HAVE_HISTROY_DATA);
+    send_error(socket, ERROR_TYPE, NO_HAVE_HISTROY_DATA,session);
     return;
   }
   int32 base_num = 10;
