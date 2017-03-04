@@ -20,7 +20,6 @@
 #define DEFAULT_CONFIG_PATH "./plugins/quotations/quotations_config.xml"
 
 
-using namespace quotations_logic;
 namespace quotations_logic {
 
 Quotationslogic *Quotationslogic::instance_ = NULL;
@@ -42,10 +41,10 @@ bool Quotationslogic::Init() {
   r = config->LoadConfig(path);
 
   quotations_logic::QuotationsEngine::GetSchdulerManager();
-  quotations_redis_ = new QuotationsRedis(config);
+  quotations_redis_ = new quotations_logic::QuotationsRedis(config);
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitRedis(
       quotations_redis_);
-  quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
+  //quotations_logic::QuotationsEngine::GetSchdulerManager()->InitGoodsData();
   quotations_logic::QuotationsEngine::GetSchdulerManager()->InitFoxreData();
   return true;
 }
@@ -224,7 +223,7 @@ bool Quotationslogic::OnTimeLine(struct server* srv, int socket,
 
 bool Quotationslogic::OnQutations(struct server* srv, int socket,
                                   struct PacketHead *packet) {
-  net_other::RealTime real_time;
+  quotations_logic::net_other::RealTime real_time;
   swp_logic::Quotations quotations;
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = real_time.set_http_packet(packet_control->body_);
