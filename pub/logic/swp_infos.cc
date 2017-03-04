@@ -92,8 +92,6 @@ void Quotations::ValueDeserialize(std::string& str) {
   if (engine == NULL) {
     LOG_ERROR("engine create null");
   }
-  if (data_)
-    return;
   base_logic::DictionaryValue* dict =  (base_logic::DictionaryValue*)engine->Deserialize(&str,&error_code,&error_str);
   dict->GetReal(L"current_price", &data_->current_price_);
   dict->GetReal(L"high_price", &data_->high_price_);

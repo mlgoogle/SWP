@@ -102,7 +102,6 @@ bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
     return false;
 
-  LOG_ERROR("====================login look");
   PacketHead *packet = NULL;
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
     //    LOG_ERROR2("UnpackStream Error socket:%d", socket);
@@ -110,7 +109,7 @@ bool Loginlogic::OnLoginMessage(struct server *srv, const int socket,
     return false;
   }
 
-  if (packet->type == LOGIN_TYPE /*&& logic::SomeUtils::VerifyToken(packet)*/) {
+  if (packet->type == LOGIN_TYPE ) {
     switch (packet->operate_code) {
       case HEARTBEAT_REQ: {
         OnHeartbeat(socket, packet);
@@ -194,7 +193,7 @@ int32 Loginlogic::OnUserLogin(const int32 socket, PacketHead* packet) {
     //send_message(server_fd_, packet);
   } while (0);
   if (err < 0) {
-    send_error(socket, ERROR_TYPE, err,packet->session_id);
+    send_error(socket, ERROR_TYPE, err, packet->session_id);
   }LOG_MSG2("UserLogin finish err:%d", err);
   return err;
 }
@@ -246,7 +245,7 @@ int32 Loginlogic::OnChangePasswd(const int32 socket, PacketHead* packet) {
     }
   } while (0);
   if (err < 0) {
-    send_error(socket, ERROR_TYPE, err,0);
+    send_error(socket, ERROR_TYPE, err, 0);
   }
   return err;
 }

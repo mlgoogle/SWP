@@ -159,7 +159,7 @@ void QuotationsManager::SetQuotationsUnit(swp_logic::Quotations& quotation) {
   last_exchange_quotations[key] = quotation;
   quotations_cache_->last_quotations_map_[quotation.type()] =
       last_exchange_quotations;
-  if (last_unix_time == current_unix_time) {
+  if (last_unix_time == current_unix_time&&r) {
     //LOG_DEBUG2("last time %lld",temp_quotations.current_unix_time()/60*60);
     return;
   }
@@ -430,12 +430,12 @@ void QuotationsManager::GetTimeLine(const int32 atype,
   for (; it != quotations_list.end(); it++) {
     i++;
     swp_logic::Quotations quotations = (*it);
-    //LOG_MSG2("count:{%d} index:{%d} unix_time:{%lld}", quotations_list.size(),
-    //  i,quotations.current_unix_time());
+    LOG_MSG2("count:{%d} index:{%d} unix_time:{%lld} start_pan:{%lld}", quotations_list.size(),
+      i,quotations.current_unix_time(),start_pan);
     if (quotations.current_unix_time() >= start_pan)
       list.push_back(quotations);
-    else
-      break;
+    /*else
+      break;*/
   }
 }
 

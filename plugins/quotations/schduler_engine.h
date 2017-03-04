@@ -77,7 +77,7 @@ class QuotationsManager {
 
   void TimeEvent(int opcode, int time);
 
-  void InitRedis(QuotationsRedis* quotations_redis);
+  void InitRedis(quotations_logic::QuotationsRedis* quotations_redis);
 
   void InitGoodsData();
 
@@ -110,9 +110,8 @@ class QuotationsManager {
   void Init();
  private:
   QuotationsCache *quotations_cache_;
-  QuotationsRedis* quotations_redis_;
+  quotations_logic::QuotationsRedis* quotations_redis_;
   //void TimeEvent(int opcode, int time);
- private:
   //QuotationsCache *quotations_cache_;
   struct threadrw_t *lock_;
 };
